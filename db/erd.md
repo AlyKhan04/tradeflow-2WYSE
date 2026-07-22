@@ -1,60 +1,56 @@
-# TradeFlow — Entity Relationship Diagram (TICKET-I002)
-
-> Replace this file with your team's ER diagram.
-
-## Skeleton (replace with your real diagram)
+# TradeFlow — Entity Relationship Diagram
 
 ```mermaid
 erDiagram
-    COUNTERPARTIES ||--o{ TRADES : "originates"
-    INSTRUMENTS    ||--o{ TRADES : "references"
-    TRADES         ||--o{ RECON_RESULTS : "produces"
-    TRADES         ||--o{ AUDIT_LOG : "is audited by"
+    COUNTERPARTIES ||--o{ TRADES        : "originates"
+    INSTRUMENTS    ||--o{ TRADES        : "references"
+    TRADES         ||--o{ SETTLEMENTS   : "settles"
+    TRADES         ||--o{ RECON_BREAKS  : "may produce"
 
     COUNTERPARTIES {
         BIGINT id PK
         VARCHAR name
         CHAR(20) lei_code UK
-        VARCHAR region
+        VARCHAR region "APAC|EMEA|NAMR|LATAM"
     }
     INSTRUMENTS {
         BIGINT id PK
         VARCHAR symbol UK
         VARCHAR name
-        VARCHAR asset_class
+        VARCHAR asset_class "EQUITY|FIXED_INCOME|FX|COMMODITY|DERIVATIVE"
         CHAR(3) currency
+        CHAR(12) isin UK
     }
     TRADES {
         BIGINT id PK
         VARCHAR trade_ref UK
         BIGINT instrument_id FK
         BIGINT counterparty_id FK
-        NUMERIC quantity
-        NUMERIC price
+        NUMERIC quantity "(18,4) > 0"
+        NUMERIC price "(18,4) >= 0"
         DATE trade_date
-        VARCHAR status
+        VARCHAR status "PENDING|MATCHED|UNMATCHED|DISPUTED|CANCELLED"
+        TIMESTAMPTZ created_at
     }
-    RECON_RESULTS {
+    SETTLEMENTS {
         BIGINT id PK
         BIGINT trade_id FK
-        VARCHAR status
-        VARCHAR discrepancy_type
+        DATE settlement_date
+        NUMERIC amount "(18,4) >= 0"
+        VARCHAR status "PENDING|SETTLED|FAILED|CANCELLED"
+    }
+    RECON_BREAKS {
+        BIGINT id PK
+        BIGINT trade_id FK
+        VARCHAR discrepancy_type "PRICE|QUANTITY|MISSING|DUPLICATE|STATUS"
+        VARCHAR status "OPEN|INVESTIGATING|RESOLVED|IGNORED"
         TIMESTAMPTZ resolved_at
     }
-    AUDIT_LOG {
-        BIGINT id PK
-        VARCHAR entity
-        BIGINT entity_id
-        VARCHAR action
-        JSONB old_value
-        JSONB new_value
-        TIMESTAMPTZ "timestamp"
-    }
 ```
-
-## TODO(TICKET-I002)
-
-- [ ] Replace the skeleton above with your team's accurate diagram.
-- [ ] Annotate cardinalities (1:N, N:N).
-- [ ] Mark optional vs mandatory fields.
-- [ ] Link this from the project root `README.md`.
+## Design decisions worth flagging
+| Decision | Why |
+|---|---|
+| `NUMERIC(18,4)` for quantity + price | IEEE-754 doubles cause silent rounding errors on money. |
+| FKs everywhere | DB enforces referential integrity cheaper + safer than app-layer checks. |
+| `recon_breaks` (not `recon_results`) | A break is a *negative* finding worth tracking. |
+| `CHAR(20)` for `lei_code` | LEI is exactly 20 alphanumerics — fixed width is cheaper + signals intent. |
