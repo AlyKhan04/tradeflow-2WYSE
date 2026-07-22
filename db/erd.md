@@ -46,12 +46,4 @@ erDiagram
         VARCHAR status "OPEN|INVESTIGATING|RESOLVED|IGNORED"
         TIMESTAMPTZ resolved_at
     }
-``\`
-
-## Design decisions worth flagging
-| Decision | Why |
-|---|---|
-| `NUMERIC(18,4)` for quantity + price | IEEE-754 doubles cause silent rounding errors on money. |
-| FKs everywhere | DB enforces referential integrity cheaper + safer than app-layer checks. |
-| `recon_breaks` (not `recon_results`) | A break is a *negative* finding worth tracking. |
-| `CHAR(20)` for `lei_code` | LEI is exactly 20 alphanumerics — fixed width is cheaper + signals intent. |
+```
