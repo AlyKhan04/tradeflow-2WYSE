@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+  <changeSet id="010-seed-trades" author="your-name">
+    <insert tableName="trades"><column name="trade_ref" value="TRD-2026-0001"/><column name="instrument_id" valueNumeric="1"/><column name="counterparty_id" valueNumeric="1"/><column name="quantity" valueNumeric="1000.0000"/><column name="price" valueNumeric="245.5000"/><column name="trade_date" valueDate="2026-03-01"/><column name="status" value="MATCHED"/></insert>
+    <insert tableName="trades"><column name="trade_ref" value="TRD-2026-0002"/><column name="instrument_id" valueNumeric="1"/><column name="counterparty_id" valueNumeric="2"/><column name="quantity" valueNumeric="500.0000"/><column name="price" valueNumeric="246.0000"/><column name="trade_date" valueDate="2026-03-01"/><column name="status" value="UNMATCHED"/></insert>
+    <insert tableName="trades"><column name="trade_ref" value="TRD-2026-0003"/><column name="instrument_id" valueNumeric="2"/><column name="counterparty_id" valueNumeric="1"/><column name="quantity" valueNumeric="100000.0000"/><column name="price" valueNumeric="99.5000"/><column name="trade_date" valueDate="2026-03-02"/><column name="status" value="MATCHED"/></insert>
+    <insert tableName="trades"><column name="trade_ref" value="TRD-2026-0004"/><column name="instrument_id" valueNumeric="3"/><column name="counterparty_id" valueNumeric="3"/><column name="quantity" valueNumeric="50000.0000"/><column name="price" valueNumeric="1.0850"/><column name="trade_date" valueDate="2026-03-02"/><column name="status" value="PENDING"/></insert>
+    <insert tableName="trades"><column name="trade_ref" value="TRD-2026-0005"/><column name="instrument_id" valueNumeric="4"/><column name="counterparty_id" valueNumeric="4"/><column name="quantity" valueNumeric="10.0000"/><column name="price" valueNumeric="2125.7500"/><column name="trade_date" valueDate="2026-03-03"/><column name="status" value="DISPUTED"/></insert>
+    <insert tableName="trades"><column name="trade_ref" value="TRD-2026-0006"/><column name="instrument_id" valueNumeric="5"/><column name="counterparty_id" valueNumeric="1"/><column name="quantity" valueNumeric="25.0000"/><column name="price" valueNumeric="78.4000"/><column name="trade_date" valueDate="2026-03-03"/><column name="status" value="MATCHED"/></insert>
+    <insert tableName="trades"><column name="trade_ref" value="TRD-2026-0007"/><column name="instrument_id" valueNumeric="1"/><column name="counterparty_id" valueNumeric="2"/><column name="quantity" valueNumeric="750.0000"/><column name="price" valueNumeric="245.7500"/><column name="trade_date" valueDate="2026-03-04"/><column name="status" value="PENDING"/></insert>
+    <insert tableName="trades"><column name="trade_ref" value="TRD-2026-0008"/><column name="instrument_id" valueNumeric="2"/><column name="counterparty_id" valueNumeric="3"/><column name="quantity" valueNumeric="50000.0000"/><column name="price" valueNumeric="99.7500"/><column name="trade_date" valueDate="2026-03-04"/><column name="status" value="CANCELLED"/></insert>
+    <insert tableName="trades"><column name="trade_ref" value="TRD-2026-0009"/><column name="instrument_id" valueNumeric="3"/><column name="counterparty_id" valueNumeric="4"/><column name="quantity" valueNumeric="25000.0000"/><column name="price" valueNumeric="1.0860"/><column name="trade_date" valueDate="2026-03-05"/><column name="status" value="UNMATCHED"/></insert>
+    <insert tableName="trades"><column name="trade_ref" value="TRD-2026-0010"/><column name="instrument_id" valueNumeric="4"/><column name="counterparty_id" valueNumeric="2"/><column name="quantity" valueNumeric="5.0000"/><column name="price" valueNumeric="2130.0000"/><column name="trade_date" valueDate="2026-03-05"/><column name="status" value="DISPUTED"/></insert>
+
+    <rollback>
+      <delete tableName="trades"/>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>
