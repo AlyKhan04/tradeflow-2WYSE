@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+  <changeSet id="009-seed-counterparties" author="your-name">
+    <insert tableName="counterparties">
+      <column name="name"     value="Goldman Sachs International"/>
+      <column name="lei_code" value="W22LROWP2IHZNBB6K528"/>
+      <column name="region"   value="EMEA"/>
+    </insert>
+    <insert tableName="counterparties">
+      <column name="name"     value="Morgan Stanley &amp; Co."/>
+      <column name="lei_code" value="I7331LVKQX1L8TUI8447"/>
+      <column name="region"   value="NAMR"/>
+    </insert>
+    <insert tableName="counterparties">
+      <column name="name"     value="Nomura International PLC"/>
+      <column name="lei_code" value="DGQCSV2PHVF7I2743539"/>
+      <column name="region"   value="APAC"/>
+    </insert>
+    <insert tableName="counterparties">
+      <column name="name"     value="Citigroup Global Markets Limited"/>
+      <column name="lei_code" value="XKZZ2JZF41MRHTR1V493"/>
+      <column name="region"   value="EMEA"/>
+    </insert>
+
+    <rollback>
+      <delete tableName="counterparties"/>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>
