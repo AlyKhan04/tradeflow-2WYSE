@@ -23,6 +23,75 @@ package com.dbtraining.tradeflow.model;
  *    - resolvedAt is @Column(nullable = true)
  * ============================================================================
  */
+
+// backend/src/main/java/com/dbtraining/tradeflow/model/ReconResult.java
+package com.dbtraining.tradeflow.model;
+
+import java.time.Instant;
+import java.util.Objects;
+
+/**
+ * ReconResult — POJO recording one reconciliation break against one Trade.
+ * status is a String for Day 2; Day 5 promotes it to a ReconStatus enum.
+ */
 public class ReconResult {
-    // TODO(TICKET-I024): fields, private ctor, Builder, getters.
+
+    private Long id;
+    private Long tradeId;
+    private String status;
+    private DiscrepancyType discrepancyType;
+    private Instant detectedAt;
+    private Instant resolvedAt;
+
+    ReconResult() {}
+
+    private ReconResult(Builder b) {
+        this.tradeId         = b.tradeId;
+        this.discrepancyType = b.discrepancyType;
+        this.status          = b.status != null ? b.status : "OPEN";
+        this.detectedAt      = b.detectedAt != null ? b.detectedAt : Instant.now();
+        this.resolvedAt      = b.resolvedAt;
+    }
+
+    public static Builder builder() { return new Builder(); }
+
+    public Long getId()                        { return id; }
+    public Long getTradeId()                   { return tradeId; }
+    public String getStatus()                  { return status; }
+    public DiscrepancyType getDiscrepancyType(){ return discrepancyType; }
+    public Instant getDetectedAt()             { return detectedAt; }
+    public Instant getResolvedAt()             { return resolvedAt; }
+
+    /** Mark this break resolved; sets resolvedAt = now. Idempotent. */
+    public void resolve() {
+        if ("RESOLVED".equals(this.status)) return;
+        this.status = "RESOLVED";
+        this.resolvedAt = Instant.now();
+    }
+
+    public boolean isOpen() { return "OPEN".equals(status); }
+
+    @Override public String toString() {
+        return "ReconResult[trade=" + tradeId + " | " + discrepancyType + " | " + status + "]";
+    }
+
+    public static final class Builder {
+        private Long tradeId;
+        private String status;
+        private DiscrepancyType discrepancyType;
+        private Instant detectedAt;
+        private Instant resolvedAt;
+
+        public Builder tradeId(Long v)                      { this.tradeId = v;         return this; }
+        public Builder status(String v)                     { this.status = v;          return this; }
+        public Builder discrepancyType(DiscrepancyType v)   { this.discrepancyType = v; return this; }
+        public Builder detectedAt(Instant v)                { this.detectedAt = v;      return this; }
+        public Builder resolvedAt(Instant v)                { this.resolvedAt = v;      return this; }
+
+        public ReconResult build() {
+            Objects.requireNonNull(tradeId,         "tradeId required");
+            Objects.requireNonNull(discrepancyType, "discrepancyType required");
+            return new ReconResult(this);
+        }
+    }
 }
