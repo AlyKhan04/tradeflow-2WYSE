@@ -24,13 +24,7 @@ public enum TradeStatus {
     DISPUTED,
     CANCELLED;
 
-    /**
-     * TODO(TICKET-I019): implement isTerminal().
-     * A "terminal" status means no further state transitions are allowed.
-     * MATCHED and CANCELLED are terminal; the others are not.
-     */
     public boolean isTerminal() {
-        // HINT: return this == MATCHED || this == CANCELLED;
-        throw new UnsupportedOperationException("TICKET-I019: implement TradeStatus.isTerminal()");
+        return this == MATCHED || this == CANCELLED;
     }
 }

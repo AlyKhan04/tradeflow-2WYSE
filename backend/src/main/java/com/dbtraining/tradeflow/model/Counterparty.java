@@ -1,5 +1,7 @@
 package com.dbtraining.tradeflow.model;
 
+import java.util.Objects;
+
 /**
  * ============================================================================
  * Counterparty — TICKET-I022 + TICKET-I057
@@ -9,30 +11,86 @@ package com.dbtraining.tradeflow.model;
  * WHY:     The trade table has an FK to this — every trade has a counterparty.
  * OBSERVE: Build a Counterparty in main(), pass it through a Trade, print both.
  * ============================================================================
- *  TODO(TICKET-I022) [Day 2]:
- *    Fields: id (Long), name (String), leiCode (String, 20 chars), region (String).
- *    Add private constructor + Builder for clean construction.
- *    Add equals()/hashCode() on leiCode (it's globally unique).
- *
- *  TODO(TICKET-I057) [Day 5]:
- *    Convert this class to a JPA entity.
- *    - @Entity @Table(name = "counterparties")
- *    - @Id @GeneratedValue(strategy = GenerationType.IDENTITY) on id
- *    - @Column(unique = true, length = 20) on leiCode
- *    - protected no-arg constructor (JPA needs it).
- * ============================================================================
  */
 public class Counterparty {
 
-    // TODO(TICKET-I022): private fields here.
+    private final Long id;
+    private final String name;
+    private final String leiCode;
+    private final String region;
 
-    // TODO(TICKET-I022): private constructor used by Builder.
+    private Counterparty(Builder builder) {
+        this.id = builder.id;
+        this.name = Objects.requireNonNull(builder.name, "name is required");
+        this.leiCode = Objects.requireNonNull(builder.leiCode, "leiCode is required");
+        this.region = Objects.requireNonNull(builder.region, "region is required");
+    }
 
-    // TODO(TICKET-I022): getters (no setters — favour immutability).
+    public Long getId() {
+        return id;
+    }
 
-    // TODO(TICKET-I022): static inner Builder class.
+    public String getName() {
+        return name;
+    }
 
-    // TODO(TICKET-I025-style): equals() + hashCode() on leiCode.
+    public String getLeiCode() {
+        return leiCode;
+    }
 
-    // TODO(TICKET-I022): toString() that returns e.g. "Counterparty[GS / W22L..ZB6K528]".
+    public String getRegion() {
+        return region;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Counterparty that)) return false;
+        return Objects.equals(leiCode, that.leiCode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(leiCode);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Counterparty[%s / %s / %s]", name, leiCode, region);
+    }
+
+    public static final class Builder {
+        private Long id;
+        private String name;
+        private String leiCode;
+        private String region;
+
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder leiCode(String leiCode) {
+            this.leiCode = leiCode;
+            return this;
+        }
+
+        public Builder region(String region) {
+            this.region = region;
+            return this;
+        }
+
+        public Counterparty build() {
+            return new Counterparty(this);
+        }
+    }
 }
