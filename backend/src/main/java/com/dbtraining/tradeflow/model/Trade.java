@@ -23,84 +23,47 @@ import java.util.Objects;
  *  TICKET-I025: override equals()/hashCode() using ONLY tradeRef.
  *  TICKET-I056: add JPA annotations — @Entity / @Table / @Id / @ManyToOne.
  * ============================================================================
- *
- * HINTS:
- * - Use BigDecimal for `quantity` + `price` (NEVER double — it loses precision
- *   for money).
- * - Use LocalDate (NOT Date) for tradeDate.
- * - Use Instant (NOT Date) for createdAt.
- * - For JPA: a `protected Trade()` no-arg constructor satisfies Hibernate;
- *   the public path stays via the Builder.
- * - For @ManyToOne on instrument/counterparty: use FetchType.LAZY to avoid
- *   accidental N+1 queries.
- * ============================================================================
  */
+public class Trade extends BaseTrade {
 
-public class Trade {
+    private final Long id;
 
-    private String tradeRef;
-    private Long instrumentId;
-    private Long counterpartyId;
-    private BigDecimal quantity;
-    private BigDecimal price;
-    private LocalDate tradeDate;
-    private TradeStatus status;
-    private Instant createdAt;
-
-    Trade() {}
-
-    private Trade(Builder b) {
-        this.tradeRef       = b.tradeRef;
-        this.instrumentId   = b.instrumentId;
-        this.counterpartyId = b.counterpartyId;
-        this.quantity       = b.quantity;
-        this.price          = b.price;
-        this.tradeDate      = b.tradeDate;
-        this.status         = b.status != null ? b.status : TradeStatus.PENDING;
-        this.createdAt      = b.createdAt != null ? b.createdAt : Instant.now();
+    protected Trade() {
+        super("", 0L, 0L, BigDecimal.ONE, BigDecimal.ONE, LocalDate.now(), TradeStatus.PENDING, Instant.now());
+        this.id = null;
     }
 
-    public static Builder builder() { return new Builder(); }
-
-    // ------------------------------------------------------------------------
-    // TICKET-I017 — getters only, no setters. Construction goes through the
-    // Builder below, so a Trade cannot be mutated after it is built.
-    // ------------------------------------------------------------------------
-    public String getTradeRef()     { return tradeRef; }
-    public Long getInstrumentId()   { return instrumentId; }
-    public Long getCounterpartyId() { return counterpartyId; }
-    public BigDecimal getQuantity() { return quantity; }
-    public BigDecimal getPrice()    { return price; }
-    public LocalDate getTradeDate() { return tradeDate; }
-    public TradeStatus getStatus()  { return status; }
-    public Instant getCreatedAt()   { return createdAt; }
-
-    /** Notional = quantity * price. Computed on demand, never stored. */
-    public BigDecimal getNotional() {
-        return quantity == null || price == null ? null : quantity.multiply(price);
+    private Trade(Builder builder) {
+        super(
+                builder.tradeRef,
+                builder.instrumentId,
+                builder.counterpartyId,
+                builder.quantity,
+                builder.price,
+                builder.tradeDate,
+                builder.status,
+                builder.createdAt);
+        this.id = builder.id;
     }
 
-    // ------------------------------------------------------------------------
-    // TICKET-I025 — equality on tradeRef, the business key.
-    //
-    // Two feeds publishing TRD-2026-0001 describe the same trade even when
-    // their price, quantity and timestamps differ, so tradeRef alone decides
-    // identity. Day 3's reconciliation dedups via HashMap<String, Trade> on
-    // exactly this key.
-    //
-    // hashCode() must stay consistent with equals(): a HashMap jumps to a
-    // bucket by hash *before* it ever calls equals(), so if two equal Trades
-    // hashed differently the comparison would never happen and lookups would
-    // silently miss.
-    // ------------------------------------------------------------------------
+    public Long getId() {
+        return id;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    @Override
+    public String assetClassDescription() {
+        return "Generic Trade";
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        // Pattern variable (Java 16+): type-test and bind in one step.
-        // Also returns false for null, so no explicit null check is needed.
-        if (!(o instanceof Trade other)) return false;
-        return Objects.equals(tradeRef, other.tradeRef);
+        if (!(o instanceof Trade trade)) return false;
+        return Objects.equals(tradeRef, trade.tradeRef);
     }
 
     @Override
@@ -110,41 +73,85 @@ public class Trade {
 
     @Override
     public String toString() {
-        return "Trade[" + tradeRef
-                + " | " + instrumentId
-                + " | " + quantity + " @ " + price
-                + " | " + tradeDate
-                + " | " + status + "]";
+        return String.format("Trade[%s | %d | %d | %s @ %s | %s | %s]",
+                tradeRef,
+                instrumentId,
+                counterpartyId,
+                quantity,
+                price,
+                tradeDate,
+                getStatus());
     }
 
     public static final class Builder {
+        private Long id;
         private String tradeRef;
         private Long instrumentId;
         private Long counterpartyId;
         private BigDecimal quantity;
         private BigDecimal price;
         private LocalDate tradeDate;
-        private TradeStatus status;
+        private TradeStatus status = TradeStatus.PENDING;
         private Instant createdAt;
 
-        public Builder tradeRef(String v)        { this.tradeRef = v;       return this; }
-        public Builder instrumentId(Long v)      { this.instrumentId = v;   return this; }
-        public Builder counterpartyId(Long v)    { this.counterpartyId = v; return this; }
-        public Builder quantity(BigDecimal v)    { this.quantity = v;       return this; }
-        public Builder price(BigDecimal v)       { this.price = v;          return this; }
-        public Builder tradeDate(LocalDate v)    { this.tradeDate = v;      return this; }
-        public Builder status(TradeStatus v)     { this.status = v;         return this; }
-        public Builder createdAt(Instant v)      { this.createdAt = v;      return this; }
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder tradeRef(String tradeRef) {
+            this.tradeRef = tradeRef;
+            return this;
+        }
+
+        public Builder instrumentId(Long instrumentId) {
+            this.instrumentId = instrumentId;
+            return this;
+        }
+
+        public Builder counterpartyId(Long counterpartyId) {
+            this.counterpartyId = counterpartyId;
+            return this;
+        }
+
+        public Builder quantity(BigDecimal quantity) {
+            this.quantity = quantity;
+            return this;
+        }
+
+        public Builder price(BigDecimal price) {
+            this.price = price;
+            return this;
+        }
+
+        public Builder tradeDate(LocalDate tradeDate) {
+            this.tradeDate = tradeDate;
+            return this;
+        }
+
+        public Builder status(TradeStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public Builder createdAt(Instant createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
 
         public Trade build() {
-            Objects.requireNonNull(tradeRef,       "tradeRef required");
-            Objects.requireNonNull(instrumentId,   "instrumentId required");
+            Objects.requireNonNull(tradeRef, "tradeRef required");
+            Objects.requireNonNull(instrumentId, "instrumentId required");
             Objects.requireNonNull(counterpartyId, "counterpartyId required");
-            Objects.requireNonNull(quantity,       "quantity required");
-            Objects.requireNonNull(price,          "price required");
-            Objects.requireNonNull(tradeDate,      "tradeDate required");
-            if (quantity.signum() <= 0) throw new IllegalStateException("quantity must be > 0");
-            if (price.signum() < 0)    throw new IllegalStateException("price must be >= 0");
+            Objects.requireNonNull(quantity, "quantity required");
+            Objects.requireNonNull(price, "price required");
+            Objects.requireNonNull(tradeDate, "tradeDate required");
+            if (quantity.signum() <= 0) {
+                throw new IllegalStateException("quantity must be > 0");
+            }
+            if (price.signum() <= 0) {
+                throw new IllegalStateException("price must be > 0");
+            }
             return new Trade(this);
         }
     }

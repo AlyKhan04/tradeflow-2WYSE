@@ -1,9 +1,19 @@
 package com.dbtraining.tradeflow.service;
 
+import com.dbtraining.tradeflow.dto.ReconReport;
 import com.dbtraining.tradeflow.dto.ReconSummary;
 import com.dbtraining.tradeflow.model.BaseTrade;
+import com.dbtraining.tradeflow.model.Discrepancy;
+import com.dbtraining.tradeflow.model.DiscrepancyType;
+import com.dbtraining.tradeflow.model.ReconResult;
+import com.dbtraining.tradeflow.repository.ReconResultDAO;
+import com.dbtraining.tradeflow.repository.TradeDAO;
 
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * ============================================================================
@@ -34,35 +44,90 @@ import java.util.List;
  */
 public class ReconciliationService {
 
-    // TODO(TICKET-I034): constructor / dependencies (Day 5 will add repos here).
+    private final TradeDAO tradeDAO;
+    private final ReconResultDAO reconResultDAO;
 
-    /**
-     * TODO(TICKET-I034 + TICKET-I035):
-     *   Compare two lists of trades by tradeRef. Return a ReconReport with:
-     *     - matched: trades present + identical on both sides
-     *     - discrepancies: list of (tradeRef, List<DiscrepancyType>) entries
-     */
-    public Object matchTrades(List<BaseTrade> internal, List<BaseTrade> external) {
-        // HINT pseudocode:
-        //   var externalByRef = external.stream().collect(toMap(BaseTrade::tradeRef, t->t));
-        //   var matched = new ArrayList<BaseTrade>();
-        //   var discrepancies = new ArrayList<Discrepancy>();
-        //   for (BaseTrade in : internal) {
-        //       var out = externalByRef.remove(in.tradeRef());
-        //       if (out == null) { discrepancies.add(new Discrepancy(in.tradeRef(), List.of(MISSING_TRADE))); continue; }
-        //       var diffs = compare(in, out);
-        //       if (diffs.isEmpty()) matched.add(in); else discrepancies.add(new Discrepancy(in.tradeRef(), diffs));
-        //   }
-        //   // anything still in externalByRef is also a MISSING_TRADE (this side)
-        //   ...
-        throw new UnsupportedOperationException("TICKET-I034: implement matchTrades");
+    public ReconciliationService(TradeDAO tradeDAO, ReconResultDAO reconResultDAO) {
+        this.tradeDAO = tradeDAO;
+        this.reconResultDAO = reconResultDAO;
     }
 
-    /**
-     * TODO(TICKET-I036):
-     *   Reduce a ReconReport into a ReconSummary suitable for the API + UI.
-     */
-    public ReconSummary generateReport(Object reconReport) {
-        throw new UnsupportedOperationException("TICKET-I036: implement generateReport");
+    public ReconReport matchTrades(List<? extends BaseTrade> internal, List<? extends BaseTrade> external) {
+        List<? extends BaseTrade> internalTrades = internal == null ? List.of() : internal;
+        List<? extends BaseTrade> externalTrades = external == null ? List.of() : external;
+
+        Map<String, BaseTrade> externalByRef = externalTrades.stream()
+                .filter(t -> t.getTradeRef() != null)
+                .collect(Collectors.toMap(BaseTrade::getTradeRef, t -> t, (first, second) -> first));
+
+        List<BaseTrade> matched = new ArrayList<>();
+        List<Discrepancy> discrepancies = new ArrayList<>();
+
+        for (BaseTrade internalTrade : internalTrades) {
+            BaseTrade externalTrade = externalByRef.remove(internalTrade.getTradeRef());
+            if (externalTrade == null) {
+                discrepancies.add(new Discrepancy(internalTrade.getTradeRef(), List.of(DiscrepancyType.MISSING_TRADE)));
+                continue;
+            }
+            List<DiscrepancyType> types = compareTrades(internalTrade, externalTrade);
+            if (types.isEmpty()) {
+                matched.add(internalTrade);
+            } else {
+                discrepancies.add(new Discrepancy(internalTrade.getTradeRef(), types));
+            }
+        }
+
+        for (BaseTrade leftover : externalByRef.values()) {
+            discrepancies.add(new Discrepancy(leftover.getTradeRef(), List.of(DiscrepancyType.MISSING_TRADE)));
+        }
+
+        return new ReconReport(matched, discrepancies, internalTrades.size(), externalTrades.size());
+    }
+
+    public ReconSummary generateReport(ReconReport reconReport) {
+        Map<DiscrepancyType, Integer> breakdown = reconReport.discrepancies().stream()
+                .flatMap(d -> d.types().stream())
+                .collect(Collectors.toMap(type -> type, type -> 1, Integer::sum));
+
+        return new ReconSummary(
+                reconReport.totalInternal(),
+                reconReport.totalExternal(),
+                reconReport.matched().size(),
+                reconReport.discrepancies().size(),
+                breakdown);
+    }
+
+    public ReconSummary reconcileWithDatabase(List<? extends BaseTrade> externalTrades) {
+        List<? extends BaseTrade> internalTrades = tradeDAO.findAll();
+        ReconReport report = matchTrades(internalTrades, externalTrades);
+        persistBreaks(report);
+        return generateReport(report);
+    }
+
+    private void persistBreaks(ReconReport report) {
+        for (Discrepancy discrepancy : report.discrepancies()) {
+            ReconResult result = ReconResult.builder()
+                    .tradeId(null)
+                    .status("OPEN")
+                    .discrepancyType(discrepancy.types().get(0))
+                    .detectedAt(Instant.now())
+                    .createdAt(Instant.now())
+                    .build();
+            reconResultDAO.insert(result);
+        }
+    }
+
+    private static List<DiscrepancyType> compareTrades(BaseTrade internal, BaseTrade external) {
+        List<DiscrepancyType> types = new ArrayList<>();
+        if (internal.getQuantity().compareTo(external.getQuantity()) != 0) {
+            types.add(DiscrepancyType.QUANTITY_MISMATCH);
+        }
+        if (internal.getPrice().compareTo(external.getPrice()) != 0) {
+            types.add(DiscrepancyType.PRICE_MISMATCH);
+        }
+        if (!internal.getTradeDate().equals(external.getTradeDate())) {
+            types.add(DiscrepancyType.DATE_MISMATCH);
+        }
+        return types;
     }
 }

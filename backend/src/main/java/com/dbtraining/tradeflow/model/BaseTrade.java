@@ -3,6 +3,7 @@ package com.dbtraining.tradeflow.model;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Objects;
 
 /**
  * ============================================================================
@@ -24,19 +25,68 @@ import java.time.LocalDate;
  */
 public abstract class BaseTrade {
 
-    // TODO(TICKET-I028): protected final fields for the shared values
-    //   tradeRef, instrumentId, counterpartyId, quantity, price, tradeDate,
-    //   status, createdAt.
+    protected final String tradeRef;
+    protected final Long instrumentId;
+    protected final Long counterpartyId;
+    protected final BigDecimal quantity;
+    protected final BigDecimal price;
+    protected final LocalDate tradeDate;
+    protected final TradeStatus status;
+    protected final Instant createdAt;
 
-    // TODO(TICKET-I028): protected constructor (subclasses call super(...)).
+    protected BaseTrade(String tradeRef,
+                        Long instrumentId,
+                        Long counterpartyId,
+                        BigDecimal quantity,
+                        BigDecimal price,
+                        LocalDate tradeDate,
+                        TradeStatus status,
+                        Instant createdAt) {
+        this.tradeRef = Objects.requireNonNull(tradeRef, "tradeRef is required");
+        this.instrumentId = Objects.requireNonNull(instrumentId, "instrumentId is required");
+        this.counterpartyId = Objects.requireNonNull(counterpartyId, "counterpartyId is required");
+        this.quantity = Objects.requireNonNull(quantity, "quantity is required");
+        this.price = Objects.requireNonNull(price, "price is required");
+        this.tradeDate = Objects.requireNonNull(tradeDate, "tradeDate is required");
+        this.status = Objects.requireNonNull(status, "status is required");
+        this.createdAt = createdAt == null ? Instant.now() : createdAt;
+    }
 
-    // TODO(TICKET-I028): public getters.
+    public String getTradeRef() {
+        return tradeRef;
+    }
 
-    /**
-     * Each asset class returns its own description for logs/UI.
-     * EquityTrade → "Equity on XETRA"
-     * FXTrade     → "FX EUR/USD"
-     * BondTrade   → "Bond coupon 4.50% mat 2030-06-15"
-     */
+    public Long getInstrumentId() {
+        return instrumentId;
+    }
+
+    public Long getCounterpartyId() {
+        return counterpartyId;
+    }
+
+    public BigDecimal getQuantity() {
+        return quantity;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public LocalDate getTradeDate() {
+        return tradeDate;
+    }
+
+    public TradeStatus getStatus() {
+        return status;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public BigDecimal getNotional() {
+        return quantity.multiply(price);
+    }
+
     public abstract String assetClassDescription();
 }
