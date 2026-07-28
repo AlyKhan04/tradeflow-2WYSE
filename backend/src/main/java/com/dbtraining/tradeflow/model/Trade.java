@@ -7,71 +7,24 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 /**
- * Trade — POJO mirroring the trades table.
- * Immutable from the outside: construction goes through the Builder (I018).
+ * Trade — generic trade type that shares the common BaseTrade fields.
+ * Immutable from the outside: construction goes through the Builder.
  */
-public class Trade {
+public class Trade extends BaseTrade {
 
-    private String tradeRef;
-    private Long instrumentId;
-    private Long counterpartyId;
-    private BigDecimal quantity;
-    private BigDecimal price;
-    private LocalDate tradeDate;
-    private TradeStatus status;
-    private Instant createdAt;
-
-    // Package-private no-arg constructor — Builder is the public path.
-    Trade() {}
-
-    public String getTradeRef()         { return tradeRef; }
-    public Long getInstrumentId()       { return instrumentId; }
-    public Long getCounterpartyId()     { return counterpartyId; }
-    public BigDecimal getQuantity()     { return quantity; }
-    public BigDecimal getPrice()        { return price; }
-    public LocalDate getTradeDate()     { return tradeDate; }
-    public TradeStatus getStatus()      { return status; }
-    public Instant getCreatedAt()       { return createdAt; }
-
-    /** Notional = quantity * price. Computed; not stored. */
-    public BigDecimal getNotional() {
-        return quantity == null || price == null ? null : quantity.multiply(price);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Trade other)) return false;
-        return Objects.equals(tradeRef, other.tradeRef);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(tradeRef);
-    }
-
-    @Override
-    public String toString() {
-        return "Trade[" + tradeRef
-                + " | " + instrumentId
-                + " | " + quantity + " @ " + price
-                + " | " + tradeDate
-                + " | " + status + "]";
+    private Trade(Builder builder) {
+        super(builder.tradeRef, builder.instrumentId, builder.counterpartyId,
+                builder.quantity, builder.price, builder.tradeDate,
+                builder.status, builder.createdAt);
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    private Trade(Builder builder) {
-        this.tradeRef = builder.tradeRef;
-        this.instrumentId = builder.instrumentId;
-        this.counterpartyId = builder.counterpartyId;
-        this.quantity = builder.quantity;
-        this.price = builder.price;
-        this.tradeDate = builder.tradeDate;
-        this.status = builder.status != null ? builder.status : TradeStatus.PENDING;
-        this.createdAt = builder.createdAt != null ? builder.createdAt : Instant.now();
+    @Override
+    public String assetClassDescription() {
+        return "Generic trade";
     }
 
     public static final class Builder {

@@ -1,7 +1,12 @@
 package com.dbtraining.tradeflow.service.validator;
 
 import com.dbtraining.tradeflow.exception.TradeValidationException;
+import com.dbtraining.tradeflow.exception.TradeValidationException.Code;
 import com.dbtraining.tradeflow.model.BaseTrade;
+import com.dbtraining.tradeflow.model.EquityTrade;
+import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
 
 /**
  * ============================================================================
@@ -17,11 +22,26 @@ import com.dbtraining.tradeflow.model.BaseTrade;
  *    - et.quantity() must be a whole multiple of lotSize
  * ============================================================================
  */
+
+@Component
 public class EquityTradeValidator implements ITradeValidator {
 
     @Override
     public void validate(BaseTrade trade) throws TradeValidationException {
-        // TODO(TICKET-I038): implement.
-        throw new TradeValidationException("TICKET-I038: implement EquityTradeValidator");
+        if (!(trade instanceof EquityTrade et)) {
+            throw new TradeValidationException(Code.INVALID_VALUE,
+                    "EquityTradeValidator only accepts EquityTrade");
+        }
+        if (et.getExchange() == null || et.getExchange().isBlank()) {
+            throw new TradeValidationException(Code.MISSING_FIELD, "exchange is required");
+        }
+        if (et.getLotSize() <= 0) {
+            throw new TradeValidationException(Code.INVALID_VALUE, "lotSize must be > 0");
+        }
+        BigDecimal lotSize = BigDecimal.valueOf(et.getLotSize());
+        if (et.getQuantity().remainder(lotSize).signum() != 0) {
+            throw new TradeValidationException(Code.INVALID_VALUE,
+                    "quantity must be a whole multiple of lotSize=" + et.getLotSize());
+        }
     }
 }

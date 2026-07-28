@@ -1,0 +1,4 @@
+asset_class,trade_ref,instrument_id,counterparty_id,quantity,price,trade_date,status,exchange,lot_size,base_ccy,quote_ccy,spot_rate,coupon_rate,maturity_date,face_value
+EQUITY,TRD-001,1,1,1000,245.75,2026-03-01,PENDING,XETR,100,,,,,,
+FX,TRD-002,2,2,1100000,1.09,2026-03-01,PENDING,,,EUR,USD,1.09,,,
+BOND,TRD-003,3,3,100000,99.50,2026-03-03,PENDING,,,,,,5.0,2031-03-02,100000
