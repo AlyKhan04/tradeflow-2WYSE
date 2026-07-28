@@ -1,7 +1,12 @@
 package com.dbtraining.tradeflow;
 
+import com.dbtraining.tradeflow.model.Trade;
+import com.dbtraining.tradeflow.model.TradeStatus;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 /**
  * ============================================================================
@@ -29,7 +34,45 @@ public class TradeflowApplication {
 
     public static void main(String[] args) {
         printBanner();
+        verifyTradeEquality();
         SpringApplication.run(TradeflowApplication.class, args);
+    }
+
+    /**
+     * TICKET-I025 — the AC's "manual assertion in main".
+     *
+     * Builds two Trades that share a tradeRef but differ in every other
+     * field, and proves they are equal with matching hash codes. Fails loudly
+     * at startup rather than silently corrupting Day 3's HashMap dedup.
+     */
+    private static void verifyTradeEquality() {
+        Trade a = Trade.builder()
+                .tradeRef("TRD-1")
+                .instrumentId(1L).counterpartyId(1L)
+                .quantity(new BigDecimal("100")).price(new BigDecimal("50.00"))
+                .tradeDate(LocalDate.now()).status(TradeStatus.PENDING)
+                .build();
+
+        Trade b = Trade.builder()
+                .tradeRef("TRD-1")                    // same business key ...
+                .instrumentId(2L).counterpartyId(9L)  // ... everything else differs
+                .quantity(new BigDecimal("200")).price(new BigDecimal("99.99"))
+                .tradeDate(LocalDate.now()).status(TradeStatus.MATCHED)
+                .build();
+
+        Trade c = Trade.builder()
+                .tradeRef("TRD-2")                    // different business key
+                .instrumentId(1L).counterpartyId(1L)
+                .quantity(new BigDecimal("100")).price(new BigDecimal("50.00"))
+                .tradeDate(LocalDate.now()).status(TradeStatus.PENDING)
+                .build();
+
+        if (!a.equals(b))                 throw new AssertionError("equals broken: same tradeRef must be equal");
+        if (a.hashCode() != b.hashCode()) throw new AssertionError("hashCode broken: equal objects must share a hash");
+        if (a.equals(c))                  throw new AssertionError("equals broken: different tradeRef must not be equal");
+
+        System.out.println("  [I025] equals/hashCode contract verified on tradeRef.");
+        System.out.println();
     }
 
     private static void printBanner() {

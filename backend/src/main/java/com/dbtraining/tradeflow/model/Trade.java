@@ -80,6 +80,43 @@ public class Trade {
         return quantity == null || price == null ? null : quantity.multiply(price);
     }
 
+    // ------------------------------------------------------------------------
+    // TICKET-I025 — equality on tradeRef, the business key.
+    //
+    // Two feeds publishing TRD-2026-0001 describe the same trade even when
+    // their price, quantity and timestamps differ, so tradeRef alone decides
+    // identity. Day 3's reconciliation dedups via HashMap<String, Trade> on
+    // exactly this key.
+    //
+    // hashCode() must stay consistent with equals(): a HashMap jumps to a
+    // bucket by hash *before* it ever calls equals(), so if two equal Trades
+    // hashed differently the comparison would never happen and lookups would
+    // silently miss.
+    // ------------------------------------------------------------------------
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        // Pattern variable (Java 16+): type-test and bind in one step.
+        // Also returns false for null, so no explicit null check is needed.
+        if (!(o instanceof Trade other)) return false;
+        return Objects.equals(tradeRef, other.tradeRef);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(tradeRef);
+    }
+
+    @Override
+    public String toString() {
+        return "Trade[" + tradeRef
+                + " | " + instrumentId
+                + " | " + quantity + " @ " + price
+                + " | " + tradeDate
+                + " | " + status + "]";
+    }
+
     public static final class Builder {
         private String tradeRef;
         private Long instrumentId;
