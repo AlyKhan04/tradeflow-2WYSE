@@ -1,5 +1,8 @@
 package com.dbtraining.tradeflow.model;
 
+import java.time.Instant;
+import java.util.Objects;
+
 /**
  * ============================================================================
  * ReconResult — TICKET-I024 + TICKET-I058
@@ -11,73 +14,57 @@ package com.dbtraining.tradeflow.model;
  * OBSERVE: A row with status='OPEN' and discrepancyType=PRICE_MISMATCH means
  *          a human has to investigate.
  * ============================================================================
- *  TODO(TICKET-I024) [Day 2]:
- *    Fields: id, tradeId (Long), status (String for now), discrepancyType
- *            (DiscrepancyType, nullable), resolvedAt (Instant, nullable),
- *            createdAt (Instant).
- *
- *  TODO(TICKET-I058) [Day 5]:
- *    Convert to JPA entity.
- *    - @ManyToOne(fetch = LAZY) on the Trade reference
- *    - @Enumerated(EnumType.STRING) on discrepancyType
- *    - resolvedAt is @Column(nullable = true)
- * ============================================================================
  */
-import java.time.Instant;
-import java.util.Objects;
-
 public class ReconResult {
 
     private final Long id;
     private final Long tradeId;
     private final String status;
     private final DiscrepancyType discrepancyType;
+    private final Instant detectedAt;
     private final Instant resolvedAt;
     private final Instant createdAt;
 
-    protected ReconResult() {
-        this.id = null;
-        this.tradeId = null;
-        this.status = null;
-        this.discrepancyType = null;
-        this.resolvedAt = null;
-        this.createdAt = null;
+    private ReconResult(Builder builder) {
+        this.id = builder.id;
+        this.tradeId = builder.tradeId;
+        this.status = Objects.requireNonNull(builder.status, "status is required");
+        this.discrepancyType = builder.discrepancyType;
+        this.detectedAt = Objects.requireNonNull(builder.detectedAt, "detectedAt is required");
+        this.resolvedAt = builder.resolvedAt;
+        this.createdAt = Objects.requireNonNull(builder.createdAt, "createdAt is required");
     }
 
-    private ReconResult(Builder b) {
-        this.id = b.id;
-        this.tradeId = b.tradeId;
-        this.status = b.status;
-        this.discrepancyType = b.discrepancyType;
-        this.resolvedAt = b.resolvedAt;
-        this.createdAt = b.createdAt != null ? b.createdAt : Instant.now();
+    public Long getId() {
+        return id;
     }
 
-    public Long getId() { return id; }
-    public Long getTradeId() { return tradeId; }
-    public String getStatus() { return status; }
-    public DiscrepancyType getDiscrepancyType() { return discrepancyType; }
-    public Instant getResolvedAt() { return resolvedAt; }
-    public Instant getCreatedAt() { return createdAt; }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ReconResult)) return false;
-        ReconResult that = (ReconResult) o;
-        return Objects.equals(id, that.id);
+    public Long getTradeId() {
+        return tradeId;
     }
 
-    @Override
-    public int hashCode() { return Objects.hashCode(id); }
+    public String getStatus() {
+        return status;
+    }
 
-    @Override
-    public String toString() {
-        return String.format("ReconResult[id=%s tradeId=%s status=%s discrepancy=%s]",
-                id != null ? id.toString() : "-",
-                tradeId != null ? tradeId.toString() : "-",
-                status != null ? status : "-",
-                discrepancyType != null ? discrepancyType.name() : "-");
+    public DiscrepancyType getDiscrepancyType() {
+        return discrepancyType;
+    }
+
+    public Instant getDetectedAt() {
+        return detectedAt;
+    }
+
+    public Instant getResolvedAt() {
+        return resolvedAt;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public static final class Builder {
@@ -85,19 +72,46 @@ public class ReconResult {
         private Long tradeId;
         private String status;
         private DiscrepancyType discrepancyType;
+        private Instant detectedAt;
         private Instant resolvedAt;
         private Instant createdAt;
 
-        public Builder id(Long v) { this.id = v; return this; }
-        public Builder tradeId(Long v) { this.tradeId = v; return this; }
-        public Builder status(String v) { this.status = v; return this; }
-        public Builder discrepancyType(DiscrepancyType v) { this.discrepancyType = v; return this; }
-        public Builder resolvedAt(Instant v) { this.resolvedAt = v; return this; }
-        public Builder createdAt(Instant v) { this.createdAt = v; return this; }
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder tradeId(Long tradeId) {
+            this.tradeId = tradeId;
+            return this;
+        }
+
+        public Builder status(String status) {
+            this.status = status;
+            return this;
+        }
+
+        public Builder discrepancyType(DiscrepancyType discrepancyType) {
+            this.discrepancyType = discrepancyType;
+            return this;
+        }
+
+        public Builder detectedAt(Instant detectedAt) {
+            this.detectedAt = detectedAt;
+            return this;
+        }
+
+        public Builder resolvedAt(Instant resolvedAt) {
+            this.resolvedAt = resolvedAt;
+            return this;
+        }
+
+        public Builder createdAt(Instant createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
 
         public ReconResult build() {
-            Objects.requireNonNull(status, "status required");
-            Objects.requireNonNull(tradeId, "tradeId required");
             return new ReconResult(this);
         }
     }

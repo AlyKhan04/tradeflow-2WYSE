@@ -25,7 +25,7 @@ public enum AssetClass {
     public boolean isCash() {
         return switch (this) {
             case EQUITY, FIXED_INCOME, FX -> true;
-            default -> false;
+            case COMMODITY, DERIVATIVE -> false;
         };
     }
 }

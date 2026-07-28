@@ -22,20 +22,18 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <!-- Day-1 bootstrap: all 5 tables + indexes -->
+    <!-- Day-1 bootstrap: all 5 tables + indexes + seed data + views -->
     <include file="db/changelog/changes/001-init.xml"/>
-
-    <!--
-        As you complete Day-1 tickets I003..I008 (REVIEW + EXTEND the
-        bootstrap), add new changeset files here. Naming convention:
-
-            002-<your-change>.xml   author=<your-handle>
-
-        Example additions you might write:
-          - Add CHECK constraints on trades.status and trades.quantity > 0
-          - Add CHECK constraint on counterparties.region
-          - Add an audit_log immutability trigger
-          - Add a generated column trades.notional_amount
-    -->
+    <include file="db/changelog/changes/002-create-trades.xml"/>
+    <include file="db/changelog/changes/003-createinstruments.xml"/>
+    <include file="db/changelog/changes/004-create-counterparties.xml"/>
+    <include file="db/changelog/changes/005-create-settlements.xml"/>
+    <include file="db/changelog/changes/006-create-recon-breaks.xml"/>
+    <include file="db/changelog/changes/007-fks-and-indexes.xml"/>
+    <include file="db/changelog/changes/008-seed-instruments.xml"/>
+    <include file="db/changelog/changes/009-seed-counterparties.xml"/>
+    <include file="db/changelog/changes/010-seed-trades.xml"/>
+    <include file="db/changelog/changes/011-create-views.xml"/>
+    <include file="db/changelog/changes/012-create-audit-log.xml"/>
 
 </databaseChangeLog>
