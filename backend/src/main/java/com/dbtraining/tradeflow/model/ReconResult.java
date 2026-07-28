@@ -15,6 +15,17 @@ import java.util.Objects;
  *          a human has to investigate.
  * ============================================================================
  */
+
+// backend/src/main/java/com/dbtraining/tradeflow/model/ReconResult.java
+package com.dbtraining.tradeflow.model;
+
+import java.time.Instant;
+import java.util.Objects;
+
+/**
+ * ReconResult — POJO recording one reconciliation break against one Trade.
+ * status is a String for Day 2; Day 5 promotes it to a ReconStatus enum.
+ */
 public class ReconResult {
 
     private final Long id;

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+  <changeSet id="012-create-audit-log" author="your-name">
+    <createTable tableName="audit_log">
+      <column name="id" type="BIGINT" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="table_name" type="VARCHAR(64)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="operation" type="CHAR(1)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="row_pk" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="before_data" type="JSONB"/>
+      <column name="after_data"  type="JSONB"/>
+      <column name="changed_by" type="VARCHAR(50)"
+              defaultValueComputed="CURRENT_USER">
+        <constraints nullable="false"/>
+      </column>
+      <column name="changed_at" type="TIMESTAMP WITH TIME ZONE"
+              defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <sql>
+      ALTER TABLE audit_log ADD CONSTRAINT chk_audit_log_operation
+          CHECK (operation IN ('I','U','D'));
+    </sql>
+
+    <createIndex tableName="audit_log" indexName="idx_audit_log_table_pk">
+      <column name="table_name"/>
+      <column name="row_pk"/>
+    </createIndex>
+
+    <createIndex tableName="audit_log" indexName="idx_audit_log_changed_at">
+      <column name="changed_at"/>
+    </createIndex>
+
+    <rollback>
+      <dropTable tableName="audit_log"/>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>
