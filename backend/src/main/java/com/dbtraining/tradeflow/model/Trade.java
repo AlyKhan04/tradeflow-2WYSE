@@ -3,6 +3,7 @@ package com.dbtraining.tradeflow.model;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Objects;
 
 /**
  * ============================================================================
@@ -61,7 +62,23 @@ public class Trade {
 
     public static Builder builder() { return new Builder(); }
 
-    // (getters from I017 — omitted for brevity)
+    // ------------------------------------------------------------------------
+    // TICKET-I017 — getters only, no setters. Construction goes through the
+    // Builder below, so a Trade cannot be mutated after it is built.
+    // ------------------------------------------------------------------------
+    public String getTradeRef()     { return tradeRef; }
+    public Long getInstrumentId()   { return instrumentId; }
+    public Long getCounterpartyId() { return counterpartyId; }
+    public BigDecimal getQuantity() { return quantity; }
+    public BigDecimal getPrice()    { return price; }
+    public LocalDate getTradeDate() { return tradeDate; }
+    public TradeStatus getStatus()  { return status; }
+    public Instant getCreatedAt()   { return createdAt; }
+
+    /** Notional = quantity * price. Computed on demand, never stored. */
+    public BigDecimal getNotional() {
+        return quantity == null || price == null ? null : quantity.multiply(price);
+    }
 
     public static final class Builder {
         private String tradeRef;
