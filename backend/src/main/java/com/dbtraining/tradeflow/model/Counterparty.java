@@ -24,15 +24,57 @@ package com.dbtraining.tradeflow.model;
  */
 public class Counterparty {
 
-    // TODO(TICKET-I022): private fields here.
+    private Long id;
+    private String name;
+    private String leiCode;
+    private String region;
 
-    // TODO(TICKET-I022): private constructor used by Builder.
+    Counterparty() {}
 
-    // TODO(TICKET-I022): getters (no setters — favour immutability).
+    private Counterparty(Builder b) {
+        this.name    = b.name;
+        this.leiCode = b.leiCode;
+        this.region  = b.region;
+    }
 
-    // TODO(TICKET-I022): static inner Builder class.
+    public static Builder builder() { return new Builder(); }
 
-    // TODO(TICKET-I025-style): equals() + hashCode() on leiCode.
+    public Long getId()        { return id; }
+    public String getName()    { return name; }
+    public String getLeiCode() { return leiCode; }
+    public String getRegion()  { return region; }
 
-    // TODO(TICKET-I022): toString() that returns e.g. "Counterparty[GS / W22L..ZB6K528]".
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Counterparty other)) return false;
+        return Objects.equals(leiCode, other.leiCode);
+    }
+
+    @Override public int hashCode() { return Objects.hash(leiCode); }
+
+    @Override public String toString() {
+        return "Counterparty[" + leiCode + " | " + name + " | " + region + "]";
+    }
+
+    public static final class Builder {
+        private String name;
+        private String leiCode;
+        private String region;
+
+        public Builder name(String v)    { this.name = v;    return this; }
+        public Builder leiCode(String v) { this.leiCode = v; return this; }
+        public Builder region(String v)  { this.region = v;  return this; }
+
+        public Counterparty build() {
+            Objects.requireNonNull(name,    "name required");
+            Objects.requireNonNull(leiCode, "leiCode required");
+            Objects.requireNonNull(region,  "region required");
+            if (leiCode.length() != 20)
+                throw new IllegalStateException("leiCode must be exactly 20 chars (LEI standard)");
+            if (!region.matches("APAC|EMEA|NAMR|LATAM"))
+                throw new IllegalStateException("region must be one of APAC|EMEA|NAMR|LATAM");
+            return new Counterparty(this);
+        }
+    }
 }
