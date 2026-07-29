@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BondTrade.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tradeflow</a> &gt; <a href="index.source.html" class="el_package">com.dbtraining.tradeflow.model</a> &gt; <span class="el_source">BondTrade.java</span></div><h1>BondTrade.java</h1><pre class="source lang-java linenums">package com.dbtraining.tradeflow.model;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+/**
+ * ============================================================================
+ * BondTrade — TICKET-I031
+ * ============================================================================
+ * WHAT:    A trade on a fixed-income instrument.
+ * WHY:     Bonds need coupon and maturity to compute yield / settlement.
+ * ============================================================================
+ *  TODO(TICKET-I031):
+ *    extends BaseTrade.
+ *    Extra fields:
+ *      private final BigDecimal couponRate;       // 0.0 .. 100.0
+ *      private final LocalDate maturityDate;      // must be after tradeDate
+ *      private final BigDecimal faceValue;
+ *
+ *    Validate in builder:
+ *      - couponRate &gt;= 0 &amp;&amp; couponRate &lt;= 100
+ *      - maturityDate.isAfter(tradeDate)
+ *
+ *    assetClassDescription() returns
+ *      &quot;Bond coupon &quot; + couponRate + &quot;% mat &quot; + maturityDate.
+ * ============================================================================
+ */
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Objects;
+
+public class BondTrade extends BaseTrade {
+
+<span class="nc" id="L35">    private static final BigDecimal HUNDRED = new BigDecimal(&quot;100&quot;);</span>
+
+    private final BigDecimal couponRate;
+    private final LocalDate maturityDate;
+    private final BigDecimal faceValue;
+
+    private BondTrade(Builder b) {
+<span class="nc" id="L42">        super(b.tradeRef, b.instrumentId, b.counterpartyId, b.quantity, b.price,</span>
+              b.tradeDate, b.status, b.createdAt);
+<span class="nc" id="L44">        this.couponRate   = Objects.requireNonNull(b.couponRate,   &quot;couponRate required&quot;);</span>
+<span class="nc" id="L45">        this.maturityDate = Objects.requireNonNull(b.maturityDate, &quot;maturityDate required&quot;);</span>
+<span class="nc" id="L46">        this.faceValue    = Objects.requireNonNull(b.faceValue,    &quot;faceValue required&quot;);</span>
+<span class="nc bnc" id="L47" title="All 4 branches missed.">        if (couponRate.signum() &lt; 0 || couponRate.compareTo(HUNDRED) &gt; 0)</span>
+<span class="nc" id="L48">            throw new IllegalStateException(&quot;couponRate must be between 0 and 100&quot;);</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        if (!maturityDate.isAfter(tradeDate))</span>
+<span class="nc" id="L50">            throw new IllegalStateException(&quot;maturityDate must be after tradeDate&quot;);</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        if (faceValue.signum() &lt;= 0)</span>
+<span class="nc" id="L52">            throw new IllegalStateException(&quot;faceValue must be &gt; 0&quot;);</span>
+<span class="nc" id="L53">    }</span>
+
+<span class="nc" id="L55">    public static Builder builder() { return new Builder(); }</span>
+
+<span class="nc" id="L57">    public BigDecimal getCouponRate()    { return couponRate; }</span>
+<span class="nc" id="L58">    public LocalDate getMaturityDate()   { return maturityDate; }</span>
+<span class="nc" id="L59">    public BigDecimal getFaceValue()     { return faceValue; }</span>
+
+    @Override
+    public String assetClassDescription() {
+<span class="nc" id="L63">        return &quot;Bond coupon &quot; + couponRate + &quot;% mat &quot; + maturityDate;</span>
+    }
+
+<span class="nc" id="L66">    public static final class Builder {</span>
+        private String tradeRef;
+        private Long instrumentId;
+        private Long counterpartyId;
+        private BigDecimal quantity;
+        private BigDecimal price;
+        private LocalDate tradeDate;
+        private TradeStatus status;
+        private Instant createdAt;
+        private BigDecimal couponRate;
+        private LocalDate maturityDate;
+        private BigDecimal faceValue;
+
+<span class="nc" id="L79">        public Builder tradeRef(String v)         { this.tradeRef = v;       return this; }</span>
+<span class="nc" id="L80">        public Builder instrumentId(Long v)        { this.instrumentId = v;   return this; }</span>
+<span class="nc" id="L81">        public Builder counterpartyId(Long v)      { this.counterpartyId = v; return this; }</span>
+<span class="nc" id="L82">        public Builder quantity(BigDecimal v)      { this.quantity = v;       return this; }</span>
+<span class="nc" id="L83">        public Builder price(BigDecimal v)         { this.price = v;          return this; }</span>
+<span class="nc" id="L84">        public Builder tradeDate(LocalDate v)      { this.tradeDate = v;      return this; }</span>
+<span class="nc" id="L85">        public Builder status(TradeStatus v)       { this.status = v;         return this; }</span>
+<span class="nc" id="L86">        public Builder createdAt(Instant v)        { this.createdAt = v;      return this; }</span>
+<span class="nc" id="L87">        public Builder couponRate(BigDecimal v)    { this.couponRate = v;     return this; }</span>
+<span class="nc" id="L88">        public Builder maturityDate(LocalDate v)   { this.maturityDate = v;   return this; }</span>
+<span class="nc" id="L89">        public Builder faceValue(BigDecimal v)     { this.faceValue = v;      return this; }</span>
+
+<span class="nc" id="L91">        public BondTrade build() { return new BondTrade(this); }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

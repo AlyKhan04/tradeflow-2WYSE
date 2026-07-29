@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.dbtraining.tradeflow.service.ReconciliationServiceTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.672 s -- in com.dbtraining.tradeflow.service.ReconciliationServiceTest

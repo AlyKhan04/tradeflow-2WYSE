@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Counterparty.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tradeflow</a> &gt; <a href="index.source.html" class="el_package">com.dbtraining.tradeflow.model</a> &gt; <span class="el_source">Counterparty.java</span></div><h1>Counterparty.java</h1><pre class="source lang-java linenums">package com.dbtraining.tradeflow.model;
+
+import java.util.Objects;
+
+/**
+ * ============================================================================
+ * Counterparty — TICKET-I022 + TICKET-I057
+ * ============================================================================
+ * WHAT:    The other side of a trade — broker, exchange, or another bank.
+ * HOW:     Plain POJO on Day 2; converted to JPA @Entity on Day 5.
+ * WHY:     The trade table has an FK to this — every trade has a counterparty.
+ * OBSERVE: Build a Counterparty in main(), pass it through a Trade, print both.
+ * ============================================================================
+ *  TODO(TICKET-I022) [Day 2]:
+ *    Fields: id (Long), name (String), leiCode (String, 20 chars), region (String).
+ *    Add private constructor + Builder for clean construction.
+ *    Add equals()/hashCode() on leiCode (it's globally unique).
+ *
+ *  TODO(TICKET-I057) [Day 5]:
+ *    Convert this class to a JPA entity.
+ *    - @Entity @Table(name = &quot;counterparties&quot;)
+ *    - @Id @GeneratedValue(strategy = GenerationType.IDENTITY) on id
+ *    - @Column(unique = true, length = 20) on leiCode
+ *    - protected no-arg constructor (JPA needs it).
+ * ============================================================================
+ */
+public class Counterparty {
+
+    private final Long id;
+    private final String name;
+    private final String leiCode;
+    private final String region;
+
+<span class="nc" id="L34">    protected Counterparty() {</span>
+<span class="nc" id="L35">        this.id = null;</span>
+<span class="nc" id="L36">        this.name = null;</span>
+<span class="nc" id="L37">        this.leiCode = null;</span>
+<span class="nc" id="L38">        this.region = null;</span>
+<span class="nc" id="L39">    }</span>
+
+<span class="nc" id="L41">    private Counterparty(Builder b) {</span>
+<span class="nc" id="L42">        this.id = b.id;</span>
+<span class="nc" id="L43">        this.name = b.name;</span>
+<span class="nc" id="L44">        this.leiCode = b.leiCode;</span>
+<span class="nc" id="L45">        this.region = b.region;</span>
+<span class="nc" id="L46">    }</span>
+
+<span class="nc" id="L48">    public Long getId() { return id; }</span>
+<span class="nc" id="L49">    public String getName() { return name; }</span>
+<span class="nc" id="L50">    public String getLeiCode() { return leiCode; }</span>
+<span class="nc" id="L51">    public String getRegion() { return region; }</span>
+
+    @Override
+    public boolean equals(Object o) {
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        if (this == o) return true;</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        if (!(o instanceof Counterparty)) return false;</span>
+<span class="nc" id="L57">        Counterparty that = (Counterparty) o;</span>
+<span class="nc bnc" id="L58" title="All 4 branches missed.">        return leiCode != null &amp;&amp; leiCode.equals(that.leiCode);</span>
+    }
+
+    @Override
+<span class="nc bnc" id="L62" title="All 2 branches missed.">    public int hashCode() { return leiCode != null ? leiCode.hashCode() : 0; }</span>
+
+    @Override
+    public String toString() {
+<span class="nc bnc" id="L66" title="All 4 branches missed.">        return String.format(&quot;Counterparty[%s / %s]&quot;, name != null ? name : &quot;-&quot;, leiCode != null ? leiCode : &quot;-&quot;);</span>
+    }
+
+<span class="nc" id="L69">    public static final class Builder {</span>
+        private Long id;
+        private String name;
+        private String leiCode;
+        private String region;
+
+<span class="nc" id="L75">        public Builder id(Long v) { this.id = v; return this; }</span>
+<span class="nc" id="L76">        public Builder name(String v) { this.name = v; return this; }</span>
+<span class="nc" id="L77">        public Builder leiCode(String v) { this.leiCode = v; return this; }</span>
+<span class="nc" id="L78">        public Builder region(String v) { this.region = v; return this; }</span>
+
+        public Counterparty build() {
+<span class="nc" id="L81">            Objects.requireNonNull(leiCode, &quot;leiCode required&quot;);</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">            if (leiCode.length() != 20) throw new IllegalStateException(&quot;leiCode must be exactly 20 characters&quot;);</span>
+<span class="nc" id="L83">            Objects.requireNonNull(region, &quot;region required&quot;);</span>
+<span class="nc" id="L84">            String r = region.toUpperCase();</span>
+<span class="nc bnc" id="L85" title="All 8 branches missed.">            if (!(r.equals(&quot;APAC&quot;) || r.equals(&quot;EMEA&quot;) || r.equals(&quot;NAMR&quot;) || r.equals(&quot;LATAM&quot;)))</span>
+<span class="nc" id="L86">                throw new IllegalStateException(&quot;region must be one of APAC, EMEA, NAMR, LATAM&quot;);</span>
+<span class="nc" id="L87">            this.region = r;</span>
+<span class="nc" id="L88">            return new Counterparty(this);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

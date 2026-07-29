@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tradeflow</a> &gt; <a href="index.source.html" class="el_package">com.dbtraining.tradeflow.exception</a> &gt; <span class="el_source">GlobalExceptionHandler.java</span></div><h1>GlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package com.dbtraining.tradeflow.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.Instant;
+import java.util.Map;
+
+/**
+ * ============================================================================
+ * GlobalExceptionHandler — TICKET-I075
+ * ============================================================================
+ * WHAT:    @RestControllerAdvice that converts thrown exceptions into a
+ *          consistent JSON error envelope.
+ * HOW:     One @ExceptionHandler method per exception type, returning a
+ *          ResponseEntity&lt;Map&lt;...&gt;&gt;.
+ * WHY:     Every API consumer (React, Postman, tests) gets the same shape:
+ *          { &quot;code&quot;, &quot;message&quot;, &quot;timestamp&quot;, &quot;path&quot; }. No stack traces in
+ *          production. Easier to consume on the frontend.
+ * OBSERVE: POST a trade with missing fields → response body has these 4
+ *          keys, HTTP 400.
+ * ============================================================================
+ *  TODO(TICKET-I075):
+ *    - handle TradeValidationException → 400
+ *    - handle TradeNotFoundException → 404
+ *    - handle MethodArgumentNotValidException → 400 with field details
+ *    - handle generic Exception → 500 (last-resort catch-all)
+ *
+ *  HINT: define a small `record ErrorEnvelope(...)` and return it from
+ *        each handler — cleaner than Map&lt;String,Object&gt;.
+ * ============================================================================
+ */
+@RestControllerAdvice
+<span class="nc" id="L36">public class GlobalExceptionHandler {</span>
+
+    // ------------------------------------------------------------------
+    // Skeleton handler — replace with the full set per TICKET-I075.
+    // ------------------------------------------------------------------
+    @ExceptionHandler(TradeNotFoundException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleNotFound(TradeNotFoundException ex) {
+        // TODO(TICKET-I075): build full envelope including the request path.
+<span class="nc" id="L44">        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(</span>
+                &quot;code&quot;, &quot;TRADE_NOT_FOUND&quot;,
+<span class="nc" id="L46">                &quot;message&quot;, ex.getMessage(),</span>
+<span class="nc" id="L47">                &quot;timestamp&quot;, Instant.now().toString()</span>
+        ));
+    }
+
+    // TODO(TICKET-I075): add handler for TradeValidationException -&gt; 400.
+    // TODO(TICKET-I075): add handler for MethodArgumentNotValidException -&gt; 400.
+    // TODO(TICKET-I075): add handler for Exception.class -&gt; 500 (NEVER leak stack trace).
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
