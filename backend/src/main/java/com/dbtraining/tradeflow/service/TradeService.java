@@ -9,12 +9,9 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * ============================================================================
@@ -41,60 +38,58 @@ import java.util.stream.Collectors;
 @Service
 public class TradeService {
 
-    private final Map<String, BaseTrade> trades = new HashMap<>();
+    // TODO(TICKET-I041): in-memory store as HashMap keyed by tradeRef.
+    private final Map<String, BaseTrade> tradesByRef = new HashMap<>();
+
+    // TODO(TICKET-I062) [Day 5]: replace the Map with TradeRepository injection:
+    //   private final TradeRepository tradeRepository;
+    //   public TradeService(TradeRepository tradeRepository) { ... }
 
     public Collection<BaseTrade> getAllTrades() {
-        return Collections.unmodifiableCollection(trades.values());
+        // TODO(TICKET-I041): return an unmodifiable view of the values.
+        return Collections.unmodifiableCollection(tradesByRef.values());
     }
 
     public void addTrade(BaseTrade trade) {
-        if (trade == null) {
-            throw new IllegalArgumentException("trade is required");
-        }
-        if (trade.getTradeRef() == null) {
-            throw new IllegalArgumentException("tradeRef is required");
-        }
-        if (trades.containsKey(trade.getTradeRef())) {
-            throw new IllegalStateException("Duplicate tradeRef: " + trade.getTradeRef());
-        }
-        trades.put(trade.getTradeRef(), trade);
+        // TODO(TICKET-I041): put in the map keyed by tradeRef. Reject duplicates.
+        throw new UnsupportedOperationException("TICKET-I041");
     }
 
-    public Optional<BaseTrade> findByRef(String tradeRef) {
-        return Optional.ofNullable(trades.get(tradeRef));
-    }
-
+    /**
+     * TODO(TICKET-I042):
+     *   Streams pipeline that:
+     *     - filters trades by status == MATCHED
+     *     - groups by counterpartyId
+     *     - sums quantity * price into BigDecimal
+     */
     public Map<Long, BigDecimal> sumByCounterparty() {
-        return trades.values().stream()
-                .filter(t -> t.getStatus() == TradeStatus.MATCHED)
-                .collect(Collectors.groupingBy(
-                        BaseTrade::getCounterpartyId,
-                        Collectors.reducing(
-                                BigDecimal.ZERO,
-                                BaseTrade::getNotional,
-                                BigDecimal::add)));
+        throw new UnsupportedOperationException("TICKET-I042");
     }
 
+    /**
+     * TODO(TICKET-I043):
+     *   Top N trades by notional value (quantity * price) descending.
+     */
     public List<BaseTrade> topNByValue(int n) {
-        if (n <= 0) {
-            throw new IllegalArgumentException("n must be > 0 (was " + n + ")");
-        }
-        return trades.values().stream()
-                .sorted(Comparator.comparing(BaseTrade::getNotional).reversed()
-                        .thenComparing(BaseTrade::getTradeRef))
-                .limit(n)
-                .toList();
+        throw new UnsupportedOperationException("TICKET-I043");
     }
 
+    /**
+     * TODO(TICKET-I062) [Day 5]:
+     *   Convert TradeRequest -> Trade entity, save via TradeRepository,
+     *   publish TradeEvent on success (TICKET-I115), return TradeDto.
+     */
     public TradeDto createTrade(TradeRequest request) {
         throw new UnsupportedOperationException("TICKET-I062");
     }
 
     public TradeDto updateStatus(Long id, TradeStatus newStatus) {
+        // TODO(TICKET-I070): implement on Day 6.
         throw new UnsupportedOperationException("TICKET-I070");
     }
 
     public void softDelete(Long id) {
+        // TODO(TICKET-I071): implement soft delete + audit log on Day 6.
         throw new UnsupportedOperationException("TICKET-I071");
     }
 }

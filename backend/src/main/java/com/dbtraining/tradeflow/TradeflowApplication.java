@@ -136,6 +136,11 @@ public class TradeflowApplication {
     }
 
     private static void printBanner() {
+        // TICKET-I026 note: the guide suggests stripping @SpringBootApplication
+        // to make main() plain Java for Day 2. We deliberately did not -- Day 2's
+        // Sprint 3 (Liquibase, I009/I010) needs the app to boot to run the
+        // migrations. Printing before SpringApplication.run satisfies I026's AC
+        // without breaking that.
         System.out.println();
         System.out.println("  ████████ ██████   █████  ██████  ███████ ███████ ██       ██████  ██     ██");
         System.out.println("     ██    ██   ██ ██   ██ ██   ██ ██      ██      ██      ██    ██ ██     ██");

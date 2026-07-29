@@ -17,12 +17,20 @@ public enum DiscrepancyType {
     DATE_MISMATCH,
     MISSING_TRADE;
 
+    /**
+     * TODO(TICKET-I021): implement describe() — return a short
+     * human-readable string for the UI / CSV export.
+     *
+     * Examples:
+     *   PRICE_MISMATCH    -> "Price does not match counterparty record"
+     *   MISSING_TRADE     -> "Trade exists internally but not externally"
+     */
     public String describe() {
         return switch (this) {
-            case PRICE_MISMATCH -> "Price does not match counterparty record";
+            case PRICE_MISMATCH    -> "Price does not match counterparty record";
             case QUANTITY_MISMATCH -> "Quantity does not match counterparty record";
-            case DATE_MISMATCH -> "Trade date does not match counterparty record";
-            case MISSING_TRADE -> "Trade exists on one side but not the other";
+            case DATE_MISMATCH     -> "Trade or settlement date mismatch";
+            case MISSING_TRADE     -> "Trade exists on one side only";
         };
     }
 }
