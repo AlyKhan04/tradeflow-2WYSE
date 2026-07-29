@@ -19,6 +19,7 @@ public enum AssetClass {
     DERIVATIVE;
 
     /**
+     * TODO(TICKET-I020): implement isCash().
      * Cash products = EQUITY, FIXED_INCOME, FX.
      * Non-cash       = COMMODITY, DERIVATIVE.
      */
