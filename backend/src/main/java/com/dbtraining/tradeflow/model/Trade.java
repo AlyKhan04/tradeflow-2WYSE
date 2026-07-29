@@ -6,115 +6,24 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 /**
- * ============================================================================
- * Trade — TICKET-I017 + TICKET-I018 + TICKET-I025 + TICKET-I056
- * ============================================================================
- * WHAT:    Domain object representing a single trade. Central to the system.
- * HOW:     Plain POJO with private final fields and a fluent Builder.
- *          On Day 5 we convert it to a JPA @Entity.
- * WHY:     Immutability + Builder = thread-safe construction + a readable
- *          API at call sites. JPA needs a no-arg constructor — keep it
- *          protected so the Builder is still the only public way in.
- * OBSERVE: Trade t = Trade.builder().tradeRef("TRD-1").quantity(...).build();
- *          Two trades with the same tradeRef should be .equals().
- * ============================================================================
- *  TICKET-I017: define the fields and getters.
- *  TICKET-I018: add the Builder.
- *  TICKET-I025: override equals()/hashCode() using ONLY tradeRef.
- *  TICKET-I056: add JPA annotations — @Entity / @Table / @Id / @ManyToOne.
- * ============================================================================
- *
- * HINTS:
- * - Use BigDecimal for `quantity` + `price` (NEVER double — it loses precision
- *   for money).
- * - Use LocalDate (NOT Date) for tradeDate.
- * - Use Instant (NOT Date) for createdAt.
- * - For JPA: a `protected Trade()` no-arg constructor satisfies Hibernate;
- *   the public path stays via the Builder.
- * - For @ManyToOne on instrument/counterparty: use FetchType.LAZY to avoid
- *   accidental N+1 queries.
- * ============================================================================
+ * Trade — generic trade type that shares the common BaseTrade fields.
+ * Immutable from the outside: construction goes through the Builder.
  */
+public class Trade extends BaseTrade {
 
-public class Trade {
-
-    private String tradeRef;
-    private Long instrumentId;
-    private Long counterpartyId;
-    private BigDecimal quantity;
-    private BigDecimal price;
-    private LocalDate tradeDate;
-    private TradeStatus status;
-    private Instant createdAt;
-
-    Trade() {}
-
-    private Trade(Builder b) {
-        this.tradeRef       = b.tradeRef;
-        this.instrumentId   = b.instrumentId;
-        this.counterpartyId = b.counterpartyId;
-        this.quantity       = b.quantity;
-        this.price          = b.price;
-        this.tradeDate      = b.tradeDate;
-        this.status         = b.status != null ? b.status : TradeStatus.PENDING;
-        this.createdAt      = b.createdAt != null ? b.createdAt : Instant.now();
+    private Trade(Builder builder) {
+        super(builder.tradeRef, builder.instrumentId, builder.counterpartyId,
+                builder.quantity, builder.price, builder.tradeDate,
+                builder.status, builder.createdAt);
     }
 
-    public static Builder builder() { return new Builder(); }
-
-    // ------------------------------------------------------------------------
-    // TICKET-I017 — getters only, no setters. Construction goes through the
-    // Builder below, so a Trade cannot be mutated after it is built.
-    // ------------------------------------------------------------------------
-    public String getTradeRef()     { return tradeRef; }
-    public Long getInstrumentId()   { return instrumentId; }
-    public Long getCounterpartyId() { return counterpartyId; }
-    public BigDecimal getQuantity() { return quantity; }
-    public BigDecimal getPrice()    { return price; }
-    public LocalDate getTradeDate() { return tradeDate; }
-    public TradeStatus getStatus()  { return status; }
-    public Instant getCreatedAt()   { return createdAt; }
-
-    /** Notional = quantity * price. Computed on demand, never stored. */
-    public BigDecimal getNotional() {
-        return quantity == null || price == null ? null : quantity.multiply(price);
-    }
-
-    // ------------------------------------------------------------------------
-    // TICKET-I025 — equality on tradeRef, the business key.
-    //
-    // Two feeds publishing TRD-2026-0001 describe the same trade even when
-    // their price, quantity and timestamps differ, so tradeRef alone decides
-    // identity. Day 3's reconciliation dedups via HashMap<String, Trade> on
-    // exactly this key.
-    //
-    // hashCode() must stay consistent with equals(): a HashMap jumps to a
-    // bucket by hash *before* it ever calls equals(), so if two equal Trades
-    // hashed differently the comparison would never happen and lookups would
-    // silently miss.
-    // ------------------------------------------------------------------------
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        // Pattern variable (Java 16+): type-test and bind in one step.
-        // Also returns false for null, so no explicit null check is needed.
-        if (!(o instanceof Trade other)) return false;
-        return Objects.equals(tradeRef, other.tradeRef);
+    public static Builder builder() {
+        return new Builder();
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(tradeRef);
-    }
-
-    @Override
-    public String toString() {
-        return "Trade[" + tradeRef
-                + " | " + instrumentId
-                + " | " + quantity + " @ " + price
-                + " | " + tradeDate
-                + " | " + status + "]";
+    public String assetClassDescription() {
+        return "Generic trade";
     }
 
     public static final class Builder {

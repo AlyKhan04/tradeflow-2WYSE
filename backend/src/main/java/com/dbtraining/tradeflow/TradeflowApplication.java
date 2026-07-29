@@ -1,33 +1,22 @@
 package com.dbtraining.tradeflow;
 
+import com.dbtraining.tradeflow.dto.ReconSummary;
 import com.dbtraining.tradeflow.model.Trade;
 import com.dbtraining.tradeflow.model.TradeStatus;
+import com.dbtraining.tradeflow.service.TradeProcessor;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 
 import java.math.BigDecimal;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 
 /**
  * ============================================================================
  * TradeflowApplication — Spring Boot entry point
- * ============================================================================
- * WHAT:    The single annotated main() that bootstraps the whole service.
- * HOW:     `@SpringBootApplication` = `@Configuration` + `@EnableAutoConfiguration`
- *          + `@ComponentScan` — scans this package and below for beans.
- * WHY:     One starting point, predictable lifecycle, easy to launch from
- *          IDE or `./mvnw spring-boot:run`.
- * OBSERVE: Boot log includes "Started TradeflowApplication in X seconds".
- * ============================================================================
- *  Tickets that touch this file:
- *   - TICKET-I016 — package structure + boot main
- *   - TICKET-I026 — print formatted trade list (Day 2, BEFORE Spring boot wiring)
- *   - TICKET-I040 — wire up the full recon pipeline run in main (Day 3 sprint)
- *
- *  Note: I026 runs BEFORE we have Spring Boot — for Day 2 you'll use a plain
- *  `public static void main` without `@SpringBootApplication`. From Day 5
- *  onward, this becomes the Spring Boot entry-point as below.
  * ============================================================================
  */
 @SpringBootApplication
@@ -44,13 +33,19 @@ public class TradeflowApplication {
         SpringApplication.run(TradeflowApplication.class, args);
     }
 
-    /**
-     * TICKET-I025 — the AC's "manual assertion in main".
-     *
-     * Builds two Trades that share a tradeRef but differ in every other
-     * field, and proves they are equal with matching hash codes. Fails loudly
-     * at startup rather than silently corrupting Day 3's HashMap dedup.
-     */
+    @Bean
+    CommandLineRunner reconDemoRunner(TradeProcessor processor) {
+        return args -> {
+            Path internal = Path.of("src/test/resources/internal-trades.csv");
+            Path external = Path.of("src/test/resources/external-trades.csv");
+            ReconSummary summary = processor.process(internal, external);
+            System.out.println();
+            System.out.println("== Day-3 recon demo (TICKET-I040) ==================================================");
+            System.out.println(summary);
+            System.out.println("====================================================================================");
+        };
+    }
+
     private static void verifyTradeEquality() {
         Trade a = Trade.builder()
                 .tradeRef("TRD-1")
@@ -60,14 +55,14 @@ public class TradeflowApplication {
                 .build();
 
         Trade b = Trade.builder()
-                .tradeRef("TRD-1")                    // same business key ...
-                .instrumentId(2L).counterpartyId(9L)  // ... everything else differs
+                .tradeRef("TRD-1")
+                .instrumentId(2L).counterpartyId(9L)
                 .quantity(new BigDecimal("200")).price(new BigDecimal("99.99"))
                 .tradeDate(LocalDate.now()).status(TradeStatus.MATCHED)
                 .build();
 
         Trade c = Trade.builder()
-                .tradeRef("TRD-2")                    // different business key
+                .tradeRef("TRD-2")
                 .instrumentId(1L).counterpartyId(1L)
                 .quantity(new BigDecimal("100")).price(new BigDecimal("50.00"))
                 .tradeDate(LocalDate.now()).status(TradeStatus.PENDING)
@@ -81,18 +76,6 @@ public class TradeflowApplication {
         System.out.println();
     }
 
-    /**
-     * TICKET-I026 — console demo of the domain model, independent of the DB.
-     *
-     * Proves the model compiles and constructs end-to-end before Day 4 wires
-     * JDBC. Trades are hardcoded on purpose: there is no persistence yet.
-     *
-     * The header and the data rows share ROW_FORMAT, so the columns line up
-     * by construction rather than by counting spaces. In printf, "%-15s" is a
-     * string left-aligned in a minimum width of 15; dropping the "-" right-
-     * aligns it, which is why the numeric columns read right and the labels
-     * read left. "%n" emits the platform-correct newline (prefer it to "\n").
-     */
     private static void printDay2Demo() {
         List<Trade> trades = List.of(
                 Trade.builder().tradeRef("TRD-2026-0001")
@@ -136,11 +119,6 @@ public class TradeflowApplication {
     }
 
     private static void printBanner() {
-        // TICKET-I026 note: the guide suggests stripping @SpringBootApplication
-        // to make main() plain Java for Day 2. We deliberately did not -- Day 2's
-        // Sprint 3 (Liquibase, I009/I010) needs the app to boot to run the
-        // migrations. Printing before SpringApplication.run satisfies I026's AC
-        // without breaking that.
         System.out.println();
         System.out.println("  ████████ ██████   █████  ██████  ███████ ███████ ██       ██████  ██     ██");
         System.out.println("     ██    ██   ██ ██   ██ ██   ██ ██      ██      ██      ██    ██ ██     ██");
