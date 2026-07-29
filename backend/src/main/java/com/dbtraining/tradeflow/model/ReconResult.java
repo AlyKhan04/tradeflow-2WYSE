@@ -24,9 +24,6 @@ package com.dbtraining.tradeflow.model;
  * ============================================================================
  */
 
-// backend/src/main/java/com/dbtraining/tradeflow/model/ReconResult.java
-package com.dbtraining.tradeflow.model;
-
 import java.time.Instant;
 import java.util.Objects;
 
