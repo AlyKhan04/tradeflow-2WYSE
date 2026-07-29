@@ -1,4 +1,3 @@
-// backend/src/main/java/com/dbtraining/tradeflow/model/Trade.java
 package com.dbtraining.tradeflow.model;
 
 import java.math.BigDecimal;
@@ -42,23 +41,19 @@ public class Trade extends BaseTrade {
         public Builder counterpartyId(Long v)    { this.counterpartyId = v; return this; }
         public Builder quantity(BigDecimal v)    { this.quantity = v;       return this; }
         public Builder price(BigDecimal v)       { this.price = v;          return this; }
-        public Builder tradeDate(LocalDate v)     { this.tradeDate = v;      return this; }
+        public Builder tradeDate(LocalDate v)    { this.tradeDate = v;      return this; }
         public Builder status(TradeStatus v)     { this.status = v;         return this; }
         public Builder createdAt(Instant v)      { this.createdAt = v;      return this; }
 
         public Trade build() {
-            Objects.requireNonNull(tradeRef, "tradeRef required");
-            Objects.requireNonNull(instrumentId, "instrumentId required");
+            Objects.requireNonNull(tradeRef,       "tradeRef required");
+            Objects.requireNonNull(instrumentId,   "instrumentId required");
             Objects.requireNonNull(counterpartyId, "counterpartyId required");
-            Objects.requireNonNull(quantity, "quantity required");
-            Objects.requireNonNull(price, "price required");
-            Objects.requireNonNull(tradeDate, "tradeDate required");
-            if (quantity.signum() <= 0) {
-                throw new IllegalStateException("quantity must be > 0");
-            }
-            if (price.signum() < 0) {
-                throw new IllegalStateException("price must be >= 0");
-            }
+            Objects.requireNonNull(quantity,       "quantity required");
+            Objects.requireNonNull(price,          "price required");
+            Objects.requireNonNull(tradeDate,      "tradeDate required");
+            if (quantity.signum() <= 0) throw new IllegalStateException("quantity must be > 0");
+            if (price.signum() < 0)    throw new IllegalStateException("price must be >= 0");
             return new Trade(this);
         }
     }

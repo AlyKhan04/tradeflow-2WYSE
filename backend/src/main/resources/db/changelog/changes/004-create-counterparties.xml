@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+  <changeSet id="004-create-counterparties" author="tradeflow-team">
+    <createTable tableName="counterparties">
+      <column name="id" type="BIGINT" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="name" type="VARCHAR(100)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="lei_code" type="CHAR(20)">
+        <constraints nullable="false" unique="true"
+                     uniqueConstraintName="uq_counterparties_lei"/>
+      </column>
+      <column name="region" type="VARCHAR(10)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <sql>
+      ALTER TABLE counterparties ADD CONSTRAINT chk_counterparties_region
+          CHECK (region IN ('APAC','EMEA','NAMR','LATAM'));
+    </sql>
+
+    <rollback>
+      <dropTable tableName="counterparties"/>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>

@@ -19,13 +19,14 @@ public enum AssetClass {
     DERIVATIVE;
 
     /**
+     * TODO(TICKET-I020): implement isCash().
      * Cash products = EQUITY, FIXED_INCOME, FX.
      * Non-cash       = COMMODITY, DERIVATIVE.
      */
     public boolean isCash() {
         return switch (this) {
             case EQUITY, FIXED_INCOME, FX -> true;
-            default -> false;
+            case COMMODITY, DERIVATIVE -> false;
         };
     }
 }

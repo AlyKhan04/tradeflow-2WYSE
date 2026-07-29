@@ -46,6 +46,7 @@ class ReconciliationServiceTest {
     }
 
     @Test
+    @DisplayName("Day 3: matchTrades with matching trades returns 0 discrepancies")
     void matchTrades_allMatched_returnsEmptyDiscrepancies() {
         BaseTrade trade = equity("TRD-1");
         List<BaseTrade> internal = List.of(trade);
@@ -58,6 +59,7 @@ class ReconciliationServiceTest {
     }
 
     @Test
+    @DisplayName("Day 3: matchTrades with price difference flags PRICE_MISMATCH")
     void matchTrades_priceMismatch_flagsDiscrepancy() {
         BaseTrade internal = equity("TRD-1");
         BaseTrade external = EquityTrade.builder()
@@ -80,6 +82,7 @@ class ReconciliationServiceTest {
     }
 
     @Test
+    @DisplayName("Day 3: matchTrades with missing external trade flags MISSING_TRADE")
     void matchTrades_missingExternal_flagsMissingTrade() {
         List<BaseTrade> internal = List.of(equity("TRD-INT-ONLY"));
         List<BaseTrade> external = List.of();

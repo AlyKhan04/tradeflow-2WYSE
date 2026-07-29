@@ -26,65 +26,56 @@ import java.util.Objects;
  */
 public class Counterparty {
 
-    private final Long id;
-    private final String name;
-    private final String leiCode;
-    private final String region;
+    private Long id;
+    private String name;
+    private String leiCode;
+    private String region;
 
-    protected Counterparty() {
-        this.id = null;
-        this.name = null;
-        this.leiCode = null;
-        this.region = null;
-    }
+    Counterparty() {}
 
     private Counterparty(Builder b) {
-        this.id = b.id;
-        this.name = b.name;
+        this.name    = b.name;
         this.leiCode = b.leiCode;
-        this.region = b.region;
+        this.region  = b.region;
     }
 
-    public Long getId() { return id; }
-    public String getName() { return name; }
+    public static Builder builder() { return new Builder(); }
+
+    public Long getId()        { return id; }
+    public String getName()    { return name; }
     public String getLeiCode() { return leiCode; }
-    public String getRegion() { return region; }
+    public String getRegion()  { return region; }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Counterparty)) return false;
-        Counterparty that = (Counterparty) o;
-        return leiCode != null && leiCode.equals(that.leiCode);
+        if (!(o instanceof Counterparty other)) return false;
+        return Objects.equals(leiCode, other.leiCode);
     }
 
-    @Override
-    public int hashCode() { return leiCode != null ? leiCode.hashCode() : 0; }
+    @Override public int hashCode() { return Objects.hash(leiCode); }
 
-    @Override
-    public String toString() {
-        return String.format("Counterparty[%s / %s]", name != null ? name : "-", leiCode != null ? leiCode : "-");
+    @Override public String toString() {
+        return "Counterparty[" + leiCode + " | " + name + " | " + region + "]";
     }
 
     public static final class Builder {
-        private Long id;
         private String name;
         private String leiCode;
         private String region;
 
-        public Builder id(Long v) { this.id = v; return this; }
-        public Builder name(String v) { this.name = v; return this; }
+        public Builder name(String v)    { this.name = v;    return this; }
         public Builder leiCode(String v) { this.leiCode = v; return this; }
-        public Builder region(String v) { this.region = v; return this; }
+        public Builder region(String v)  { this.region = v;  return this; }
 
         public Counterparty build() {
+            Objects.requireNonNull(name,    "name required");
             Objects.requireNonNull(leiCode, "leiCode required");
-            if (leiCode.length() != 20) throw new IllegalStateException("leiCode must be exactly 20 characters");
-            Objects.requireNonNull(region, "region required");
-            String r = region.toUpperCase();
-            if (!(r.equals("APAC") || r.equals("EMEA") || r.equals("NAMR") || r.equals("LATAM")))
-                throw new IllegalStateException("region must be one of APAC, EMEA, NAMR, LATAM");
-            this.region = r;
+            Objects.requireNonNull(region,  "region required");
+            if (leiCode.length() != 20)
+                throw new IllegalStateException("leiCode must be exactly 20 chars (LEI standard)");
+            if (!region.matches("APAC|EMEA|NAMR|LATAM"))
+                throw new IllegalStateException("region must be one of APAC|EMEA|NAMR|LATAM");
             return new Counterparty(this);
         }
     }
