@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReconController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tradeflow</a> &gt; <a href="index.source.html" class="el_package">com.dbtraining.tradeflow.controller</a> &gt; <span class="el_source">ReconController.java</span></div><h1>ReconController.java</h1><pre class="source lang-java linenums">package com.dbtraining.tradeflow.controller;
+
+import com.dbtraining.tradeflow.dto.ReconSummary;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * ============================================================================
+ * ReconController — TICKET-I072 + I073 + I074
+ * ============================================================================
+ * WHAT:    REST controller for /api/v1/recon.
+ * ============================================================================
+ *  TICKET-I072: POST /api/v1/recon/run         -&gt; ReconSummary
+ *  TICKET-I073: GET  /api/v1/recon/results     -&gt; Page&lt;ReconBreakDto&gt;
+ *  TICKET-I074: PUT  /api/v1/recon/{id}/resolve -&gt; 204
+ * ============================================================================
+ *  Day-0 stub: GET returns empty list so the React Recon page boots clean.
+ *  Replace with real DB-backed reads once the schema exists (Day 1) and
+ *  the JDBC/JPA layer is in place (Day 4 / Day 5).
+ * ============================================================================
+ */
+@RestController
+@RequestMapping(&quot;/api/v1/recon&quot;)
+@Tag(name = &quot;Reconciliation&quot;, description = &quot;Run recon + manage breaks&quot;)
+<span class="nc" id="L30">public class ReconController {</span>
+
+    @Operation(summary = &quot;Trigger a reconciliation run&quot;)
+    @PostMapping(&quot;/run&quot;)
+    public ReconSummary run() {
+        // TODO(TICKET-I072): inject ReconciliationService, call run(), return summary.
+<span class="nc" id="L36">        throw new UnsupportedOperationException(&quot;TICKET-I072&quot;);</span>
+    }
+
+    @Operation(summary = &quot;List reconciliation results&quot;)
+    @GetMapping(&quot;/results&quot;)
+    public List&lt;Map&lt;String, Object&gt;&gt; listResults(
+            @RequestParam(required = false, defaultValue = &quot;OPEN&quot;) String status) {
+        // TODO(TICKET-I073): paginated query via ReconBreakRepository
+        //   (or JdbcTemplate JOIN onto `trades` to surface trade_ref).
+        //   Day-1 empty list keeps the UI working until you've built recon_breaks.
+<span class="nc" id="L46">        return Collections.emptyList();</span>
+    }
+
+    @Operation(summary = &quot;Mark a break as resolved&quot;)
+    @PutMapping(&quot;/{id}/resolve&quot;)
+    public void resolve(@PathVariable Long id) {
+        // TODO(TICKET-I074): update status to RESOLVED, set resolved_at, write audit log.
+<span class="nc" id="L53">        throw new UnsupportedOperationException(&quot;TICKET-I074&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TradeEventProducer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tradeflow</a> &gt; <a href="index.source.html" class="el_package">com.dbtraining.tradeflow.kafka</a> &gt; <span class="el_source">TradeEventProducer.java</span></div><h1>TradeEventProducer.java</h1><pre class="source lang-java linenums">package com.dbtraining.tradeflow.kafka;
+
+import com.dbtraining.tradeflow.dto.TradeEvent;
+
+/**
+ * ============================================================================
+ * TradeEventProducer — TICKET-I115 (Day 9)
+ * ============================================================================
+ * WHAT:    Publishes TradeEvent messages to Kafka topic `trade-events`.
+ * HOW:     KafkaTemplate&lt;String, TradeEvent&gt;. Called from TradeService.
+ * WHY:     Decouples &quot;trade saved&quot; from &quot;recon ran&quot; / &quot;audit recorded&quot; —
+ *          new consumers can subscribe without touching the producer.
+ * OBSERVE: Kafdrop (localhost:9000) shows the message immediately after
+ *          POST /api/v1/trades succeeds.
+ * ============================================================================
+ *
+ *  TODO(TICKET-I115):
+ *    @Service
+ *    public class TradeEventProducer {
+ *        private static final Logger log = LoggerFactory.getLogger(...);
+ *        private final KafkaTemplate&lt;String, TradeEvent&gt; kafkaTemplate;
+ *        private final String topic;
+ *
+ *        public TradeEventProducer(KafkaTemplate&lt;String, TradeEvent&gt; t,
+ *                                  @Value(&quot;${tradeflow.kafka.topics.trades}&quot;) String topic) { ... }
+ *
+ *        public void publish(TradeEvent e) {
+ *            kafkaTemplate.send(topic, e.tradeRef(), e)
+ *                .whenComplete((ok, ex) -&gt; {
+ *                    if (ex != null) log.error(&quot;Failed to publish {}&quot;, e.tradeRef(), ex);
+ *                    else log.info(&quot;Published {} -&gt; partition={}&quot;, e.tradeRef(),
+ *                                  ok.getRecordMetadata().partition());
+ *                });
+ *        }
+ *    }
+ *
+ *  GOTCHA: NEVER let a Kafka publish failure roll back the DB transaction.
+ *          Publish AFTER commit (use TransactionSynchronizationManager or
+ *          @TransactionalEventListener), or accept eventual consistency.
+ * ============================================================================
+ */
+<span class="nc" id="L42">public class TradeEventProducer {</span>
+
+    public void publish(TradeEvent event) {
+<span class="nc" id="L45">        throw new UnsupportedOperationException(&quot;TICKET-I115&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

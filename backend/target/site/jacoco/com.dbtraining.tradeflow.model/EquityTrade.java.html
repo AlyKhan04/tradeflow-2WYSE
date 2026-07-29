@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EquityTrade.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tradeflow</a> &gt; <a href="index.source.html" class="el_package">com.dbtraining.tradeflow.model</a> &gt; <span class="el_source">EquityTrade.java</span></div><h1>EquityTrade.java</h1><pre class="source lang-java linenums">package com.dbtraining.tradeflow.model;
+
+/**
+ * ============================================================================
+ * EquityTrade — TICKET-I029
+ * ============================================================================
+ * WHAT:    A trade on an equity (shares of a listed company).
+ * WHY:     Equities are exchange-listed, so we need the exchange name + lot size.
+ * ============================================================================
+ *  TODO(TICKET-I029):
+ *    extends BaseTrade.
+ *    Extra fields:
+ *      private final String exchange;     // e.g. &quot;XETRA&quot;, &quot;NASDAQ&quot;
+ *      private final int lotSize;         // typical 100 for US, 1 for European
+ *
+ *    assetClassDescription() returns &quot;Equity on &quot; + exchange.
+ * ============================================================================
+ */
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Objects;
+
+public class EquityTrade extends BaseTrade {
+
+    private final String exchange;
+    private final int lotSize;
+
+    private EquityTrade(Builder b) {
+<span class="fc" id="L30">        super(b.tradeRef, b.instrumentId, b.counterpartyId, b.quantity, b.price,</span>
+              b.tradeDate, b.status, b.createdAt);
+<span class="fc" id="L32">        this.exchange = Objects.requireNonNull(b.exchange, &quot;exchange required&quot;);</span>
+<span class="pc bpc" id="L33" title="1 of 2 branches missed.">        if (b.lotSize &lt;= 0) throw new IllegalStateException(&quot;lotSize must be &gt; 0&quot;);</span>
+<span class="fc" id="L34">        this.lotSize = b.lotSize;</span>
+<span class="fc" id="L35">    }</span>
+
+<span class="fc" id="L37">    public static Builder builder() { return new Builder(); }</span>
+
+<span class="nc" id="L39">    public String getExchange() { return exchange; }</span>
+<span class="nc" id="L40">    public int getLotSize()     { return lotSize; }</span>
+
+    @Override
+<span class="nc" id="L43">    public String assetClassDescription() { return &quot;Equity on &quot; + exchange; }</span>
+
+<span class="fc" id="L45">    public static final class Builder {</span>
+        private String tradeRef;
+        private Long instrumentId;
+        private Long counterpartyId;
+        private BigDecimal quantity;
+        private BigDecimal price;
+        private LocalDate tradeDate;
+        private TradeStatus status;
+        private Instant createdAt;
+        private String exchange;
+        private int lotSize;
+
+<span class="fc" id="L57">        public Builder tradeRef(String v)         { this.tradeRef = v;       return this; }</span>
+<span class="fc" id="L58">        public Builder instrumentId(Long v)        { this.instrumentId = v;   return this; }</span>
+<span class="fc" id="L59">        public Builder counterpartyId(Long v)      { this.counterpartyId = v; return this; }</span>
+<span class="fc" id="L60">        public Builder quantity(BigDecimal v)      { this.quantity = v;       return this; }</span>
+<span class="fc" id="L61">        public Builder price(BigDecimal v)         { this.price = v;          return this; }</span>
+<span class="fc" id="L62">        public Builder tradeDate(LocalDate v)      { this.tradeDate = v;      return this; }</span>
+<span class="fc" id="L63">        public Builder status(TradeStatus v)       { this.status = v;         return this; }</span>
+<span class="nc" id="L64">        public Builder createdAt(Instant v)        { this.createdAt = v;      return this; }</span>
+<span class="fc" id="L65">        public Builder exchange(String v)          { this.exchange = v;       return this; }</span>
+<span class="fc" id="L66">        public Builder lotSize(int v)              { this.lotSize = v;        return this; }</span>
+
+<span class="fc" id="L68">        public EquityTrade build() { return new EquityTrade(this); }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReconSummary.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tradeflow</a> &gt; <a href="index.source.html" class="el_package">com.dbtraining.tradeflow.dto</a> &gt; <span class="el_source">ReconSummary.java</span></div><h1>ReconSummary.java</h1><pre class="source lang-java linenums">package com.dbtraining.tradeflow.dto;
+
+import com.dbtraining.tradeflow.model.DiscrepancyType;
+
+import java.util.Map;
+
+/**
+ * ============================================================================
+ * ReconSummary — TICKET-I036
+ * ============================================================================
+ * WHAT:    Rolled-up output of a reconciliation run.
+ * WHY:     Both the console (Day 3) and REST API (Day 6 `POST /api/v1/recon/run`)
+ *          return this — same shape, two surfaces.
+ * ============================================================================
+ *
+ *  HINTS:
+ *  - `totalInternal`, `totalExternal` = sizes of the input lists.
+ *  - `matchedCount` = how many trades matched cleanly.
+ *  - `unmatchedCount` = how many had at least one discrepancy.
+ *  - `breakdownByType` = how many of each DiscrepancyType.
+ * ============================================================================
+ */
+<span class="fc" id="L23">public record ReconSummary(</span>
+        int totalInternal,
+        int totalExternal,
+        int matchedCount,
+        int unmatchedCount,
+        Map&lt;DiscrepancyType, Integer&gt; breakdownByType
+) {
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

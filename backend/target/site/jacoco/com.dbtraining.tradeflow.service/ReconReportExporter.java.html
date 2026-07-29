@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReconReportExporter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tradeflow</a> &gt; <a href="index.source.html" class="el_package">com.dbtraining.tradeflow.service</a> &gt; <span class="el_source">ReconReportExporter.java</span></div><h1>ReconReportExporter.java</h1><pre class="source lang-java linenums">package com.dbtraining.tradeflow.service;
+
+import com.dbtraining.tradeflow.model.ReconResult;
+import org.springframework.stereotype.Service;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.time.Instant;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * ============================================================================
+ * ReconReportExporter — TICKET-I037
+ * ============================================================================
+ * WHAT:    Writes reconciliation results to a CSV file.
+ * HOW:     Vanilla java.nio.file + BufferedWriter. NO external CSV library
+ *          — the point is to learn quoting/escaping by hand.
+ * WHY:     Ops users download daily recon CSVs to feed downstream systems.
+ * OBSERVE: Field values containing `,` or `&quot;` are quoted; embedded `&quot;` is
+ *          doubled to `&quot;&quot;`.
+ * ============================================================================
+ *  TODO(TICKET-I037):
+ *    public void exportReconReport(List&lt;ReconResult&gt; results, Path target)
+ *
+ *  HINTS:
+ *    1. Write to a `.tmp` sibling file, then Files.move(..., ATOMIC_MOVE) —
+ *       no half-written file is ever visible to a reader.
+ *    2. Use try-with-resources for the writer.
+ *    3. Header row: &quot;trade_id,status,discrepancy_type,resolved_at&quot;
+ *    4. Helper: private String escape(String value) — handles comma, quote, newline.
+ * ============================================================================
+ */
+@Service
+<span class="nc" id="L39">public class ReconReportExporter {</span>
+
+    private static final String HEADER = &quot;trade_ref,status,discrepancy_type,resolved_at&quot;;
+
+    public void exportReconReport(List&lt;ReconResult&gt; results, Path target) throws IOException {
+<span class="nc" id="L44">        Objects.requireNonNull(results, &quot;results required&quot;);</span>
+<span class="nc" id="L45">        Objects.requireNonNull(target,  &quot;target required&quot;);</span>
+
+<span class="nc" id="L47">        Path tmp = target.resolveSibling(target.getFileName() + &quot;.tmp&quot;);</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        if (tmp.getParent() != null) Files.createDirectories(tmp.getParent());</span>
+
+<span class="nc" id="L50">        try (BufferedWriter w = Files.newBufferedWriter(tmp, StandardCharsets.UTF_8)) {</span>
+<span class="nc" id="L51">            w.write(HEADER);</span>
+<span class="nc" id="L52">            w.newLine();</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">            for (ReconResult r : results) {</span>
+<span class="nc" id="L54">                w.write(rowFor(r));</span>
+<span class="nc" id="L55">                w.newLine();</span>
+<span class="nc" id="L56">            }</span>
+<span class="nc" id="L57">            w.flush();</span>
+        }
+
+        try {
+<span class="nc" id="L61">            Files.move(tmp, target,</span>
+                    StandardCopyOption.REPLACE_EXISTING,
+                    StandardCopyOption.ATOMIC_MOVE);
+<span class="nc" id="L64">        } catch (IOException atomicFailed) {</span>
+            // Cross-device or filesystem without atomic-move support: fall back to a plain replace.
+<span class="nc" id="L66">            Files.move(tmp, target, StandardCopyOption.REPLACE_EXISTING);</span>
+<span class="nc" id="L67">        }</span>
+<span class="nc" id="L68">    }</span>
+
+    private String rowFor(ReconResult r) {
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        String tradeRef       = r.getTradeId() != null ? r.getTradeId().toString() : &quot;&quot;;</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        String status         = r.getStatus() != null ? r.getStatus() : &quot;&quot;;</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        String discrepancy    = r.getDiscrepancyType() != null ? r.getDiscrepancyType().name() : &quot;&quot;;</span>
+<span class="nc" id="L74">        Instant resolved      = r.getResolvedAt();</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        String resolvedStr    = resolved != null ? resolved.toString() : &quot;&quot;;</span>
+<span class="nc" id="L76">        return String.join(&quot;,&quot;,</span>
+<span class="nc" id="L77">                escape(tradeRef),</span>
+<span class="nc" id="L78">                escape(status),</span>
+<span class="nc" id="L79">                escape(discrepancy),</span>
+<span class="nc" id="L80">                escape(resolvedStr));</span>
+    }
+
+    /** RFC-4180-style CSV escaping. Wraps in quotes when needed; doubles embedded quotes. */
+    private String escape(String value) {
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        if (value == null) return &quot;&quot;;</span>
+<span class="nc bnc" id="L86" title="All 4 branches missed.">        boolean needsQuoting = value.contains(&quot;,&quot;) || value.contains(&quot;\&quot;&quot;)</span>
+<span class="nc bnc" id="L87" title="All 4 branches missed.">                || value.contains(&quot;\n&quot;) || value.contains(&quot;\r&quot;);</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        if (!needsQuoting) return value;</span>
+<span class="nc" id="L89">        return &quot;\&quot;&quot; + value.replace(&quot;\&quot;&quot;, &quot;\&quot;\&quot;&quot;) + &quot;\&quot;&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

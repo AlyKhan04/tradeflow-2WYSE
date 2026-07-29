@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TradeParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tradeflow</a> &gt; <a href="index.source.html" class="el_package">com.dbtraining.tradeflow.service</a> &gt; <span class="el_source">TradeParser.java</span></div><h1>TradeParser.java</h1><pre class="source lang-java linenums">package com.dbtraining.tradeflow.service;
+
+import com.dbtraining.tradeflow.exception.InsufficientDataException;
+import com.dbtraining.tradeflow.model.BaseTrade;
+import com.dbtraining.tradeflow.model.BondTrade;
+import com.dbtraining.tradeflow.model.EquityTrade;
+import com.dbtraining.tradeflow.model.FXTrade;
+import com.dbtraining.tradeflow.model.TradeStatus;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+
+/**
+ * ============================================================================
+ * TradeParser — TICKET-I039
+ * ============================================================================
+ * WHAT:    Reads CSV (or JSON) and produces a List&lt;BaseTrade&gt;.
+ * HOW:     Stream the file line-by-line, parse each row, build a Trade via
+ *          its Builder.
+ * WHY:     Separation of concerns (SRP): parsing is its own job, distinct
+ *          from validation and from reconciliation.
+ * ============================================================================
+ *  TODO(TICKET-I039):
+ *    parseCsv(Path file) -&gt; List&lt;BaseTrade&gt;
+ *
+ *  HINTS:
+ *    - Files.lines(file).skip(1)            // skip header
+ *    - .map(line -&gt; line.split(&quot;,&quot;, -1))    // -1 keeps trailing empties
+ *    - Detect asset class from a column to pick subclass.
+ *    - Throw InsufficientDataException with line number on a bad row.
+ * ============================================================================
+ */
+
+@Service
+<span class="nc" id="L43">public class TradeParser {</span>
+
+    public List&lt;BaseTrade&gt; parseCsv(Path file) {
+<span class="nc" id="L46">        try (Stream&lt;String&gt; lines = Files.lines(file)) {</span>
+<span class="nc" id="L47">            List&lt;String&gt; rows = lines.toList();</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">            if (rows.isEmpty()) return List.of();</span>
+
+<span class="nc" id="L50">            List&lt;BaseTrade&gt; out = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">            for (int i = 1; i &lt; rows.size(); i++) {  // skip header</span>
+<span class="nc" id="L52">                String line = rows.get(i).trim();</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">                if (line.isEmpty()) continue;</span>
+                try {
+<span class="nc" id="L55">                    out.add(parseRow(line));</span>
+<span class="nc" id="L56">                } catch (RuntimeException e) {</span>
+<span class="nc" id="L57">                    throw new InsufficientDataException(</span>
+<span class="nc" id="L58">                            file.getFileName() + &quot;:&quot; + (i + 1) + &quot; — &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L59">                }</span>
+            }
+<span class="nc" id="L61">            return out;</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        } catch (IOException e) {</span>
+<span class="nc" id="L63">            throw new UncheckedIOException(e);</span>
+        }
+    }
+
+    private BaseTrade parseRow(String line) {
+<span class="nc" id="L68">        String[] c = line.split(&quot;,&quot;, -1);</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        if (c.length &lt; 8) {</span>
+<span class="nc" id="L70">            throw new InsufficientDataException(&quot;expected at least 8 columns, got &quot; + c.length);</span>
+        }
+<span class="nc" id="L72">        String assetClass     = c[0].trim();</span>
+<span class="nc" id="L73">        String tradeRef       = c[1].trim();</span>
+<span class="nc" id="L74">        long instrumentId     = parseLong(c[2], &quot;instrument_id&quot;);</span>
+<span class="nc" id="L75">        long counterpartyId   = parseLong(c[3], &quot;counterparty_id&quot;);</span>
+<span class="nc" id="L76">        BigDecimal quantity   = parseDecimal(c[4], &quot;quantity&quot;);</span>
+<span class="nc" id="L77">        BigDecimal price      = parseDecimal(c[5], &quot;price&quot;);</span>
+<span class="nc" id="L78">        LocalDate tradeDate   = LocalDate.parse(c[6].trim());</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        TradeStatus status    = c[7].isBlank() ? TradeStatus.PENDING : TradeStatus.valueOf(c[7].trim());</span>
+
+<span class="nc bnc" id="L81" title="All 4 branches missed.">        return switch (assetClass) {</span>
+<span class="nc" id="L82">            case &quot;EQUITY&quot; -&gt; EquityTrade.builder()</span>
+<span class="nc" id="L83">                    .tradeRef(tradeRef).instrumentId(instrumentId).counterpartyId(counterpartyId)</span>
+<span class="nc" id="L84">                    .quantity(quantity).price(price).tradeDate(tradeDate).status(status)</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">                    .exchange(c.length &gt; 8 ? c[8].trim() : &quot;&quot;)</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">                    .lotSize(c.length &gt; 9 ? (int) parseLong(c[9], &quot;lot_size&quot;) : 1)</span>
+<span class="nc" id="L87">                    .build();</span>
+<span class="nc" id="L88">            case &quot;FX&quot; -&gt; FXTrade.builder()</span>
+<span class="nc" id="L89">                    .tradeRef(tradeRef).instrumentId(instrumentId).counterpartyId(counterpartyId)</span>
+<span class="nc" id="L90">                    .quantity(quantity).price(price).tradeDate(tradeDate).status(status)</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">                    .baseCurrency(c.length &gt; 10 ? c[10].trim() : &quot;&quot;)</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">                    .quoteCurrency(c.length &gt; 11 ? c[11].trim() : &quot;&quot;)</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">                    .spotRate(c.length &gt; 12 ? parseDecimal(c[12], &quot;spot_rate&quot;) : BigDecimal.ZERO)</span>
+<span class="nc" id="L94">                    .build();</span>
+<span class="nc" id="L95">            case &quot;BOND&quot; -&gt; BondTrade.builder()</span>
+<span class="nc" id="L96">                    .tradeRef(tradeRef).instrumentId(instrumentId).counterpartyId(counterpartyId)</span>
+<span class="nc" id="L97">                    .quantity(quantity).price(price).tradeDate(tradeDate).status(status)</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">                    .couponRate(c.length &gt; 13 ? parseDecimal(c[13], &quot;coupon_rate&quot;) : BigDecimal.ZERO)</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">                    .maturityDate(c.length &gt; 14 ? LocalDate.parse(c[14].trim()) : tradeDate.plusYears(1))</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">                    .faceValue(c.length &gt; 15 ? parseDecimal(c[15], &quot;face_value&quot;) : BigDecimal.ONE)</span>
+<span class="nc" id="L101">                    .build();</span>
+<span class="nc" id="L102">            default -&gt; throw new InsufficientDataException(&quot;unknown asset_class: &quot; + assetClass);</span>
+        };
+    }
+
+    private static long parseLong(String raw, String field) {
+        try {
+<span class="nc" id="L108">            return Long.parseLong(raw.trim());</span>
+<span class="nc" id="L109">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L110">            throw new InsufficientDataException(</span>
+                    field + &quot; must be an integer, got '&quot; + raw + &quot;'&quot;, e);
+        }
+    }
+
+    private static BigDecimal parseDecimal(String raw, String field) {
+        try {
+<span class="nc" id="L117">            return new BigDecimal(raw.trim());</span>
+<span class="nc" id="L118">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L119">            throw new InsufficientDataException(</span>
+                    field + &quot; must be a number, got '&quot; + raw + &quot;'&quot;, e);
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
