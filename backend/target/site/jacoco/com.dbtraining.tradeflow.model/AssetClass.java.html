@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AssetClass.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tradeflow</a> &gt; <a href="index.source.html" class="el_package">com.dbtraining.tradeflow.model</a> &gt; <span class="el_source">AssetClass.java</span></div><h1>AssetClass.java</h1><pre class="source lang-java linenums">package com.dbtraining.tradeflow.model;
+
+/**
+ * ============================================================================
+ * AssetClass — TICKET-I020
+ * ============================================================================
+ * WHAT:    Category of financial instrument.
+ * WHY:     Drives subclass choice (EquityTrade vs FXTrade vs BondTrade) and
+ *          downstream routing (FX trades go to a different settlement system).
+ * OBSERVE: Used in @Enumerated(EnumType.STRING) on the Instrument entity.
+ * ============================================================================
+ */
+<span class="nc" id="L13">public enum AssetClass {</span>
+
+<span class="nc" id="L15">    EQUITY,</span>
+<span class="nc" id="L16">    FIXED_INCOME,</span>
+<span class="nc" id="L17">    FX,</span>
+<span class="nc" id="L18">    COMMODITY,</span>
+<span class="nc" id="L19">    DERIVATIVE;</span>
+
+    /**
+     * TODO(TICKET-I020): implement isCash().
+     * Cash products = EQUITY, FIXED_INCOME, FX.
+     * Non-cash       = COMMODITY, DERIVATIVE.
+     */
+    public boolean isCash() {
+<span class="nc bnc" id="L27" title="All 2 branches missed.">        return switch (this) {</span>
+<span class="nc" id="L28">            case EQUITY, FIXED_INCOME, FX -&gt; true;</span>
+<span class="nc" id="L29">            case COMMODITY, DERIVATIVE -&gt; false;</span>
+        };
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

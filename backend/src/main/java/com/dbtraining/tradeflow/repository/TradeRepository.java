@@ -5,6 +5,8 @@ import com.dbtraining.tradeflow.model.TradeStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -72,5 +74,6 @@ public interface TradeRepository extends JpaRepository<Trade, Long> {
 
     long countByStatus(TradeStatus status);
 
-    List<Trade> findByCounterpartyId(Long counterpartyId);
+    @Query("select t from Trade t where t.counterparty.id = :counterpartyId")
+    List<Trade> findByCounterpartyId(@Param("counterpartyId") Long counterpartyId);
 }

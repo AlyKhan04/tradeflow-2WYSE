@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT:5432}/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    hikari:
+      maximum-pool-size: 20
+      connection-timeout: 3000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
+
+logging:
+  level:
+    root: WARN
+    com.dbtraining.tradeflow: INFO

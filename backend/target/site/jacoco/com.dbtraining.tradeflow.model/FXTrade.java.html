@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FXTrade.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tradeflow</a> &gt; <a href="index.source.html" class="el_package">com.dbtraining.tradeflow.model</a> &gt; <span class="el_source">FXTrade.java</span></div><h1>FXTrade.java</h1><pre class="source lang-java linenums">package com.dbtraining.tradeflow.model;
+
+import java.math.BigDecimal;
+
+/**
+ * ============================================================================
+ * FXTrade — TICKET-I030
+ * ============================================================================
+ * WHAT:    A foreign-exchange trade (EUR/USD, GBP/JPY, ...).
+ * WHY:     FX has no exchange — pricing is OTC and settled bilaterally.
+ *          We track the currency pair + spot rate explicitly.
+ * ============================================================================
+ *  TODO(TICKET-I030):
+ *    extends BaseTrade.
+ *    Extra fields:
+ *      private final String baseCurrency;    // &quot;EUR&quot; in EUR/USD
+ *      private final String quoteCurrency;   // &quot;USD&quot; in EUR/USD
+ *      private final BigDecimal spotRate;
+ *
+ *    Validation in builder: baseCurrency != quoteCurrency.
+ *    assetClassDescription() returns baseCurrency + &quot;/&quot; + quoteCurrency.
+ * ============================================================================
+ */
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Objects;
+
+public class FXTrade extends BaseTrade {
+
+    private final String baseCurrency;
+    private final String quoteCurrency;
+    private final BigDecimal spotRate;
+
+    private FXTrade(Builder b) {
+<span class="nc" id="L36">        super(b.tradeRef, b.instrumentId, b.counterpartyId, b.quantity, b.price,</span>
+              b.tradeDate, b.status, b.createdAt);
+<span class="nc" id="L38">        this.baseCurrency  = Objects.requireNonNull(b.baseCurrency,  &quot;baseCurrency required&quot;);</span>
+<span class="nc" id="L39">        this.quoteCurrency = Objects.requireNonNull(b.quoteCurrency, &quot;quoteCurrency required&quot;);</span>
+<span class="nc" id="L40">        this.spotRate      = Objects.requireNonNull(b.spotRate,      &quot;spotRate required&quot;);</span>
+<span class="nc bnc" id="L41" title="All 4 branches missed.">        if (baseCurrency.length() != 3 || quoteCurrency.length() != 3)</span>
+<span class="nc" id="L42">            throw new IllegalStateException(&quot;currencies must be ISO-4217 3-letter codes&quot;);</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        if (baseCurrency.equals(quoteCurrency))</span>
+<span class="nc" id="L44">            throw new IllegalStateException(&quot;base and quote currencies must differ&quot;);</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        if (spotRate.signum() &lt;= 0)</span>
+<span class="nc" id="L46">            throw new IllegalStateException(&quot;spotRate must be &gt; 0&quot;);</span>
+<span class="nc" id="L47">    }</span>
+
+<span class="nc" id="L49">    public static Builder builder() { return new Builder(); }</span>
+
+<span class="nc" id="L51">    public String getBaseCurrency()  { return baseCurrency; }</span>
+<span class="nc" id="L52">    public String getQuoteCurrency() { return quoteCurrency; }</span>
+<span class="nc" id="L53">    public BigDecimal getSpotRate()  { return spotRate; }</span>
+
+    @Override
+<span class="nc" id="L56">    public String assetClassDescription() { return baseCurrency + &quot;/&quot; + quoteCurrency; }</span>
+
+<span class="nc" id="L58">    public static final class Builder {</span>
+        private String tradeRef;
+        private Long instrumentId;
+        private Long counterpartyId;
+        private BigDecimal quantity;
+        private BigDecimal price;
+        private LocalDate tradeDate;
+        private TradeStatus status;
+        private Instant createdAt;
+        private String baseCurrency;
+        private String quoteCurrency;
+        private BigDecimal spotRate;
+
+<span class="nc" id="L71">        public Builder tradeRef(String v)         { this.tradeRef = v;       return this; }</span>
+<span class="nc" id="L72">        public Builder instrumentId(Long v)        { this.instrumentId = v;   return this; }</span>
+<span class="nc" id="L73">        public Builder counterpartyId(Long v)      { this.counterpartyId = v; return this; }</span>
+<span class="nc" id="L74">        public Builder quantity(BigDecimal v)      { this.quantity = v;       return this; }</span>
+<span class="nc" id="L75">        public Builder price(BigDecimal v)         { this.price = v;          return this; }</span>
+<span class="nc" id="L76">        public Builder tradeDate(LocalDate v)      { this.tradeDate = v;      return this; }</span>
+<span class="nc" id="L77">        public Builder status(TradeStatus v)       { this.status = v;         return this; }</span>
+<span class="nc" id="L78">        public Builder createdAt(Instant v)        { this.createdAt = v;      return this; }</span>
+<span class="nc" id="L79">        public Builder baseCurrency(String v)      { this.baseCurrency = v;   return this; }</span>
+<span class="nc" id="L80">        public Builder quoteCurrency(String v)     { this.quoteCurrency = v;  return this; }</span>
+<span class="nc" id="L81">        public Builder spotRate(BigDecimal v)      { this.spotRate = v;       return this; }</span>
+
+<span class="nc" id="L83">        public FXTrade build() { return new FXTrade(this); }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

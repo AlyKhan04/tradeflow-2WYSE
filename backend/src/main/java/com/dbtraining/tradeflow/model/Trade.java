@@ -48,6 +48,7 @@ public class Trade {
     protected Trade() {}
 
     private Trade(Builder b) {
+        this.id           = b.id;
         this.tradeRef     = b.tradeRef;
         this.instrument   = b.instrument;
         this.counterparty = b.counterparty;
@@ -61,6 +62,7 @@ public class Trade {
     public static Builder builder() { return new Builder(); }
 
     public static final class Builder {
+        private Long id;
         private String tradeRef;
         private Instrument instrument;
         private Counterparty counterparty;
@@ -70,9 +72,22 @@ public class Trade {
         private TradeStatus status;
         private Instant createdAt;
 
+        public Builder id(Long v)                  { this.id = v; return this; }
         public Builder tradeRef(String v)          { this.tradeRef = v; return this; }
         public Builder instrument(Instrument v)    { this.instrument = v; return this; }
         public Builder counterparty(Counterparty v){ this.counterparty = v; return this; }
+        public Builder instrumentId(Long v) {
+            if (v != null) {
+                this.instrument = Instrument.builder().id(v).build();
+            }
+            return this;
+        }
+        public Builder counterpartyId(Long v) {
+            if (v != null) {
+                this.counterparty = Counterparty.builder().id(v).build();
+            }
+            return this;
+        }
         public Builder quantity(BigDecimal v)      { this.quantity = v; return this; }
         public Builder price(BigDecimal v)         { this.price = v; return this; }
         public Builder tradeDate(LocalDate v)      { this.tradeDate = v; return this; }
@@ -86,6 +101,8 @@ public class Trade {
     public String getTradeRef()          { return tradeRef; }
     public Instrument getInstrument()    { return instrument; }
     public Counterparty getCounterparty(){ return counterparty; }
+    public Long getInstrumentId()        { return instrument != null ? instrument.getId() : null; }
+    public Long getCounterpartyId()      { return counterparty != null ? counterparty.getId() : null; }
     public BigDecimal getQuantity()      { return quantity; }
     public BigDecimal getPrice()         { return price; }
     public LocalDate getTradeDate()      { return tradeDate; }

@@ -49,6 +49,7 @@ public class Instrument {
     protected Instrument() {}
 
     private Instrument(Builder b) {
+        this.id         = b.id;
         this.symbol     = b.symbol;
         this.name       = b.name;
         this.assetClass = b.assetClass;
@@ -59,12 +60,14 @@ public class Instrument {
     public static Builder builder() { return new Builder(); }
 
     public static final class Builder {
+        private Long id;
         private String symbol;
         private String name;
         private AssetClass assetClass;
         private String currency;
         private String isin;
 
+        public Builder id(Long v)               { this.id = v; return this; }
         public Builder symbol(String v)         { this.symbol = v; return this; }
         public Builder name(String v)           { this.name = v; return this; }
         public Builder assetClass(AssetClass v) { this.assetClass = v; return this; }

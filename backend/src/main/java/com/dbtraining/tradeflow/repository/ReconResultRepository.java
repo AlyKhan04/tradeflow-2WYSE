@@ -33,7 +33,8 @@ public interface ReconResultRepository extends JpaRepository<ReconResult, Long> 
 
     long countByStatus(ReconResult.Status status);
 
-    List<ReconResult> findByTradeId(Long tradeId);
+    @Query("select r from ReconResult r where r.trade.id = :tradeId")
+    List<ReconResult> findByTradeId(@Param("tradeId") Long tradeId);
 
     @Query("""
            select r from ReconResult r

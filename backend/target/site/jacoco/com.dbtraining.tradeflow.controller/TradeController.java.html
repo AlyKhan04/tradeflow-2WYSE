@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TradeController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tradeflow</a> &gt; <a href="index.source.html" class="el_package">com.dbtraining.tradeflow.controller</a> &gt; <span class="el_source">TradeController.java</span></div><h1>TradeController.java</h1><pre class="source lang-java linenums">package com.dbtraining.tradeflow.controller;
+
+import com.dbtraining.tradeflow.dto.TradeDto;
+import com.dbtraining.tradeflow.dto.TradeRequest;
+import com.dbtraining.tradeflow.service.TradeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * ============================================================================
+ * TradeController — TICKET-I068 + I069 + I070 + I071
+ * ============================================================================
+ * WHAT:    REST controller for /api/v1/trades.
+ * HOW:     @RestController + @RequestMapping.
+ * WHY:     Single entry-point for trade CRUD from the React UI and Postman.
+ *          Stays thin: parse + validate + delegate to TradeService.
+ * OBSERVE: Day-0 — every endpoint returns empty or 501-style throw. As
+ *          students complete Day-1..6 tickets, the controller wires through
+ *          to the real DB and the React UI populates.
+ * ============================================================================
+ *
+ *  TICKET-I068: GET    /api/v1/trades (paginated + filterable)
+ *  TICKET-I069: POST   /api/v1/trades (@Valid + 201 Created)
+ *  TICKET-I070: PUT    /api/v1/trades/{id}/status
+ *  TICKET-I071: DELETE /api/v1/trades/{id}  (soft delete)
+ *  TICKET-I064: OpenAPI annotations on every method
+ * ============================================================================
+ */
+@RestController
+@RequestMapping(&quot;/api/v1/trades&quot;)
+@Tag(name = &quot;Trades&quot;, description = &quot;Trade management endpoints&quot;)
+public class TradeController {
+
+    private final TradeService tradeService;
+
+<span class="nc" id="L46">    public TradeController(TradeService tradeService) {</span>
+<span class="nc" id="L47">        this.tradeService = tradeService;</span>
+<span class="nc" id="L48">    }</span>
+
+    // ------------------------------------------------------------------------
+    // TICKET-I068
+    // ------------------------------------------------------------------------
+    @Operation(summary = &quot;List trades (paginated, filterable)&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Trades returned successfully&quot;),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid query parameters&quot;)
+    })
+    @GetMapping
+    public List&lt;TradeDto&gt; list(
+            @Parameter(description = &quot;Filter trades by status&quot;) @RequestParam(required = false) String status,
+            @Parameter(description = &quot;Filter trades from this date&quot;) @RequestParam(required = false) LocalDate from,
+            @Parameter(description = &quot;Filter trades up to this date&quot;) @RequestParam(required = false) LocalDate to
+    ) {
+        // TODO(TICKET-I068): replace this empty response with a real DB-backed
+        //   call once the JDBC DAO (Day 4 / TICKET-I045) or JPA repository
+        //   (Day 5 / TICKET-I060+I062) is in place.
+        //   For Day 1, returning an empty list keeps the React UI booting
+        //   gracefully (shows &quot;no trades match&quot;) while you build the schema.
+<span class="nc" id="L69">        return Collections.emptyList();</span>
+    }
+
+    // ------------------------------------------------------------------------
+    // TICKET-I069
+    // ------------------------------------------------------------------------
+    @Operation(summary = &quot;Create a new trade&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;201&quot;, description = &quot;Trade created successfully&quot;),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid trade payload&quot;)
+    })
+    @PostMapping
+    public ResponseEntity&lt;TradeDto&gt; create(@Parameter(description = &quot;Trade payload to create&quot;) @Valid @RequestBody TradeRequest request) {
+        // TODO(TICKET-I069): call service, build Location header, return 201.
+        //   TradeDto saved = tradeService.createTrade(request);
+        //   return ResponseEntity.created(URI.create(&quot;/api/v1/trades/&quot; + saved.id())).body(saved);
+<span class="nc" id="L85">        throw new UnsupportedOperationException(&quot;TICKET-I069&quot;);</span>
+    }
+
+    // ------------------------------------------------------------------------
+    // TICKET-I070
+    // ------------------------------------------------------------------------
+    @Operation(summary = &quot;Update a trade's status&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Trade status updated successfully&quot;),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid status payload&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Trade not found&quot;)
+    })
+    @PutMapping(&quot;/{id}/status&quot;)
+    public TradeDto updateStatus(
+            @Parameter(description = &quot;Trade identifier&quot;) @PathVariable Long id,
+            @Parameter(description = &quot;Status update payload&quot;) @RequestBody StatusUpdate body) {
+        // TODO(TICKET-I070): delegate to tradeService.updateStatus(id, body.status()).
+<span class="nc" id="L102">        throw new UnsupportedOperationException(&quot;TICKET-I070&quot;);</span>
+    }
+
+    // ------------------------------------------------------------------------
+    // TICKET-I071 — soft delete
+    // ------------------------------------------------------------------------
+    @Operation(summary = &quot;Soft-delete a trade (sets status to CANCELLED)&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;204&quot;, description = &quot;Trade soft-deleted successfully&quot;),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid trade identifier&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Trade not found&quot;)
+    })
+    @DeleteMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Void&gt; softDelete(@Parameter(description = &quot;Trade identifier&quot;) @PathVariable Long id) {
+        // TODO(TICKET-I071): tradeService.softDelete(id); return 204.
+<span class="nc" id="L117">        throw new UnsupportedOperationException(&quot;TICKET-I071&quot;);</span>
+    }
+
+    /** Tiny inbound record for PUT /{id}/status. */
+<span class="nc" id="L121">    public record StatusUpdate(String status) {}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

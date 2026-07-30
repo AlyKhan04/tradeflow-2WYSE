@@ -18,12 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * ============================================================================
@@ -50,18 +47,29 @@ import java.util.stream.Collectors;
 @Service
 public class TradeService {
 
-    private final Map<String, BaseTrade> tradesByRef = new HashMap<>();
+    private final TradeRepository tradeRepository;
+    private final InstrumentRepository instrumentRepository;
+    private final CounterpartyRepository counterpartyRepository;
+    private final Map<String, Trade> tradesByRef = new HashMap<>();
+
+    public TradeService(TradeRepository tradeRepository,
+                        InstrumentRepository instrumentRepository,
+                        CounterpartyRepository counterpartyRepository) {
+        this.tradeRepository = tradeRepository;
+        this.instrumentRepository = instrumentRepository;
+        this.counterpartyRepository = counterpartyRepository;
+    }
 
     @Transactional(readOnly = true)
     public Page<TradeDto> findAll(Pageable pageable) {
         return tradeRepository.findAll(pageable).map(TradeDto::from);
     }
 
-    public Collection<BaseTrade> getAllTrades() {
+    public Collection<Trade> getAllTrades() {
         return Collections.unmodifiableCollection(tradesByRef.values());
     }
 
-    public void addTrade(BaseTrade trade) {
+    public void addTrade(Trade trade) {
         if (tradesByRef.containsKey(trade.getTradeRef())) {
             throw new IllegalStateException(
                     "Duplicate tradeRef: " + trade.getTradeRef());
@@ -69,34 +77,21 @@ public class TradeService {
         tradesByRef.put(trade.getTradeRef(), trade);
     }
 
-    public Optional<BaseTrade> findByRef(String tradeRef) {
+    public Optional<Trade> findByRef(String tradeRef) {
         return Optional.ofNullable(tradesByRef.get(tradeRef));
     }
 
     public Map<Long, BigDecimal> sumByCounterparty() {
-        return sumByCounterparty(tradesByRef.values().stream().toList());
-    }
-
-    public Map<Long, BigDecimal> sumByCounterparty(List<BaseTrade> input) {
-        return input.stream()
-                .filter(t -> t.getStatus() == TradeStatus.MATCHED)
-                .collect(Collectors.groupingBy(
-                        BaseTrade::getCounterpartyId,
-                        Collectors.reducing(
-                                BigDecimal.ZERO,
-                                BaseTrade::getNotional,
-                                BigDecimal::add)));
-    }
-
-    public List<BaseTrade> topNByValue(int n) {
-        if (n <= 0) {
-            throw new IllegalArgumentException("n must be > 0 (was " + n + ")");
-        }
         return tradesByRef.values().stream()
-                .sorted(Comparator.comparing(BaseTrade::getNotional).reversed()
-                        .thenComparing(BaseTrade::getTradeRef))
-                .limit(n)
-                .toList();
+                .filter(t -> t.getStatus() == TradeStatus.MATCHED)
+                .map(t -> Map.entry(t.getCounterpartyId(), t.getNotional()))
+                .reduce(new HashMap<Long, BigDecimal>(), (acc, entry) -> {
+                    acc.merge(entry.getKey(), entry.getValue(), BigDecimal::add);
+                    return acc;
+                }, (left, right) -> {
+                    right.forEach((key, value) -> left.merge(key, value, BigDecimal::add));
+                    return left;
+                });
     }
 
     @Transactional

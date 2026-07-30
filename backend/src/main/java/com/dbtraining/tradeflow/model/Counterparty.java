@@ -45,6 +45,7 @@ public class Counterparty {
     protected Counterparty() {}
 
     private Counterparty(Builder b) {
+        this.id      = b.id;
         this.name    = b.name;
         this.leiCode = b.leiCode;
         this.region  = b.region;
@@ -53,10 +54,12 @@ public class Counterparty {
     public static Builder builder() { return new Builder(); }
 
     public static final class Builder {
+        private Long id;
         private String name;
         private String leiCode;
         private String region;
 
+        public Builder id(Long v)       { this.id = v; return this; }
         public Builder name(String v)    { this.name = v; return this; }
         public Builder leiCode(String v) { this.leiCode = v; return this; }
         public Builder region(String v)  { this.region = v; return this; }
