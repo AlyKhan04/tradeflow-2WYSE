@@ -30,3 +30,4 @@ logging:
     com.dbtraining.tradeflow: DEBUG
     org.springframework.web: INFO
     org.hibernate.SQL: DEBUG
+
