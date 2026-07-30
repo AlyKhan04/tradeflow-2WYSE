@@ -31,6 +31,7 @@
     <groupId>com.dbtraining</groupId>
     <artifactId>tradeflow</artifactId>
     <version>0.1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
     <name>tradeflow</name>
     <description>TradeFlow — trade reconciliation service (student starter)</description>
 

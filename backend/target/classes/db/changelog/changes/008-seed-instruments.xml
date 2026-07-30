@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+  <changeSet id="008-seed-instruments" author="your-name">
+    <insert tableName="instruments">
+      <column name="symbol"      value="SAP.DE"/>
+      <column name="name"        value="SAP SE"/>
+      <column name="asset_class" value="EQUITY"/>
+      <column name="currency"    value="EUR"/>
+    </insert>
+    <insert tableName="instruments">
+      <column name="symbol"      value="US10Y"/>
+      <column name="name"        value="US 10-Year Treasury"/>
+      <column name="asset_class" value="FIXED_INCOME"/>
+      <column name="currency"    value="USD"/>
+    </insert>
+    <insert tableName="instruments">
+      <column name="symbol"      value="EURUSD"/>
+      <column name="name"        value="Euro / US Dollar"/>
+      <column name="asset_class" value="FX"/>
+      <column name="currency"    value="USD"/>
+    </insert>
+    <insert tableName="instruments">
+      <column name="symbol"      value="XAU"/>
+      <column name="name"        value="Spot Gold"/>
+      <column name="asset_class" value="COMMODITY"/>
+      <column name="currency"    value="USD"/>
+    </insert>
+    <insert tableName="instruments">
+      <column name="symbol"      value="ESM6"/>
+      <column name="name"        value="S&amp;P 500 E-mini Futures (Jun 2026)"/>
+      <column name="asset_class" value="DERIVATIVE"/>
+      <column name="currency"    value="USD"/>
+    </insert>
+
+    <rollback>
+      <delete tableName="instruments"/>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>

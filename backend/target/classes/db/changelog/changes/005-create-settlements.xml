@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+  <changeSet id="005-create-settlements" author="your-name">
+    <createTable tableName="settlements">
+      <column name="id" type="BIGINT" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="trade_id" type="BIGINT">
+        <constraints nullable="false"
+                     foreignKeyName="fk_settlements_trade"
+                     references="trades(id)"/>
+      </column>
+      <column name="settlement_date" type="DATE">
+        <constraints nullable="false"/>
+      </column>
+      <column name="settled_at" type="TIMESTAMP WITH TIME ZONE">
+      </column>
+      <column name="status" type="VARCHAR(20)" defaultValue="PENDING">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE"
+              defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <sql>
+      ALTER TABLE settlements ADD CONSTRAINT chk_settlements_status
+          CHECK (status IN ('PENDING','SETTLED','FAILED'));
+    </sql>
+
+    <createIndex tableName="settlements" indexName="idx_settlements_trade">
+      <column name="trade_id"/>
+    </createIndex>
+
+    <rollback>
+      <dropTable tableName="settlements"/>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>
