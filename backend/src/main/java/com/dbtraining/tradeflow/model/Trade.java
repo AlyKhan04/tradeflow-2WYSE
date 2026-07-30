@@ -1,5 +1,6 @@
 package com.dbtraining.tradeflow.model;
 
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -9,9 +10,15 @@ import java.util.Objects;
  * Trade — generic trade type that shares the common BaseTrade fields.
  * Immutable from the outside: construction goes through the Builder.
  */
+@Entity
+@Table(name = "trades")
 public class Trade extends BaseTrade {
 
-    private final Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    public Trade() {}
 
     private Trade(Builder builder) {
         super(builder.tradeRef, builder.instrumentId, builder.counterpartyId,

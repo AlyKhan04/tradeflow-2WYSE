@@ -1,46 +1,37 @@
 package com.dbtraining.tradeflow.model;
 
-/**
- * ============================================================================
- * ReconResult — TICKET-I024 + TICKET-I058
- * ============================================================================
- * WHAT:    Outcome of comparing one trade against its external counterpart.
- *          One row per break (or per matched trade, depending on team policy).
- * HOW:     POJO on Day 2; @Entity on Day 5.
- * WHY:     The Ops UI page on Day 8 lists ReconResults so users can resolve.
- * OBSERVE: A row with status='OPEN' and discrepancyType=PRICE_MISMATCH means
- *          a human has to investigate.
- * ============================================================================
- *  TODO(TICKET-I024) [Day 2]:
- *    Fields: id, tradeId (Long), status (String for now), discrepancyType
- *            (DiscrepancyType, nullable), resolvedAt (Instant, nullable),
- *            createdAt (Instant).
- *
- *  TODO(TICKET-I058) [Day 5]:
- *    Convert to JPA entity.
- *    - @ManyToOne(fetch = LAZY) on the Trade reference
- *    - @Enumerated(EnumType.STRING) on discrepancyType
- *    - resolvedAt is @Column(nullable = true)
- * ============================================================================
- */
-
+import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.Objects;
 
 /**
- * ReconResult — POJO recording one reconciliation break against one Trade.
- * status is a String for Day 2; Day 5 promotes it to a ReconStatus enum.
+ * ReconResult — JPA Entity recording one reconciliation break against one Trade.
  */
+@Entity
+@Table(name = "recon_breaks")
 public class ReconResult {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "trade_id", nullable = false)
     private Long tradeId;
+
+    @Column(name = "status", nullable = false)
     private String status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "discrepancy_type")
     private DiscrepancyType discrepancyType;
+
+    @Column(name = "detected_at")
     private Instant detectedAt;
+
+    @Column(name = "resolved_at")
     private Instant resolvedAt;
 
-    ReconResult() {}
+    public ReconResult() {}
 
     private ReconResult(Builder b) {
         this.tradeId         = b.tradeId;

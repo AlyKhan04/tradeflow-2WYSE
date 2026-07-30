@@ -1,53 +1,43 @@
 package com.dbtraining.tradeflow.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.MappedSuperclass;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Objects;
-/**
- * ============================================================================
- * BaseTrade — TICKET-I028
- * ============================================================================
- * WHAT:    Abstract superclass for asset-class-specific trade types
- *          (EquityTrade, FXTrade, BondTrade).
- * HOW:     Holds the common fields. Concrete classes add asset-class-specific
- *          fields and override the abstract describer.
- * WHY:     Demonstrates inheritance + polymorphism in real domain terms,
- *          and gives `ReconciliationService` one type to operate on.
- * OBSERVE: You CANNOT do `new BaseTrade(...)` — only the subclasses.
- *
- * GOTCHA:  Read "Effective Java" Item 18 — favour composition over inheritance.
- *          Discuss with your team: is BaseTrade the right call, or would a
- *          single Trade with an AssetClass enum + composition (e.g.
- *          AssetSpecificDetails) be cleaner? Document your choice in the PR.
- * ============================================================================
- */
 
-    // TODO(TICKET-I028): protected final fields for the shared values
-    //   tradeRef, instrumentId, counterpartyId, quantity, price, tradeDate,
-    //   status, createdAt.
-
-    // TODO(TICKET-I028): protected constructor (subclasses call super(...)).
-
-    // TODO(TICKET-I028): public getters.
-
-    /**
-     * Each asset class returns its own description for logs/UI.
-     * EquityTrade → "Equity on XETRA"
-     * FXTrade     → "FX EUR/USD"
-     * BondTrade   → "Bond coupon 4.50% mat 2030-06-15"
-     */
-
+@MappedSuperclass
 public abstract class BaseTrade {
 
-    protected final String tradeRef;
-    protected final Long instrumentId;
-    protected final Long counterpartyId;
-    protected final BigDecimal quantity;
-    protected final BigDecimal price;
-    protected final LocalDate tradeDate;
-    protected final TradeStatus status;
-    protected final Instant createdAt;
+    @Column(name = "trade_ref", nullable = false, unique = true)
+    protected String tradeRef;
+
+    @Column(name = "instrument_id", nullable = false)
+    protected Long instrumentId;
+
+    @Column(name = "counterparty_id", nullable = false)
+    protected Long counterpartyId;
+
+    @Column(name = "quantity", nullable = false)
+    protected BigDecimal quantity;
+
+    @Column(name = "price", nullable = false)
+    protected BigDecimal price;
+
+    @Column(name = "trade_date", nullable = false)
+    protected LocalDate tradeDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    protected TradeStatus status;
+
+    @Column(name = "created_at")
+    protected Instant createdAt;
+
+    protected BaseTrade() {}
 
     protected BaseTrade(String tradeRef, Long instrumentId, Long counterpartyId,
                         BigDecimal quantity, BigDecimal price, LocalDate tradeDate,
