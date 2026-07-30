@@ -2,19 +2,12 @@ package com.dbtraining.tradeflow.service;
 
 import com.dbtraining.tradeflow.dto.TradeDto;
 import com.dbtraining.tradeflow.dto.TradeRequest;
-import com.dbtraining.tradeflow.model.BaseTrade;
+import com.dbtraining.tradeflow.model.Trade;
 import com.dbtraining.tradeflow.model.TradeStatus;
+import com.dbtraining.tradeflow.repository.TradeDAO;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * ============================================================================
@@ -41,60 +34,46 @@ import java.util.stream.Collectors;
 @Service
 public class TradeService {
 
-    private final Map<String, BaseTrade> trades = new HashMap<>();
+    private final TradeDAO tradeDAO;
 
-    public Collection<BaseTrade> getAllTrades() {
-        return Collections.unmodifiableCollection(trades.values());
+    public TradeService(TradeDAO tradeDAO) {
+        this.tradeDAO = tradeDAO;
     }
 
-    public void addTrade(BaseTrade trade) {
-        if (trade == null) {
-            throw new IllegalArgumentException("trade is required");
-        }
-        if (trade.getTradeRef() == null) {
-            throw new IllegalArgumentException("tradeRef is required");
-        }
-        if (trades.containsKey(trade.getTradeRef())) {
-            throw new IllegalStateException("Duplicate tradeRef: " + trade.getTradeRef());
-        }
-        trades.put(trade.getTradeRef(), trade);
-    }
-
-    public Optional<BaseTrade> findByRef(String tradeRef) {
-        return Optional.ofNullable(trades.get(tradeRef));
-    }
-
-    public Map<Long, BigDecimal> sumByCounterparty() {
-        return trades.values().stream()
-                .filter(t -> t.getStatus() == TradeStatus.MATCHED)
-                .collect(Collectors.groupingBy(
-                        BaseTrade::getCounterpartyId,
-                        Collectors.reducing(
-                                BigDecimal.ZERO,
-                                BaseTrade::getNotional,
-                                BigDecimal::add)));
-    }
-
-    public List<BaseTrade> topNByValue(int n) {
-        if (n <= 0) {
-            throw new IllegalArgumentException("n must be > 0 (was " + n + ")");
-        }
-        return trades.values().stream()
-                .sorted(Comparator.comparing(BaseTrade::getNotional).reversed()
-                        .thenComparing(BaseTrade::getTradeRef))
-                .limit(n)
-                .toList();
+    public List<Trade> getAllTrades() {
+        return tradeDAO.findAll();
     }
 
     public TradeDto createTrade(TradeRequest request) {
-        throw new UnsupportedOperationException("TICKET-I062");
+        Trade trade = Trade.builder()
+                .tradeRef(request.tradeRef())
+                .instrumentId(request.instrumentId())
+                .counterpartyId(request.counterpartyId())
+                .quantity(request.quantity())
+                .price(request.price())
+                .tradeDate(request.tradeDate())
+                .status(TradeStatus.PENDING)
+                .build();
+
+        long id = tradeDAO.insert(trade);
+        Trade saved = tradeDAO.findById(id)
+                .orElseThrow(() -> new IllegalStateException("Created trade not found: " + id));
+        return TradeDto.from(saved);
     }
 
     public TradeDto updateStatus(Long id, TradeStatus newStatus) {
-        throw new UnsupportedOperationException("TICKET-I070");
+        int updated = tradeDAO.updateStatusById(id, newStatus);
+        if (updated == 0) {
+            throw new IllegalArgumentException("Trade not found: " + id);
+        }
+        return TradeDto.from(tradeDAO.findById(id)
+                .orElseThrow(() -> new IllegalStateException("Updated trade not found: " + id)));
     }
 
     public void softDelete(Long id) {
-        throw new UnsupportedOperationException("TICKET-I071");
+        int updated = tradeDAO.softDeleteById(id);
+        if (updated == 0) {
+            throw new IllegalArgumentException("Trade not found: " + id);
+        }
     }
 }

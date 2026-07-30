@@ -29,6 +29,17 @@ public record TradeDto(
         TradeStatus status,
         Instant createdAt
 ) {
-    // TODO(TICKET-I068): consider adding `static TradeDto from(Trade entity)`
-    //                    so the mapping has one home.
+    public static TradeDto from(com.dbtraining.tradeflow.model.Trade trade) {
+        return new TradeDto(
+                trade.getId(),
+                trade.getTradeRef(),
+                trade.getInstrumentId(),
+                trade.getCounterpartyId(),
+                trade.getQuantity(),
+                trade.getPrice(),
+                trade.getTradeDate(),
+                trade.getStatus(),
+                trade.getCreatedAt()
+        );
+    }
 }

@@ -2,6 +2,9 @@ package com.dbtraining.tradeflow.controller;
 
 import com.dbtraining.tradeflow.dto.ReconSummary;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +33,11 @@ import java.util.Map;
 public class ReconController {
 
     @Operation(summary = "Trigger a reconciliation run")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Reconciliation run completed"),
+            @ApiResponse(responseCode = "401", description = "Auth missing"),
+            @ApiResponse(responseCode = "403", description = "Insufficient role")
+    })
     @PostMapping("/run")
     public ReconSummary run() {
         // TODO(TICKET-I072): inject ReconciliationService, call run(), return summary.
@@ -37,9 +45,15 @@ public class ReconController {
     }
 
     @Operation(summary = "List reconciliation results")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "List of reconciliation results returned"),
+            @ApiResponse(responseCode = "400", description = "Invalid query parameters"),
+            @ApiResponse(responseCode = "401", description = "Auth missing"),
+            @ApiResponse(responseCode = "403", description = "Insufficient role")
+    })
     @GetMapping("/results")
     public List<Map<String, Object>> listResults(
-            @RequestParam(required = false, defaultValue = "OPEN") String status) {
+            @Parameter(description = "Optional result status filter") @RequestParam(required = false, defaultValue = "OPEN") String status) {
         // TODO(TICKET-I073): paginated query via ReconBreakRepository
         //   (or JdbcTemplate JOIN onto `trades` to surface trade_ref).
         //   Day-1 empty list keeps the UI working until you've built recon_breaks.
@@ -47,8 +61,14 @@ public class ReconController {
     }
 
     @Operation(summary = "Mark a break as resolved")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Break resolved"),
+            @ApiResponse(responseCode = "401", description = "Auth missing"),
+            @ApiResponse(responseCode = "403", description = "Insufficient role"),
+            @ApiResponse(responseCode = "404", description = "Break not found")
+    })
     @PutMapping("/{id}/resolve")
-    public void resolve(@PathVariable Long id) {
+    public void resolve(@Parameter(description = "Recon result id") @PathVariable Long id) {
         // TODO(TICKET-I074): update status to RESOLVED, set resolved_at, write audit log.
         throw new UnsupportedOperationException("TICKET-I074");
     }

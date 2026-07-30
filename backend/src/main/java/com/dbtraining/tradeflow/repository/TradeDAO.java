@@ -4,6 +4,7 @@ import com.dbtraining.tradeflow.exception.JdbcException;
 import com.dbtraining.tradeflow.model.BaseTrade;
 import com.dbtraining.tradeflow.model.Trade;
 import com.dbtraining.tradeflow.model.TradeStatus;
+import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -23,6 +24,7 @@ import java.util.Optional;
  *          On Day 5 you can either delete this file or keep it for comparison.
  * ============================================================================
  */
+@Repository
 public class TradeDAO {
 
     private static final String SELECT_COLUMNS =
@@ -75,6 +77,19 @@ public class TradeDAO {
         }
     }
 
+    public Optional<Trade> findById(Long id) {
+        String sql = "SELECT " + SELECT_COLUMNS + TABLE + "WHERE id = ? LIMIT 1";
+        try (Connection cx = dataSource.getConnection();
+             PreparedStatement ps = cx.prepareStatement(sql)) {
+            ps.setLong(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? Optional.of(mapRow(rs)) : Optional.empty();
+            }
+        } catch (SQLException e) {
+            throw new JdbcException("findById failed: " + id, e);
+        }
+    }
+
     public List<Trade> findAll() {
         String sql = "SELECT " + SELECT_COLUMNS + TABLE + "ORDER BY trade_date DESC, id DESC";
         try (Connection cx = dataSource.getConnection();
@@ -100,6 +115,22 @@ public class TradeDAO {
         } catch (SQLException e) {
             throw new JdbcException("updateStatus failed: " + tradeRef, e);
         }
+    }
+
+    public int updateStatusById(Long id, TradeStatus newStatus) {
+        String sql = "UPDATE trades SET status = ? WHERE id = ?";
+        try (Connection cx = dataSource.getConnection();
+             PreparedStatement ps = cx.prepareStatement(sql)) {
+            ps.setString(1, newStatus.name());
+            ps.setLong(2, id);
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new JdbcException("updateStatusById failed: " + id, e);
+        }
+    }
+
+    public int softDeleteById(Long id) {
+        return updateStatusById(id, TradeStatus.CANCELLED);
     }
 
     private static Trade mapRow(ResultSet rs) throws SQLException {
