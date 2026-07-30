@@ -10,6 +10,7 @@ import com.dbtraining.tradeflow.model.ReconResult;
 import com.dbtraining.tradeflow.repository.ReconResultRepository;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,12 +55,20 @@ public class ReconciliationService {
 
     private final ReconResultRepository reconResultRepository;
     private final Counter reconResolvedCounter;
+    private final Timer reconRunTimer;
 
     public ReconciliationService() {
         this(null, null);
     }
 
     public ReconciliationService(ReconResultRepository reconResultRepository, MeterRegistry registry) {
+        this.reconRunTimer = (registry == null)
+                ? null
+                : Timer.builder("tradeflow_recon_run_seconds")
+                .description("Time taken for a full reconciliation run")
+                .publishPercentiles(0.5, 0.95, 0.99)
+                .publishPercentileHistogram()
+                .register(registry);
         this.reconResultRepository = reconResultRepository;
         this.reconResolvedCounter = (registry == null)
                 ? null
