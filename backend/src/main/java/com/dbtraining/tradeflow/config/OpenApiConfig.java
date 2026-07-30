@@ -1,7 +1,9 @@
 package com.dbtraining.tradeflow.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -27,6 +29,11 @@ public class OpenApiConfig {
                 .info(new Info()
                         .title("TradeFlow API")
                         .description("Trade reconciliation REST API — Deutsche Bank TDI 2026 case study.")
-                        .version("v1"));
+                        .version("v1")
+                        .contact(new Contact()
+                                .name("TradeFlow Team")
+                                .email("tradeflow@dbtraining.example"))
+                        .license(new License()
+                                .name("Internal — Deutsche Bank TDI")));
     }
 }

@@ -15,53 +15,88 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+/**
+ * ============================================================================
+ * TradeService — TICKET-I041..I043 + TICKET-I062
+ * ============================================================================
+ * WHAT:    Business-logic facade for Trade operations.
+ *          Day 4: HashMap-backed + Streams pipelines.
+ *          Day 5: rewritten to use TradeRepository (Spring Data JPA).
+ *          Day 6: also publishes TradeEvent to Kafka (TICKET-I115).
+ * HOW:     @Service from Day 1 (so Spring can wire it into controllers).
+ *          Day-1 default is a no-op stub — controllers bypass it via
+ *          JdbcTemplate. Day-4 onward, students replace the stubs.
+ * WHY:     Controllers stay thin — all rules and persistence live here.
+ * OBSERVE: Switching from HashMap to JPA on Day 5 should NOT require changing
+ *          callers (controller code stays the same).
+ * ============================================================================
+ *
+ *  TICKET-I041: refactor in-memory store to Map<String, BaseTrade>.
+ *  TICKET-I042: Streams pipeline — sumByCounterparty.
+ *  TICKET-I043: Streams pipeline — topNByValue.
+ *  TICKET-I062: rewrite using JPA repositories + DTOs (Day 5).
+ * ============================================================================
+ */
 @Service
 public class TradeService {
 
-    private final TradeRepository tradeRepository;
-    private final InstrumentRepository instrumentRepository;
-    private final CounterpartyRepository counterpartyRepository;
-
-    public TradeService(TradeRepository tradeRepository,
-                        InstrumentRepository instrumentRepository,
-                        CounterpartyRepository counterpartyRepository) {
-        this.tradeRepository       = tradeRepository;
-        this.instrumentRepository  = instrumentRepository;
-        this.counterpartyRepository = counterpartyRepository;
-    }
-
-    @Transactional(readOnly = true)
-    public List<TradeDto> findAll() {
-        return tradeRepository.findAll().stream().map(TradeDto::from).toList();
-    }
+    private final Map<String, BaseTrade> tradesByRef = new HashMap<>();
 
     @Transactional(readOnly = true)
     public Page<TradeDto> findAll(Pageable pageable) {
         return tradeRepository.findAll(pageable).map(TradeDto::from);
     }
 
-    @Transactional(readOnly = true)
-    public TradeDto findById(Long id) {
-        return tradeRepository.findById(id).map(TradeDto::from)
-                .orElseThrow(() -> new TradeNotFoundException("Trade " + id + " not found"));
+    public Collection<BaseTrade> getAllTrades() {
+        return Collections.unmodifiableCollection(tradesByRef.values());
     }
 
-    @Transactional(readOnly = true)
-    public List<TradeDto> findByStatus(TradeStatus status) {
-        return tradeRepository.findByStatus(status).stream().map(TradeDto::from).toList();
+    public void addTrade(BaseTrade trade) {
+        if (tradesByRef.containsKey(trade.getTradeRef())) {
+            throw new IllegalStateException(
+                    "Duplicate tradeRef: " + trade.getTradeRef());
+        }
+        tradesByRef.put(trade.getTradeRef(), trade);
     }
 
-    @Transactional(readOnly = true)
-    public Page<TradeDto> findPageByStatus(TradeStatus status, Pageable pageable) {
-        return tradeRepository.findByStatus(status, pageable).map(TradeDto::from);
+    public Optional<BaseTrade> findByRef(String tradeRef) {
+        return Optional.ofNullable(tradesByRef.get(tradeRef));
     }
 
-    @Transactional(readOnly = true)
-    public List<TradeDto> findByDateRange(LocalDate from, LocalDate to) {
-        return tradeRepository.findByTradeDateBetween(from, to).stream().map(TradeDto::from).toList();
+    public Map<Long, BigDecimal> sumByCounterparty() {
+        return sumByCounterparty(tradesByRef.values().stream().toList());
+    }
+
+    public Map<Long, BigDecimal> sumByCounterparty(List<BaseTrade> input) {
+        return input.stream()
+                .filter(t -> t.getStatus() == TradeStatus.MATCHED)
+                .collect(Collectors.groupingBy(
+                        BaseTrade::getCounterpartyId,
+                        Collectors.reducing(
+                                BigDecimal.ZERO,
+                                BaseTrade::getNotional,
+                                BigDecimal::add)));
+    }
+
+    public List<BaseTrade> topNByValue(int n) {
+        if (n <= 0) {
+            throw new IllegalArgumentException("n must be > 0 (was " + n + ")");
+        }
+        return tradesByRef.values().stream()
+                .sorted(Comparator.comparing(BaseTrade::getNotional).reversed()
+                        .thenComparing(BaseTrade::getTradeRef))
+                .limit(n)
+                .toList();
     }
 
     @Transactional
