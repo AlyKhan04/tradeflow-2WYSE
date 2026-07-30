@@ -108,4 +108,3 @@ public class AuditLog {
     public String getChangedBy()    { return changedBy; }
     public Instant getChangedAt()   { return changedAt; }
 }
-}
