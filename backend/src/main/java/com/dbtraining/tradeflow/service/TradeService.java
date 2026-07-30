@@ -2,9 +2,18 @@ package com.dbtraining.tradeflow.service;
 
 import com.dbtraining.tradeflow.dto.TradeDto;
 import com.dbtraining.tradeflow.dto.TradeRequest;
-import com.dbtraining.tradeflow.model.BaseTrade;
+import com.dbtraining.tradeflow.exception.TradeNotFoundException;
+import com.dbtraining.tradeflow.model.Counterparty;
+import com.dbtraining.tradeflow.model.Instrument;
+import com.dbtraining.tradeflow.model.Trade;
 import com.dbtraining.tradeflow.model.TradeStatus;
+import com.dbtraining.tradeflow.repository.CounterpartyRepository;
+import com.dbtraining.tradeflow.repository.InstrumentRepository;
+import com.dbtraining.tradeflow.repository.TradeRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -43,9 +52,10 @@ public class TradeService {
 
     private final Map<String, BaseTrade> tradesByRef = new HashMap<>();
 
-    // TODO(TICKET-I062) [Day 5]: replace the Map with TradeRepository injection:
-    //   private final TradeRepository tradeRepository;
-    //   public TradeService(TradeRepository tradeRepository) { ... }
+    @Transactional(readOnly = true)
+    public Page<TradeDto> findAll(Pageable pageable) {
+        return tradeRepository.findAll(pageable).map(TradeDto::from);
+    }
 
     public Collection<BaseTrade> getAllTrades() {
         return Collections.unmodifiableCollection(tradesByRef.values());
@@ -89,22 +99,49 @@ public class TradeService {
                 .toList();
     }
 
-    /**
-     * TODO(TICKET-I062) [Day 5]:
-     *   Convert TradeRequest -> Trade entity, save via TradeRepository,
-     *   publish TradeEvent on success (TICKET-I115), return TradeDto.
-     */
+    @Transactional
     public TradeDto createTrade(TradeRequest request) {
-        throw new UnsupportedOperationException("TICKET-I062");
+        if (tradeRepository.existsByTradeRef(request.tradeRef())) {
+            throw new IllegalStateException("Trade with tradeRef '" + request.tradeRef() + "' already exists");
+        }
+        Instrument instrument = instrumentRepository.findById(request.instrumentId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "instrumentId " + request.instrumentId() + " not found"));
+        Counterparty counterparty = counterpartyRepository.findById(request.counterpartyId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "counterpartyId " + request.counterpartyId() + " not found"));
+
+        Trade trade = Trade.builder()
+                .tradeRef(request.tradeRef())
+                .instrument(instrument)
+                .counterparty(counterparty)
+                .quantity(request.quantity())
+                .price(request.price())
+                .tradeDate(request.tradeDate())
+                .status(TradeStatus.PENDING)
+                .build();
+
+        Trade saved = tradeRepository.save(trade);
+        return TradeDto.from(saved);
     }
 
+    @Transactional
     public TradeDto updateStatus(Long id, TradeStatus newStatus) {
-        // TODO(TICKET-I070): implement on Day 6.
-        throw new UnsupportedOperationException("TICKET-I070");
+        Trade trade = tradeRepository.findById(id)
+                .orElseThrow(() -> new TradeNotFoundException("Trade " + id + " not found"));
+        if (trade.getStatus() != null && trade.getStatus().isTerminal()) {
+            throw new IllegalStateException(
+                    "Trade " + id + " is in terminal status " + trade.getStatus() + " and cannot transition");
+        }
+        trade.setStatus(newStatus);
+        return TradeDto.from(trade);
     }
 
+    @Transactional
     public void softDelete(Long id) {
-        // TODO(TICKET-I071): implement soft delete + audit log on Day 6.
-        throw new UnsupportedOperationException("TICKET-I071");
+        Trade trade = tradeRepository.findById(id)
+                .orElseThrow(() -> new TradeNotFoundException("Trade " + id + " not found"));
+        trade.setStatus(TradeStatus.CANCELLED);
+        // JPA dirty-checking flushes the UPDATE at commit — no explicit save() needed.
     }
 }
