@@ -1,5 +1,8 @@
 package com.dbtraining.tradeflow.config;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 import javax.sql.DataSource;
 
 /**
@@ -10,27 +13,35 @@ import javax.sql.DataSource;
  * HOW:     Build a HikariDataSource from environment / properties.
  * WHY:     Day 4 uses raw JDBC — without a pool you'd open + close a
  *          connection per call, which is brutal under any load.
- * OBSERVE: On Day 5 Spring Boot auto-configures the DataSource — you can
- *          delete this class OR keep it for the standalone TradeProcessor
- *          smoke run. Document your team's choice in the PR.
- * ============================================================================
- *
- *  TODO(TICKET-I044):
- *    public static DataSource dataSource() {
- *        HikariConfig cfg = new HikariConfig();
- *        cfg.setJdbcUrl(System.getenv().getOrDefault("JDBC_URL",
- *            "jdbc:postgresql://localhost:5432/tradeflow"));
- *        cfg.setUsername(System.getenv().getOrDefault("POSTGRES_USER", "tradeflow_user"));
- *        cfg.setPassword(System.getenv().getOrDefault("POSTGRES_PASSWORD", "changeme"));
- *        cfg.setMaximumPoolSize(10);
- *        cfg.setConnectionTimeout(5_000);
- *        return new HikariDataSource(cfg);
- *    }
  * ============================================================================
  */
-public class DatabaseConfig {
+public final class DatabaseConfig {
 
+    private static volatile DataSource instance;
+
+    private DatabaseConfig() {}
+
+    /**
+     * TICKET-I044: Lazily-built singleton DataSource backed by HikariCP.
+     */
     public static DataSource dataSource() {
-        throw new UnsupportedOperationException("TICKET-I044: configure HikariCP");
+        DataSource local = instance;
+        if (local == null) {
+            synchronized (DatabaseConfig.class) {
+                local = instance;
+                if (local == null) {
+                    HikariConfig cfg = new HikariConfig();
+                    cfg.setJdbcUrl(System.getenv().getOrDefault(
+                            "JDBC_URL", "jdbc:h2:mem:tradeflow;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"));
+                    cfg.setUsername(System.getenv().getOrDefault("POSTGRES_USER", "sa"));
+                    cfg.setPassword(System.getenv().getOrDefault("POSTGRES_PASSWORD", ""));
+                    cfg.setMaximumPoolSize(10);
+                    cfg.setConnectionTimeout(5_000);
+                    cfg.setPoolName("tradeflow-jdbc");
+                    instance = local = new HikariDataSource(cfg);
+                }
+            }
+        }
+        return local;
     }
 }

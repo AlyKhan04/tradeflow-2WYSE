@@ -11,10 +11,17 @@ import java.util.Objects;
  */
 public class Trade extends BaseTrade {
 
+    private final Long id;
+
     private Trade(Builder builder) {
         super(builder.tradeRef, builder.instrumentId, builder.counterpartyId,
                 builder.quantity, builder.price, builder.tradeDate,
                 builder.status, builder.createdAt);
+        this.id = builder.id;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public static Builder builder() {
@@ -27,6 +34,7 @@ public class Trade extends BaseTrade {
     }
 
     public static final class Builder {
+        private Long id;
         private String tradeRef;
         private Long instrumentId;
         private Long counterpartyId;
@@ -36,6 +44,7 @@ public class Trade extends BaseTrade {
         private TradeStatus status;
         private Instant createdAt;
 
+        public Builder id(Long v)                { this.id = v;             return this; }
         public Builder tradeRef(String v)        { this.tradeRef = v;       return this; }
         public Builder instrumentId(Long v)      { this.instrumentId = v;   return this; }
         public Builder counterpartyId(Long v)    { this.counterpartyId = v; return this; }
