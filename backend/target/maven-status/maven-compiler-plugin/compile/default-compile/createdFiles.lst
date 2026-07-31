@@ -41,6 +41,7 @@ com/dbtraining/tradeflow/model/FXTrade$Builder.class
 com/dbtraining/tradeflow/repository/ReconResultRepository.class
 com/dbtraining/tradeflow/service/validator/FXTradeValidator.class
 com/dbtraining/tradeflow/exception/TradeValidationException.class
+com/dbtraining/tradeflow/exception/GlobalExceptionHandler$ErrorEnvelope.class
 com/dbtraining/tradeflow/exception/GlobalExceptionHandler.class
 com/dbtraining/tradeflow/model/FXTrade.class
 com/dbtraining/tradeflow/dto/Discrepancy.class

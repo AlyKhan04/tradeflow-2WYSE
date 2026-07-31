@@ -4,15 +4,18 @@ import com.dbtraining.tradeflow.dto.Discrepancy;
 import com.dbtraining.tradeflow.dto.ReconReport;
 import com.dbtraining.tradeflow.dto.ReconResultDto;
 import com.dbtraining.tradeflow.dto.ReconSummary;
+import com.dbtraining.tradeflow.exception.TradeNotFoundException;
 import com.dbtraining.tradeflow.model.BaseTrade;
 import com.dbtraining.tradeflow.model.DiscrepancyType;
 import com.dbtraining.tradeflow.model.ReconResult;
 import com.dbtraining.tradeflow.repository.ReconResultRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -25,46 +28,27 @@ import java.util.stream.Collectors;
 public class ReconciliationService {
 
     private final ReconResultRepository reconResultRepository;
-
-    public ReconciliationService(ReconResultRepository reconResultRepository) {
-        this.reconResultRepository = reconResultRepository;
-    }
+    private final Counter reconResolvedCounter;
+    private final Timer reconRunTimer;
 
     public ReconciliationService() {
-        this.reconResultRepository = null;
+        this(null, null);
     }
 
-    @Transactional(readOnly = true)
-    public ReconSummary runForAll() {
-        if (reconResultRepository == null) {
-            return new ReconSummary(0, 0, 0, 0, Map.of());
-        }
-        long matched = reconResultRepository.countByStatus(ReconResult.Status.RESOLVED);
-        long unmatched = reconResultRepository.countByStatus(ReconResult.Status.OPEN);
-
-        Map<DiscrepancyType, Integer> breakdown = new EnumMap<>(DiscrepancyType.class);
-        for (DiscrepancyType t : DiscrepancyType.values()) {
-            breakdown.put(t, 0);
-        }
-        for (ReconResult r : reconResultRepository.findByStatus(ReconResult.Status.OPEN)) {
-            breakdown.merge(r.getDiscrepancyType(), 1, Integer::sum);
-        }
-
-        long total = matched + unmatched;
-        return new ReconSummary((int) total, (int) total, (int) matched, (int) unmatched, breakdown);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<ReconResultDto> listBreaks(ReconResult.Status status,
-                                           Long counterpartyId,
-                                           Pageable pageable) {
-        if (reconResultRepository == null) {
-            return Page.empty();
-        }
-        Page<ReconResult> page = (counterpartyId == null)
-                ? reconResultRepository.findByStatus(status, pageable)
-                : reconResultRepository.findByStatusAndCounterpartyId(status, counterpartyId, pageable);
-        return page.map(ReconResultDto::from);
+    public ReconciliationService(ReconResultRepository reconResultRepository, MeterRegistry registry) {
+        this.reconRunTimer = (registry == null)
+                ? null
+                : Timer.builder("tradeflow_recon_run_seconds")
+                .description("Time taken for a full reconciliation run")
+                .publishPercentiles(0.5, 0.95, 0.99)
+                .publishPercentileHistogram()
+                .register(registry);
+        this.reconResultRepository = reconResultRepository;
+        this.reconResolvedCounter = (registry == null)
+                ? null
+                : Counter.builder("tradeflow_recon_resolved_total")
+                .description("Total reconciliation breaks resolved")
+                .register(registry);
     }
 
     public ReconReport matchTrades(List<BaseTrade> internal, List<BaseTrade> external) {
@@ -144,5 +128,24 @@ public class ReconciliationService {
         s.breakdownByType().forEach((type, count) ->
                 sb.append(String.format("    - %-20s %d%n", type, count)));
         return sb.toString();
+    }
+
+    @Transactional
+    public void resolveBreak(Long id) {
+        if (reconResultRepository == null) {
+            throw new IllegalStateException("ReconResultRepository is not configured");
+        }
+        if (reconResolvedCounter == null) {
+            throw new IllegalStateException("MeterRegistry is not configured");
+        }
+
+        ReconResult r = reconResultRepository.findById(id)
+                .orElseThrow(() -> new TradeNotFoundException("Recon break " + id + " not found"));
+        if (r.getStatus() == ReconResult.Status.RESOLVED) {
+            return;  // idempotent
+        }
+        r.resolve();
+        reconResolvedCounter.increment();
+        // Audit row is written by the Day-2 DB trigger on UPDATE.
     }
 }

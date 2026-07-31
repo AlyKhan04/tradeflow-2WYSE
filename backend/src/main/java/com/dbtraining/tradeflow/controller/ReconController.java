@@ -2,16 +2,13 @@ package com.dbtraining.tradeflow.controller;
 
 import com.dbtraining.tradeflow.dto.ReconResultDto;
 import com.dbtraining.tradeflow.dto.ReconSummary;
-import com.dbtraining.tradeflow.model.ReconResult;
 import com.dbtraining.tradeflow.service.ReconciliationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -52,14 +49,14 @@ public class ReconController {
         return reconService.listBreaks(parsedStatus, counterpartyId, pageable);
     }
 
-    @Operation(summary = "Mark a break as resolved")
+    @Operation(summary = "Mark a recon break as RESOLVED")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Break marked as resolved"),
-            @ApiResponse(responseCode = "404", description = "Reconciliation break not found")
+            @ApiResponse(responseCode = "204", description = "Resolved (idempotent)"),
+            @ApiResponse(responseCode = "404", description = "Break not found")
     })
     @PutMapping("/{id}/resolve")
-    public void resolve(@Parameter(description = "Reconciliation break identifier") @PathVariable Long id) {
-        // TODO(TICKET-I074): update status to RESOLVED, set resolved_at, write audit log.
-        throw new UnsupportedOperationException("TICKET-I074");
+    public ResponseEntity<Void> resolve(@Parameter(description = "Reconciliation break identifier") @PathVariable Long id) {
+        reconService.resolveBreak(id);
+        return ResponseEntity.noContent().build();
     }
 }
