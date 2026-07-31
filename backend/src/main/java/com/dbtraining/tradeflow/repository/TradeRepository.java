@@ -64,6 +64,9 @@ public interface TradeRepository extends JpaRepository<Trade, Long> {
 
     List<Trade> findByStatus(TradeStatus status);
 
+    // TradeRepository.java
+    long countByStatus(TradeStatus status); // TICKET 1081
+
     Page<Trade> findByStatus(TradeStatus status, Pageable pageable);
 
     List<Trade> findByTradeDateBetween(LocalDate from, LocalDate to);
