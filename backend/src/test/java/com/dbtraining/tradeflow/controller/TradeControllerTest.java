@@ -28,9 +28,70 @@ class TradeControllerTest {
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         verify(tradeService).softDelete(1L);
     }
+    @Test
+@WithMockUser(roles = "TRADER")
+void createTrade_missingQuantity_returns400() throws Exception {
+    String body = """
+            {
+              "tradeRef": "TRD-NEW-0002",
+              "instrumentId": 1,
+              "counterpartyId": 1,
+              "price": 250.50,
+              "tradeDate": "2026-03-01"
+            }
+            """;
+    mvc.perform(post("/api/v1/trades")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(body))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+            .andExpect(jsonPath("$.details.quantity").exists());
 }
 
 @Test
+@WithMockUser(roles = "TRADER")
+void createTrade_negativeQuantity_returns400() throws Exception {
+    String body = """
+            {
+              "tradeRef": "TRD-NEG-0001",
+              "instrumentId": 1,
+              "counterpartyId": 1,
+              "quantity": -100,
+              "price": 250.50,
+              "tradeDate": "2026-03-01"
+            }
+            """;
+    mvc.perform(post("/api/v1/trades")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(body))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+            .andExpect(jsonPath("$.details.quantity",
+                    org.hamcrest.Matchers.containsString("must be greater than 0")));
+}
+
+@Test
+@WithMockUser(roles = "TRADER")
+void createTrade_futureTradeDate_returns400() throws Exception {
+    String body = """
+            {
+              "tradeRef": "TRD-FUT-0001",
+              "instrumentId": 1,
+              "counterpartyId": 1,
+              "quantity": 100,
+              "price": 250.50,
+              "tradeDate": "2099-01-01"
+            }
+            """;
+    mvc.perform(post("/api/v1/trades")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(body))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+            .andExpect(jsonPath("$.details.tradeDate").exists());
+}
+
+    @Test
 @WithMockUser(roles = "VIEWER")
 void list_paginated_returnsPageEnvelope() throws Exception {
     Pageable pageable = PageRequest.of(0, 5);
@@ -87,159 +148,6 @@ void viewer_cannotPost_returns403() throws Exception {
                     .content(body))
             .andExpect(status().isForbidden());
 }
-
-{
-  "info": {
-    "name": "TradeFlow API",
-    "description": "TICKET-I085 — Postman collection covering all REST endpoints with auth + assertion tests.",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "auth": {
-    "type": "basic",
-    "basic": [
-      { "key": "username", "value": "{{username}}", "type": "string" },
-      { "key": "password", "value": "{{password}}", "type": "string" }
-    ]
-  },
-  "variable": [
-    { "key": "baseUrl",   "value": "http://localhost:8080" },
-    { "key": "username",  "value": "trader" },
-    { "key": "password",  "value": "trader-pw" },
-    { "key": "tradeId",   "value": "1" },
-    { "key": "breakId",   "value": "1" }
-  ],
-  "item": [
-    {
-      "name": "Health",
-      "item": [
-        {
-          "name": "GET /actuator/health",
-          "request": { "method": "GET",
-                       "url": { "raw": "{{baseUrl}}/actuator/health" } },
-          "event": [{
-            "listen": "test",
-            "script": { "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));",
-              "pm.test('status UP', () => pm.expect(pm.response.json().status).to.eql('UP'));"
-            ]}
-          }]
-        }
-      ]
-    },
-    {
-      "name": "Trades",
-      "item": [
-        {
-          "name": "GET /api/v1/trades (paginated)",
-          "request": { "method": "GET",
-                       "url": { "raw": "{{baseUrl}}/api/v1/trades?page=0&size=20" } },
-          "event": [{
-            "listen": "test",
-            "script": { "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));",
-              "pm.test('page envelope', () => {",
-              "  const body = pm.response.json();",
-              "  pm.expect(body).to.have.property('content');",
-              "  pm.expect(body).to.have.property('totalElements');",
-              "});"
-            ]}
-          }]
-        },
-        {
-          "name": "POST /api/v1/trades (happy path)",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/v1/trades" },
-            "body": { "mode": "raw",
-                      "raw": "{\n  \"tradeRef\": \"TRD-2026-{{$timestamp}}\",\n  \"instrumentId\": 1,\n  \"counterpartyId\": 1,\n  \"quantity\": 1000,\n  \"price\": 245.50,\n  \"tradeDate\": \"2026-03-15\"\n}" }
-          },
-          "event": [{
-            "listen": "test",
-            "script": { "exec": [
-              "pm.test('201', () => pm.response.to.have.status(201));",
-              "pm.test('Location header', () => pm.expect(pm.response.headers.get('Location')).to.match(/\\/api\\/v1\\/trades\\/\\d+/));",
-              "const loc = pm.response.headers.get('Location');",
-              "if (loc) pm.collectionVariables.set('tradeId', loc.split('/').pop());"
-            ]}
-          }]
-        },
-        {
-          "name": "PUT /api/v1/trades/{{tradeId}}/status",
-          "request": {
-            "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/v1/trades/{{tradeId}}/status" },
-            "body": { "mode": "raw", "raw": "{ \"status\": \"MATCHED\" }" }
-          },
-          "event": [{
-            "listen": "test",
-            "script": { "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));",
-              "pm.test('status flipped', () => pm.expect(pm.response.json().status).to.eql('MATCHED'));"
-            ]}
-          }]
-        },
-        {
-          "name": "DELETE /api/v1/trades/{{tradeId}}",
-          "request": {
-            "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/api/v1/trades/{{tradeId}}" }
-          },
-          "event": [{
-            "listen": "test",
-            "script": { "exec": [
-              "pm.test('204', () => pm.response.to.have.status(204));"
-            ]}
-          }]
-        }
-      ]
-    },
-    {
-      "name": "Recon",
-      "item": [
-        {
-          "name": "POST /api/v1/recon/run",
-          "request": { "method": "POST",
-                       "url": { "raw": "{{baseUrl}}/api/v1/recon/run" } },
-          "event": [{
-            "listen": "test",
-            "script": { "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));",
-              "pm.test('summary shape', () => {",
-              "  const b = pm.response.json();",
-              "  pm.expect(b).to.have.property('matchedCount');",
-              "  pm.expect(b).to.have.property('unmatchedCount');",
-              "  pm.expect(b).to.have.property('breakdownByType');",
-              "});"
-            ]}
-          }]
-        },
-        {
-          "name": "GET /api/v1/recon/results?status=OPEN",
-          "request": { "method": "GET",
-                       "url": { "raw": "{{baseUrl}}/api/v1/recon/results?status=OPEN&page=0&size=20" } },
-          "event": [{
-            "listen": "test",
-            "script": { "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));",
-              "pm.test('page envelope', () => pm.expect(pm.response.json()).to.have.property('content'));"
-            ]}
-          }]
-        },
-        {
-          "name": "PUT /api/v1/recon/{{breakId}}/resolve",
-          "request": { "method": "PUT",
-                       "url": { "raw": "{{baseUrl}}/api/v1/recon/{{breakId}}/resolve" } },
-          "event": [{
-            "listen": "test",
-            "script": { "exec": [
-              "pm.test('204', () => pm.response.to.have.status(204));"
-            ]}
-          }]
-        }
-      ]
-    }
-  ]
+    
 }
 
