@@ -1,29 +1,8 @@
-/**
- * ============================================================================
- * apiService.js — TICKET-I100
- * ============================================================================
- * WHAT:    One module for ALL backend calls.
- * HOW:     Tiny `request()` wrapper around fetch; named exports for each
- *          endpoint.
- * WHY:     Auth header in one place, error envelope handled in one place,
- *          base URL in one place. Components stay focused on rendering.
- * OBSERVE: Open the Network tab — every API call goes through here.
- * ============================================================================
- */
-
 const BASE = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 
-// Hard-coded TRADER credentials for Day 8. A real login flow would replace
-// this in a later phase. TRADER role is required for POST/PUT/DELETE — the
-// Add Trade form and Recon Resolve button both need it. VIEWER alone gets
-// 403 on writes (per Phase-2.5 SecurityConfig role matchers).
+// Hard-coded TRADER credentials for Day 8. TRADER role is required for POST/PUT/DELETE.
 const AUTH = 'Basic ' + btoa('trader:trader-pw');
 
-/**
- * ApiError — thrown by request() on non-2xx responses.
- * Carries status and the parsed error body, so callers can show
- * meaningful messages.
- */
 export class ApiError extends Error {
     constructor(status, body) {
         super(body?.message || `HTTP ${status}`);
@@ -58,16 +37,7 @@ export const getTrades       = (params = {}) =>
 export const createTrade     = (body) =>
     request('/trades', { method: 'POST', body: JSON.stringify(body) });
 
-export const updateStatus    = (id, status) =>
-    request(`/trades/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) });
-
-export const cancelTrade     = (id) =>
-    request(`/trades/${id}`, { method: 'DELETE' });
-
 // ----- Recon ---------------------------------------------------------------
-export const runRecon        = () =>
-    request('/recon/run', { method: 'POST' });
-
 export const getReconResults = (params = {}) =>
     request('/recon/results?' + new URLSearchParams(params).toString());
 

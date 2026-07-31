@@ -1,12 +1,3 @@
-/**
- * ============================================================================
- * main.jsx — React entry point (TICKET-I099 + TICKET-I110)
- * ============================================================================
- * WHAT:    Mounts <App /> into #root, wraps it in BrowserRouter.
- * HOW:     React 18 `createRoot` + StrictMode.
- * WHY:     One file, one job — bootstrap.
- * ============================================================================
- */
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';

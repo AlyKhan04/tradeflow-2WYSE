@@ -1,24 +1,8 @@
-// ============================================================================
-// recon.js — TICKET-I097
-// ============================================================================
-// WHAT:    Fetches /api/v1/recon/results?status=OPEN and renders the breaks.
-//          Each row has a Resolve button that calls PUT /api/v1/recon/{id}/resolve.
-// ============================================================================
-
 const API_BASE = "http://localhost:8080/api/v1";
-const AUTH_HEADER = "Basic " + btoa("trader:trader-pass");
+const AUTH_HEADER = "Basic " + btoa("trader:trader-pw");
 
 document.addEventListener("DOMContentLoaded", loadBreaks);
 
-/**
- * TODO(TICKET-I097):
- *  - fetch open breaks
- *  - render each as a row with a Resolve button
- *  - clicking Resolve calls PUT /api/v1/recon/{id}/resolve and removes the row
- *
- *  HINT: Use event delegation on the <tbody> rather than adding a listener
- *  to every button — fewer leaks, easier to maintain.
- */
 async function loadBreaks() {
     const tbody = document.getElementById("recon-tbody");
     const loading = document.getElementById("recon-loading");
@@ -45,12 +29,13 @@ async function loadBreaks() {
 }
 
 function rowHtml(r) {
+    const detected = r.detectedAt ? new Date(r.detectedAt).toLocaleString("en-GB") : "";
     return `
         <tr data-id="${r.id}">
-            <td>${r.tradeRef || r.tradeId}</td>
-            <td>${r.discrepancyType || "—"}</td>
+            <td>${r.tradeRef ?? r.tradeId ?? "—"}</td>
+            <td>${r.discrepancyType ?? "—"}</td>
             <td><span class="badge badge-open">${r.status}</span></td>
-            <td>${r.createdAt || ""}</td>
+            <td>${detected}</td>
             <td><button data-action="resolve">Resolve</button></td>
         </tr>
     `;
