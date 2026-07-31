@@ -6,14 +6,17 @@
 // WHY:     Day 7 is the "feel the pain" sprint. Day 8 you replace it with React.
 // OBSERVE: After this script runs, the <tbody> contains real trade rows.
 // ============================================================================
-// HINT: ONLY for this local dashboard, hard-code the viewer:viewer-pass creds.
-//       In the real React app (Day 8+) we centralise auth in apiService.js
-//       and load creds from a login form.
+// HINT: ONLY for this local dashboard, hard-code the viewer creds.
+//       Credentials in source is a deliberate temporary hack — in the React
+//       app (Day 9+) auth is centralised in apiService.js and the creds come
+//       from a login form.
 // ============================================================================
 
-// TODO(TICKET-I093): set the base URL — default to localhost:8080 during dev.
 const API_BASE = "http://localhost:8080/api/v1";
-const AUTH_HEADER = "Basic " + btoa("viewer:viewer-pass");
+// Must match SecurityConfig's in-memory user: viewer / viewer-pw.
+const AUTH_HEADER = "Basic " + btoa("viewer:viewer-pw");
+// TICKET-I068 caps page size at 100 server-side; anything larger returns 400.
+const PAGE_SIZE = 20;
 
 // Module-level state — Day 8 is exactly what makes this approach painful.
 let allTrades = [];
@@ -26,13 +29,9 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /**
- * TODO(TICKET-I093):
- *  - show loading <div>
- *  - fetch /api/v1/trades with Authorization header
- *  - on success: hide loading, save to allTrades, render
- *  - on error: hide loading, show error <div>
- *
- * HINT: use async/await for readability.
+ * TICKET-I093 — fetch the trades page and render it.
+ * Loading shows in the prologue and hides in `finally`, so it clears on both
+ * the success and the error path.
  */
 async function loadTrades() {
     const loading = document.getElementById("trades-loading");
@@ -41,7 +40,7 @@ async function loadTrades() {
     errorDiv.classList.add("hidden");
 
     try {
-        const res = await fetch(`${API_BASE}/trades?size=200`, {
+        const res = await fetch(`${API_BASE}/trades?page=0&size=${PAGE_SIZE}`, {
             headers: { "Authorization": AUTH_HEADER }
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -79,19 +78,35 @@ function render() {
 }
 
 function rowHtml(t) {
-    // TODO(TICKET-I092 / I093): show a badge with status colour.
-    const badgeClass = "badge-" + (t.status || "pending").toLowerCase();
+    const status = t.status ?? "PENDING";
+    const badgeClass = "badge-" + status.toLowerCase();
     return `
         <tr>
-            <td>${t.tradeRef}</td>
-            <td>${t.instrumentId}</td>
-            <td>${t.counterpartyId}</td>
-            <td>${t.quantity}</td>
-            <td>${t.price}</td>
-            <td>${t.tradeDate}</td>
-            <td><span class="badge ${badgeClass}">${t.status}</span></td>
+            <td>${escapeHtml(t.tradeRef)}</td>
+            <td>${escapeHtml(t.instrumentId)}</td>
+            <td>${escapeHtml(t.counterpartyId)}</td>
+            <td>${formatNumber(t.quantity)}</td>
+            <td>${formatNumber(t.price)}</td>
+            <td>${escapeHtml(t.tradeDate)}</td>
+            <td><span class="badge ${badgeClass}">${escapeHtml(status)}</span></td>
         </tr>
     `;
+}
+
+/** Numbers arrive as JSON numbers or strings (BigDecimal); render both readably. */
+function formatNumber(n) {
+    if (n == null) return "";
+    const num = Number(n);
+    return Number.isFinite(num)
+        ? num.toLocaleString("en-GB", { maximumFractionDigits: 4 })
+        : escapeHtml(n);
+}
+
+/** Everything interpolated into innerHTML goes through here — habit, not paranoia. */
+function escapeHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
+    }[c]));
 }
 
 function compareBy(key, dir) {

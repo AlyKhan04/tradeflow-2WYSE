@@ -8,20 +8,20 @@
 // ============================================================================
 
 const API_BASE = "http://localhost:8080/api/v1";
-const AUTH_HEADER = "Basic " + btoa("trader:trader-pass");
+// Must match SecurityConfig's in-memory user: trader / trader-pw.
+// POST /api/v1/** requires ROLE_TRADER, so viewer creds would 403 here.
+const AUTH_HEADER = "Basic " + btoa("trader:trader-pw");
 
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("trade-form").addEventListener("submit", onSubmit);
 });
 
 /**
- * TODO(TICKET-I095): client-side validation:
- *  - all fields required
- *  - quantity > 0, price > 0
- *  - tradeDate not in the future
- *  - show inline error spans, return false if invalid
- *
- * TODO(TICKET-I096): on valid, POST /api/v1/trades, show toast on success.
+ * TICKET-I095 (validate) + TICKET-I096 (POST).
+ * Validation gates the network call entirely — an invalid form produces zero
+ * requests. On a server-side rejection the GlobalExceptionHandler envelope's
+ * `details` map is fanned back out into the per-field error spans, which is the
+ * same contract React Hook Form's setError() honours in I106.
  */
 async function onSubmit(evt) {
     evt.preventDefault();
@@ -29,6 +29,9 @@ async function onSubmit(evt) {
     const data = Object.fromEntries(new FormData(form).entries());
 
     if (!validate(data)) return;
+
+    const submitBtn = form.querySelector("button[type=submit]");
+    if (submitBtn) submitBtn.disabled = true;
 
     try {
         const res = await fetch(`${API_BASE}/trades`, {
@@ -38,7 +41,7 @@ async function onSubmit(evt) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                tradeRef:        data.tradeRef,
+                tradeRef:        data.tradeRef.trim(),
                 instrumentId:    Number(data.instrumentId),
                 counterpartyId:  Number(data.counterpartyId),
                 quantity:        data.quantity,
@@ -49,6 +52,11 @@ async function onSubmit(evt) {
 
         if (!res.ok) {
             const body = await res.json().catch(() => ({}));
+            // Field-level errors from the Day-6 GlobalExceptionHandler envelope:
+            // { code, message, details: { quantity: "must be > 0", ... } }
+            if (body.details) {
+                Object.entries(body.details).forEach(([field, msg]) => setError(field, msg));
+            }
             throw new Error(body.message || `HTTP ${res.status}`);
         }
 
@@ -56,18 +64,32 @@ async function onSubmit(evt) {
         setTimeout(() => location.href = "trades.html", 800);
     } catch (e) {
         showToast("Error: " + e.message, true);
+    } finally {
+        if (submitBtn) submitBtn.disabled = false;
     }
 }
 
+/** TICKET-I095 — returns true only if every rule passes. */
 function validate(data) {
-    // TODO(TICKET-I095): set/clear each .field-error[data-for=...] span.
     clearErrors();
     let ok = true;
 
-    if (Number(data.quantity) <= 0) { setError("quantity", "must be > 0"); ok = false; }
-    if (Number(data.price)    <= 0) { setError("price",    "must be > 0"); ok = false; }
-    if (!data.tradeDate)             { setError("tradeDate", "required");   ok = false; }
-    if (data.tradeDate && new Date(data.tradeDate) > new Date()) {
+    if (!data.tradeRef || !data.tradeRef.trim()) {
+        setError("tradeRef", "required"); ok = false;
+    }
+    if (!data.instrumentId)   { setError("instrumentId",   "required"); ok = false; }
+    if (!data.counterpartyId) { setError("counterpartyId", "required"); ok = false; }
+
+    if (!data.quantity || Number(data.quantity) <= 0) {
+        setError("quantity", "must be > 0"); ok = false;
+    }
+    if (!data.price || Number(data.price) <= 0) {
+        setError("price", "must be > 0"); ok = false;
+    }
+
+    if (!data.tradeDate) {
+        setError("tradeDate", "required"); ok = false;
+    } else if (new Date(data.tradeDate) > new Date()) {
         setError("tradeDate", "must not be in the future"); ok = false;
     }
 
