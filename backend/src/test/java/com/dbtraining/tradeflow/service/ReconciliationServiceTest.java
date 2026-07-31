@@ -10,6 +10,7 @@ import com.dbtraining.tradeflow.model.ReconResult;
 import com.dbtraining.tradeflow.model.Trade;
 import com.dbtraining.tradeflow.model.TradeStatus;
 import com.dbtraining.tradeflow.repository.ReconResultDAO;
+import com.dbtraining.tradeflow.repository.ReconResultRepository;
 import com.dbtraining.tradeflow.repository.TradeDAO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,12 +20,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -148,6 +151,17 @@ class ReconciliationServiceTest {
         orchestrator.runForAll();
 
         verify(reconResultDAO, never()).insert(any(ReconResult.class));
+    }
+
+    @Test
+    void constructorInjection_populatesRepositoryField() throws Exception {
+        ReconResultRepository repository = mock(ReconResultRepository.class);
+
+        ReconciliationService service = new ReconciliationService(repository, null);
+        Field field = ReconciliationService.class.getDeclaredField("reconResultRepository");
+        field.setAccessible(true);
+
+        assertThat(field.get(service)).isSameAs(repository);
     }
 
     private static BaseTrade equity(String tradeRef) {

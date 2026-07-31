@@ -9,6 +9,9 @@ import com.dbtraining.tradeflow.model.BaseTrade;
 import com.dbtraining.tradeflow.model.DiscrepancyType;
 import com.dbtraining.tradeflow.model.ReconResult;
 import com.dbtraining.tradeflow.repository.ReconResultRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -35,6 +38,7 @@ public class ReconciliationService {
         this(null, null);
     }
 
+    @Autowired
     public ReconciliationService(ReconResultRepository reconResultRepository, MeterRegistry registry) {
         this.reconRunTimer = (registry == null)
                 ? null
@@ -128,6 +132,38 @@ public class ReconciliationService {
         s.breakdownByType().forEach((type, count) ->
                 sb.append(String.format("    - %-20s %d%n", type, count)));
         return sb.toString();
+    }
+
+    @Transactional(readOnly = true)
+    public ReconSummary runForAll() {
+        if (reconRunTimer != null) {
+            return reconRunTimer.record(() -> buildSummaryFromRepository());
+        }
+        return buildSummaryFromRepository();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ReconResultDto> listBreaks(ReconResult.Status status, Long counterpartyId, Pageable pageable) {
+        Page<ReconResult> page = (counterpartyId == null)
+                ? reconResultRepository.findByStatus(status, pageable)
+                : reconResultRepository.findByStatusAndCounterpartyId(status, counterpartyId, pageable);
+        return page.map(ReconResultDto::from);
+    }
+
+    private ReconSummary buildSummaryFromRepository() {
+        long matched = reconResultRepository.countByStatus(ReconResult.Status.RESOLVED);
+        long unmatched = reconResultRepository.countByStatus(ReconResult.Status.OPEN);
+
+        Map<DiscrepancyType, Integer> breakdown = new EnumMap<>(DiscrepancyType.class);
+        for (DiscrepancyType type : DiscrepancyType.values()) {
+            breakdown.put(type, 0);
+        }
+        for (ReconResult result : reconResultRepository.findByStatus(ReconResult.Status.OPEN)) {
+            breakdown.merge(result.getDiscrepancyType(), 1, Integer::sum);
+        }
+
+        int total = (int) (matched + unmatched);
+        return new ReconSummary(total, total, (int) matched, (int) unmatched, breakdown);
     }
 
     @Transactional

@@ -24,6 +24,10 @@
       </column>
       <column name="resolved_by" type="VARCHAR(50)">
       </column>
+      <column name="detected_at" type="TIMESTAMP WITH TIME ZONE"
+              defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
       <column name="created_at" type="TIMESTAMP WITH TIME ZONE"
               defaultValueComputed="CURRENT_TIMESTAMP">
         <constraints nullable="false"/>
@@ -32,7 +36,7 @@
 
     <sql>
       ALTER TABLE recon_breaks ADD CONSTRAINT chk_recon_breaks_status
-          CHECK (status IN ('OPEN','RESOLVED','IGNORED'));
+          CHECK (status IN ('OPEN','RESOLVED','SUPPRESSED'));
       ALTER TABLE recon_breaks ADD CONSTRAINT chk_recon_breaks_type
           CHECK (discrepancy_type IS NULL OR discrepancy_type IN
                  ('PRICE_MISMATCH','QUANTITY_MISMATCH','DATE_MISMATCH','MISSING_TRADE'));

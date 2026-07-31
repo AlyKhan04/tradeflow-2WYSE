@@ -127,6 +127,26 @@ for (TradeStatus status : TradeStatus.values()) {
             throw new IllegalStateException(
                     "Trade " + id + " is in terminal status " + trade.getStatus() + " and cannot transition");
         }
+
+        TradeStatus current = trade.getStatus();
+        boolean allowed = false;
+        if (current == null) {
+            allowed = false;
+        } else {
+            allowed = switch (current) {
+                case PENDING -> newStatus == TradeStatus.MATCHED || newStatus == TradeStatus.CANCELLED;
+                case MATCHED -> newStatus == TradeStatus.SETTLED || newStatus == TradeStatus.CANCELLED;
+                case UNMATCHED -> newStatus == TradeStatus.MATCHED || newStatus == TradeStatus.CANCELLED;
+                case DISPUTED -> newStatus == TradeStatus.MATCHED || newStatus == TradeStatus.CANCELLED;
+                case SETTLED, CANCELLED -> false;
+            };
+        }
+
+        if (!allowed) {
+            throw new IllegalStateException(
+                    "Illegal transition " + current + " -> " + newStatus);
+        }
+
         trade.setStatus(newStatus);
         return TradeDto.from(trade);
     }

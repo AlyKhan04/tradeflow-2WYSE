@@ -78,8 +78,6 @@ public interface TradeRepository extends JpaRepository<Trade, Long> {
 
     boolean existsByTradeRef(String tradeRef);
 
-    long countByStatus(TradeStatus status);
-
     @Query("select t from Trade t where t.counterparty.id = :counterpartyId")
     List<Trade> findByCounterpartyId(@Param("counterpartyId") Long counterpartyId);
 }

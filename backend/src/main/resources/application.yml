@@ -1,4 +1,10 @@
 # application.yml — TICKET-I078
+spring:
+  application:
+    name: tradeflow
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+
 management:
   endpoints:
     web:

@@ -8,9 +8,16 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -34,16 +41,34 @@ public class TradeflowApplication {
     }
 
     @Bean
-    CommandLineRunner reconDemoRunner(TradeProcessor processor) {
+    CommandLineRunner reconDemoRunner(TradeProcessor processor, ResourceLoader resourceLoader) {
         return args -> {
-            Path internal = Path.of("src/test/resources/internal-trades.csv");
-            Path external = Path.of("src/test/resources/external-trades.csv");
-            ReconSummary summary = processor.process(internal, external);
-            System.out.println();
-            System.out.println("== Day-3 recon demo (TICKET-I040) ==================================================");
-            System.out.println(summary);
-            System.out.println("====================================================================================");
+            Path internal = loadDemoCsvFile(resourceLoader, "internal-trades.csv");
+            Path external = loadDemoCsvFile(resourceLoader, "external-trades.csv");
+            try {
+                ReconSummary summary = processor.process(internal, external);
+                System.out.println();
+                System.out.println("== Day-3 recon demo (TICKET-I040) ==================================================");
+                System.out.println(summary);
+                System.out.println("====================================================================================");
+            } finally {
+                Files.deleteIfExists(internal);
+                Files.deleteIfExists(external);
+            }
         };
+    }
+
+    static Path loadDemoCsvFile(ResourceLoader resourceLoader, String fileName) throws IOException {
+        Resource resource = resourceLoader.getResource("classpath:" + fileName);
+        if (!resource.exists()) {
+            throw new FileNotFoundException("Demo CSV resource not found on classpath: " + fileName);
+        }
+
+        Path tempFile = Files.createTempFile(fileName.replace(".csv", ""), ".csv");
+        try (InputStream inputStream = resource.getInputStream()) {
+            Files.copy(inputStream, tempFile, StandardCopyOption.REPLACE_EXISTING);
+        }
+        return tempFile;
     }
 
     private static void verifyTradeEquality() {
