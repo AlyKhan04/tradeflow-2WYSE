@@ -1,5 +1,7 @@
 package com.dbtraining.tradeflow.repository;
 import com.dbtraining.tradeflow.model.ReconResult;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -32,6 +34,18 @@ public interface ReconResultRepository extends JpaRepository<ReconResult, Long> 
     List<ReconResult> findByStatus(ReconResult.Status status);
 
     long countByStatus(ReconResult.Status status);
+
+    Page<ReconResult> findByStatus(ReconResult.Status status, Pageable pageable);
+
+    @Query("""
+           select r from ReconResult r
+             join r.trade t
+           where r.status = :status
+             and t.counterparty.id = :counterpartyId
+           """)
+    Page<ReconResult> findByStatusAndCounterpartyId(@Param("status") ReconResult.Status status,
+                                                   @Param("counterpartyId") Long counterpartyId,
+                                                   Pageable pageable);
 
     @Query("select r from ReconResult r where r.trade.id = :tradeId")
     List<ReconResult> findByTradeId(@Param("tradeId") Long tradeId);
