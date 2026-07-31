@@ -2,6 +2,7 @@ package com.dbtraining.tradeflow.controller;
 
 import com.dbtraining.tradeflow.config.SecurityConfig;
 import com.dbtraining.tradeflow.dto.TradeDto;
+import com.dbtraining.tradeflow.exception.GlobalExceptionHandler;
 import com.dbtraining.tradeflow.exception.TradeNotFoundException;
 import com.dbtraining.tradeflow.model.TradeStatus;
 import com.dbtraining.tradeflow.service.TradeProcessor;
@@ -34,13 +35,17 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Imports the real SecurityConfig so the role matrix from TICKET-I077 is what
- * these tests actually exercise (and so CSRF stays disabled, as it is in the app).
- * Without it the slice falls back to Boot's default chain and every mutating
- * request fails CSRF with a 403.
+ * Imports the real SecurityConfig so the TICKET-I077 role matrix is what these
+ * tests exercise (and so CSRF stays disabled, as it is in the app) plus the
+ * GlobalExceptionHandler so error envelopes are asserted against the real
+ * advice. Without SecurityConfig the slice falls back to Boot's default chain
+ * and every mutating request fails CSRF with a 403.
  */
-@WebMvcTest(TradeController.class)
-@Import(SecurityConfig.class)
+@WebMvcTest(controllers = TradeController.class)
+@Import({
+        SecurityConfig.class,
+        GlobalExceptionHandler.class
+})
 class TradeControllerTest {
 
     @Autowired
@@ -138,12 +143,19 @@ class TradeControllerTest {
                 .andExpect(jsonPath("$.details.tradeRef").exists());
     }
 
-    /** TICKET-I069: happy path — 201 + Location header. */
+    // =========================
+    // Added TICKET-I083
+    // Valid create trade test
+    // =========================
+
     @Test
     @WithMockUser(roles = "TRADER")
-    void createTrade_valid_returns201WithLocation() throws Exception {
+    void createTrade_validInput_returns201() throws Exception {
 
-        when(tradeService.createTrade(any())).thenReturn(sampleDto(42L, "TRD-2026-0001"));
+        TradeDto saved = sampleDto(42L, "TRD-2026-0001");
+
+        when(tradeService.createTrade(any()))
+                .thenReturn(saved);
 
         String body = """
                 {
@@ -161,9 +173,18 @@ class TradeControllerTest {
                         .content(body))
 
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/api/v1/trades/42"))
-                .andExpect(jsonPath("$.id").value(42))
-                .andExpect(jsonPath("$.tradeRef").value("TRD-2026-0001"));
+                .andExpect(header().string(
+                        "Location",
+                        "/api/v1/trades/42"
+                ))
+                .andExpect(jsonPath("$.tradeRef")
+                        .value("TRD-2026-0001"))
+                .andExpect(jsonPath("$.id")
+                        .value(42))
+                .andExpect(jsonPath("$.status")
+                        .value("PENDING"));
+
+        verify(tradeService).createTrade(any());
     }
 
     // =========================

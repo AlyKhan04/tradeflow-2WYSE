@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Gauge;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -39,6 +40,16 @@ public class TradeService {
         this.tradesCreatedCounter = Counter.builder("tradeflow_trades_created_total")
                 .description("Total trades successfully created via POST /api/v1/trades")
                 .register(meterRegistry);
+
+                // TradeService.java — inside the constructor (TICKET-I081)
+for (TradeStatus status : TradeStatus.values()) {
+    Gauge.builder("tradeflow_trades_by_status",
+                    tradeRepository,
+                    r -> (double) r.countByStatus(status))
+            .description("Live count of trades per status")
+            .tag("status", status.name())
+            .register(meterRegistry);
+}
     }
 
     @Transactional(readOnly = true)
