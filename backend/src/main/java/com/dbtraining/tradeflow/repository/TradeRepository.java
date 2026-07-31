@@ -71,6 +71,9 @@ public interface TradeRepository extends JpaRepository<Trade, Long> {
 
     List<Trade> findByTradeDateBetween(LocalDate from, LocalDate to);
 
+    // TICKET-I068: paged variant backing GET /api/v1/trades/by-date.
+    Page<Trade> findByTradeDateBetween(LocalDate from, LocalDate to, Pageable pageable);
+
     Optional<Trade> findByTradeRef(String tradeRef);
 
     boolean existsByTradeRef(String tradeRef);

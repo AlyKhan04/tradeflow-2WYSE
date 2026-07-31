@@ -83,6 +83,15 @@ for (TradeStatus status : TradeStatus.values()) {
         return tradeRepository.findByTradeDateBetween(from, to).stream().map(TradeDto::from).toList();
     }
 
+    // TICKET-I068: paged date-range lookup backing GET /api/v1/trades/by-date.
+    @Transactional(readOnly = true)
+    public Page<TradeDto> findByTradeDateBetween(LocalDate from, LocalDate to, Pageable pageable) {
+        if (from != null && to != null && from.isAfter(to)) {
+            throw new IllegalArgumentException("'from' must not be after 'to'");
+        }
+        return tradeRepository.findByTradeDateBetween(from, to, pageable).map(TradeDto::from);
+    }
+
     @Transactional
     public TradeDto createTrade(TradeRequest request) {
         if (tradeRepository.existsByTradeRef(request.tradeRef())) {
