@@ -20,15 +20,13 @@
 <body>
 
 <header class="topbar">
-    <!-- TODO(TICKET-I086): bank logo (placeholder) + user name on the right. -->
     <span class="logo">DB · TradeFlow</span>
     <span class="user">Logged in as <strong>viewer</strong></span>
 </header>
 
 <div class="layout">
 
-    <nav class="sidebar">
-        <!-- TODO(TICKET-I086): nav links. -->
+    <nav class="sidebar" aria-label="Primary">
         <ul>
             <li><a href="dashboard.html" class="active">Dashboard</a></li>
             <li><a href="trades.html">Trades</a></li>
@@ -74,8 +72,12 @@
 
 </div>
 
-<!-- TODO(TICKET-I091/I098): a small JS file that populates the card numbers. -->
-<!-- <script src="js/cards.js" defer></script> -->
+<!--
+  cards.js is created by TICKET-I092A and populates the four card values.
+  Until that ticket lands the file 404s in the console; the page still renders
+  because the script is deferred. Card ids above are the contract it must use.
+-->
+<script src="js/cards.js" defer></script>
 
 </body>
 </html>
