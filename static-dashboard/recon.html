@@ -1,14 +1,8 @@
 <!DOCTYPE html>
-<!--
-=============================================================================
-  recon.html — TICKET-I088 + TICKET-I097
-=============================================================================
-  WHAT:    Lists reconciliation breaks (status=OPEN) with a Resolve button.
-=============================================================================
--->
 <html lang="en">
 <head>
     <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>TradeFlow — Recon</title>
     <link rel="stylesheet" href="css/style.css"/>
 </head>
@@ -21,7 +15,7 @@
 
 <div class="layout">
 
-    <nav class="sidebar">
+    <nav class="sidebar" aria-label="Primary">
         <ul>
             <li><a href="dashboard.html">Dashboard</a></li>
             <li><a href="trades.html">Trades</a></li>
@@ -34,8 +28,6 @@
 
         <h1>Reconciliation Breaks</h1>
 
-        <!-- TODO(TICKET-I088): filter pills (All | OPEN | RESOLVED). -->
-
         <table class="data-table">
             <thead>
             <tr>
@@ -47,7 +39,6 @@
             </tr>
             </thead>
             <tbody id="recon-tbody">
-            <!-- TODO(TICKET-I097): rows populated by recon.js. -->
             </tbody>
         </table>
 
