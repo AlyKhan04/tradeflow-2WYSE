@@ -136,7 +136,7 @@ class ReconciliationServiceTest {
         verify(reconResultDAO, times(1)).insert(captor.capture());
         ReconResult inserted = captor.getValue();
         assertThat(inserted.getDiscrepancyType()).isEqualTo(DiscrepancyType.MISSING_TRADE);
-        assertThat(inserted.getStatus()).isEqualTo("OPEN");
+        assertThat(inserted.getStatus()).isEqualTo(ReconResult.Status.OPEN);
     }
 
     @Test
@@ -210,17 +210,33 @@ class ReconciliationServiceTest {
         private ReconSummary runForAll() {
             List<Trade> internalTrades = tradeDAO.findAll();
             List<BaseTrade> internal = new java.util.ArrayList<>(internalTrades.size());
-            internal.addAll(internalTrades);
+            for (Trade trade : internalTrades) {
+                internal.add(equityFromTrade(trade));
+            }
             ReconReport report = service.matchTrades(internal, externalTrades);
             for (Discrepancy discrepancy : report.discrepancies()) {
                 ReconResult result = ReconResult.builder()
-                        .tradeId(1L)
-                        .status("OPEN")
+                        .trade(Trade.builder().id(1L).build())
+                        .status(ReconResult.Status.OPEN)
                         .discrepancyType(discrepancy.types().get(0))
                         .build();
                 reconResultDAO.insert(result);
             }
             return service.generateReport(report);
+        }
+
+        private static BaseTrade equityFromTrade(Trade trade) {
+            return EquityTrade.builder()
+                    .tradeRef(trade.getTradeRef())
+                    .instrumentId(trade.getInstrumentId())
+                    .counterpartyId(trade.getCounterpartyId())
+                    .quantity(trade.getQuantity())
+                    .price(trade.getPrice())
+                    .tradeDate(trade.getTradeDate())
+                    .status(trade.getStatus())
+                    .exchange("XETRA")
+                    .lotSize(100)
+                    .build();
         }
     }
 }

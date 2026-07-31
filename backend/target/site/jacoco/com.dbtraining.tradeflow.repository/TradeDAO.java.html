@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TradeDAO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tradeflow</a> &gt; <a href="index.source.html" class="el_package">com.dbtraining.tradeflow.repository</a> &gt; <span class="el_source">TradeDAO.java</span></div><h1>TradeDAO.java</h1><pre class="source lang-java linenums">package com.dbtraining.tradeflow.repository;
+
+import com.dbtraining.tradeflow.exception.JdbcException;
+import com.dbtraining.tradeflow.model.Trade;
+import com.dbtraining.tradeflow.model.TradeStatus;
+
+import javax.sql.DataSource;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+/**
+ * ============================================================================
+ * TradeDAO — TICKET-I045 (Day 4 — raw JDBC)
+ * ============================================================================
+ * WHAT:    Raw JDBC data-access object for trades.
+ * HOW:     PreparedStatement everywhere — NEVER string concatenation.
+ * WHY:     Day 4 builds JDBC by hand so you understand what JPA hides on Day 5.
+ * ============================================================================
+ */
+public class TradeDAO {
+
+    private static final String SELECT_COLUMNS =
+            &quot;id, trade_ref, instrument_id, counterparty_id, quantity, price, &quot; +
+            &quot;trade_date, status, created_at &quot;;
+
+    private static final String TABLE = &quot;FROM trades &quot;;
+
+    private final DataSource dataSource;
+
+<span class="fc" id="L33">    public TradeDAO(DataSource dataSource) {</span>
+<span class="fc" id="L34">        this.dataSource = Objects.requireNonNull(dataSource, &quot;dataSource required&quot;);</span>
+<span class="fc" id="L35">    }</span>
+
+    public long insert(Trade trade) {
+<span class="fc" id="L38">        String sql = &quot;INSERT INTO trades &quot; +</span>
+                &quot;(trade_ref, instrument_id, counterparty_id, quantity, price, trade_date, status) &quot; +
+                &quot;VALUES (?, ?, ?, ?, ?, ?, ?)&quot;;
+<span class="fc" id="L41">        try (Connection cx = dataSource.getConnection();</span>
+<span class="fc" id="L42">             PreparedStatement ps = cx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {</span>
+<span class="fc" id="L43">            ps.setString(1, trade.getTradeRef());</span>
+<span class="fc" id="L44">            ps.setLong(2, trade.getInstrumentId());</span>
+<span class="fc" id="L45">            ps.setLong(3, trade.getCounterpartyId());</span>
+<span class="fc" id="L46">            ps.setBigDecimal(4, trade.getQuantity());</span>
+<span class="fc" id="L47">            ps.setBigDecimal(5, trade.getPrice());</span>
+<span class="fc" id="L48">            ps.setDate(6, Date.valueOf(trade.getTradeDate()));</span>
+<span class="fc" id="L49">            ps.setString(7, trade.getStatus().name());</span>
+<span class="fc" id="L50">            ps.executeUpdate();</span>
+<span class="fc" id="L51">            try (ResultSet keys = ps.getGeneratedKeys()) {</span>
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">                if (keys.next()) {</span>
+<span class="fc" id="L53">                    return keys.getLong(1);</span>
+                }
+<span class="nc" id="L55">                throw new JdbcException(&quot;insert returned no generated key&quot;);</span>
+            }
+<span class="nc" id="L57">        } catch (SQLException e) {</span>
+<span class="nc" id="L58">            throw new JdbcException(&quot;insert failed: &quot; + trade.getTradeRef(), e);</span>
+        }
+    }
+
+    public Optional&lt;Trade&gt; findByRef(String tradeRef) {
+<span class="fc" id="L63">        String sql = &quot;SELECT &quot; + SELECT_COLUMNS + TABLE + &quot;WHERE trade_ref = ? LIMIT 1&quot;;</span>
+<span class="fc" id="L64">        try (Connection cx = dataSource.getConnection();</span>
+<span class="fc" id="L65">             PreparedStatement ps = cx.prepareStatement(sql)) {</span>
+<span class="fc" id="L66">            ps.setString(1, tradeRef);</span>
+<span class="fc" id="L67">            try (ResultSet rs = ps.executeQuery()) {</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">                return rs.next() ? Optional.of(mapRow(rs)) : Optional.empty();</span>
+            }
+<span class="nc" id="L70">        } catch (SQLException e) {</span>
+<span class="nc" id="L71">            throw new JdbcException(&quot;findByRef failed: &quot; + tradeRef, e);</span>
+        }
+    }
+
+    public List&lt;Trade&gt; findAll() {
+<span class="fc" id="L76">        String sql = &quot;SELECT &quot; + SELECT_COLUMNS + TABLE + &quot;ORDER BY trade_date DESC, id DESC&quot;;</span>
+<span class="fc" id="L77">        try (Connection cx = dataSource.getConnection();</span>
+<span class="fc" id="L78">             PreparedStatement ps = cx.prepareStatement(sql);</span>
+<span class="fc" id="L79">             ResultSet rs = ps.executeQuery()) {</span>
+<span class="fc" id="L80">            List&lt;Trade&gt; out = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">            while (rs.next()) {</span>
+<span class="fc" id="L82">                out.add(mapRow(rs));</span>
+            }
+<span class="fc" id="L84">            return out;</span>
+<span class="nc" id="L85">        } catch (SQLException e) {</span>
+<span class="nc" id="L86">            throw new JdbcException(&quot;findAll failed&quot;, e);</span>
+        }
+    }
+
+    public int updateStatus(String tradeRef, TradeStatus newStatus) {
+<span class="fc" id="L91">        String sql = &quot;UPDATE trades SET status = ? WHERE trade_ref = ?&quot;;</span>
+<span class="fc" id="L92">        try (Connection cx = dataSource.getConnection();</span>
+<span class="fc" id="L93">             PreparedStatement ps = cx.prepareStatement(sql)) {</span>
+<span class="fc" id="L94">            ps.setString(1, newStatus.name());</span>
+<span class="fc" id="L95">            ps.setString(2, tradeRef);</span>
+<span class="fc" id="L96">            return ps.executeUpdate();</span>
+<span class="nc" id="L97">        } catch (SQLException e) {</span>
+<span class="nc" id="L98">            throw new JdbcException(&quot;updateStatus failed: &quot; + tradeRef, e);</span>
+        }
+    }
+
+    private static Trade mapRow(ResultSet rs) throws SQLException {
+<span class="fc" id="L103">        return Trade.builder()</span>
+<span class="fc" id="L104">                .id(rs.getLong(&quot;id&quot;))</span>
+<span class="fc" id="L105">                .tradeRef(rs.getString(&quot;trade_ref&quot;))</span>
+<span class="fc" id="L106">                .instrumentId(rs.getLong(&quot;instrument_id&quot;))</span>
+<span class="fc" id="L107">                .counterpartyId(rs.getLong(&quot;counterparty_id&quot;))</span>
+<span class="fc" id="L108">                .quantity(rs.getBigDecimal(&quot;quantity&quot;))</span>
+<span class="fc" id="L109">                .price(rs.getBigDecimal(&quot;price&quot;))</span>
+<span class="fc" id="L110">                .tradeDate(rs.getDate(&quot;trade_date&quot;).toLocalDate())</span>
+<span class="fc" id="L111">                .status(TradeStatus.valueOf(rs.getString(&quot;status&quot;)))</span>
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">                .createdAt(rs.getTimestamp(&quot;created_at&quot;) != null</span>
+<span class="pc" id="L113">                        ? rs.getTimestamp(&quot;created_at&quot;).toInstant() : null)</span>
+<span class="fc" id="L114">                .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

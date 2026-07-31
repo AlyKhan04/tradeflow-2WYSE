@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TradeDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tradeflow</a> &gt; <a href="index.source.html" class="el_package">com.dbtraining.tradeflow.dto</a> &gt; <span class="el_source">TradeDto.java</span></div><h1>TradeDto.java</h1><pre class="source lang-java linenums">package com.dbtraining.tradeflow.dto;
+
+import com.dbtraining.tradeflow.model.Trade;
+import com.dbtraining.tradeflow.model.TradeStatus;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+
+/**
+ * ============================================================================
+ * TradeDto — Day 6 (TICKET-I068)
+ * ============================================================================
+ * WHAT:    Outbound DTO returned by the REST API.
+ * HOW:     Java `record` — concise, immutable, automatic equals/hashCode.
+ * WHY:     Never return the JPA entity from a controller — that couples your
+ *          API contract to your DB schema and risks lazy-loading exceptions
+ *          when Hibernate tries to serialize the entity outside a session.
+ * OBSERVE: Day-9 Kafka events embed this same DTO inside TradeEvent.payload.
+ * ============================================================================
+ */
+<span class="nc" id="L22">public record TradeDto(</span>
+        Long id,
+        String tradeRef,
+        Long instrumentId,
+        Long counterpartyId,
+        BigDecimal quantity,
+        BigDecimal price,
+        LocalDate tradeDate,
+        TradeStatus status,
+        Instant createdAt
+) {
+    public static TradeDto from(Trade entity) {
+<span class="nc" id="L34">        return new TradeDto(</span>
+<span class="nc" id="L35">                entity.getId(),</span>
+<span class="nc" id="L36">                entity.getTradeRef(),</span>
+<span class="nc" id="L37">                entity.getInstrumentId(),</span>
+<span class="nc" id="L38">                entity.getCounterpartyId(),</span>
+<span class="nc" id="L39">                entity.getQuantity(),</span>
+<span class="nc" id="L40">                entity.getPrice(),</span>
+<span class="nc" id="L41">                entity.getTradeDate(),</span>
+<span class="nc" id="L42">                entity.getStatus(),</span>
+<span class="nc" id="L43">                entity.getCreatedAt()</span>
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -32,13 +32,15 @@ public class ReconciliationOrchestrator {
         return runForAll(new ArrayList<>(trades), new ArrayList<>(trades));
     }
 
-    public ReconSummary runForAll(List<BaseTrade> external) {
+    public ReconSummary runForAll(List<Trade> external) {
         List<Trade> trades = tradeDAO.findAll();
         return runForAll(new ArrayList<>(trades), external);
     }
 
-    private ReconSummary runForAll(List<BaseTrade> internal, List<BaseTrade> external) {
-        ReconReport report = reconciliationService.matchTrades(internal, external);
+    private ReconSummary runForAll(List<Trade> internal, List<Trade> external) {
+        List<BaseTrade> internalBaseTrades = internal.stream().map(this::toBaseTrade).toList();
+        List<BaseTrade> externalBaseTrades = external.stream().map(this::toBaseTrade).toList();
+        ReconReport report = reconciliationService.matchTrades(internalBaseTrades, externalBaseTrades);
         for (Discrepancy discrepancy : report.discrepancies()) {
             reconResultDAO.insert(buildReconResult(discrepancy));
         }
@@ -46,10 +48,29 @@ public class ReconciliationOrchestrator {
     }
 
     private ReconResult buildReconResult(Discrepancy discrepancy) {
-        return new ReconResult.Builder()
-                .tradeId(1L)
-                .status("OPEN")
+        Trade trade = Trade.builder().tradeRef("UNKNOWN").build();
+        return ReconResult.builder()
+                .trade(trade)
+                .status(ReconResult.Status.OPEN)
                 .discrepancyType(discrepancy.types().get(0))
                 .build();
+    }
+
+    private BaseTrade toBaseTrade(Trade trade) {
+        return new BaseTrade(
+                trade.getTradeRef(),
+                trade.getInstrumentId(),
+                trade.getCounterpartyId(),
+                trade.getQuantity(),
+                trade.getPrice(),
+                trade.getTradeDate(),
+                trade.getStatus(),
+                trade.getCreatedAt()
+        ) {
+            @Override
+            public String assetClassDescription() {
+                return "Trade";
+            }
+        };
     }
 }

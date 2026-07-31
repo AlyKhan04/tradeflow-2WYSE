@@ -1,5 +1,18 @@
 package com.dbtraining.tradeflow.repository;
 
+import com.dbtraining.tradeflow.model.Trade;
+import com.dbtraining.tradeflow.model.TradeStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
 /**
  * ============================================================================
  * TradeRepository — TICKET-I060 (Day 5 — Spring Data JPA)
@@ -46,6 +59,21 @@ package com.dbtraining.tradeflow.repository;
 //
 //     Optional<Trade> findByTradeRef(String tradeRef);
 // }
-public interface TradeRepository {
-    // TODO(TICKET-I060): see commented block above.
+@Repository
+public interface TradeRepository extends JpaRepository<Trade, Long> {
+
+    List<Trade> findByStatus(TradeStatus status);
+
+    Page<Trade> findByStatus(TradeStatus status, Pageable pageable);
+
+    List<Trade> findByTradeDateBetween(LocalDate from, LocalDate to);
+
+    Optional<Trade> findByTradeRef(String tradeRef);
+
+    boolean existsByTradeRef(String tradeRef);
+
+    long countByStatus(TradeStatus status);
+
+    @Query("select t from Trade t where t.counterparty.id = :counterpartyId")
+    List<Trade> findByCounterpartyId(@Param("counterpartyId") Long counterpartyId);
 }
