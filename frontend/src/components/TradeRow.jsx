@@ -24,7 +24,7 @@ export default function TradeRow({ trade }) {
             <tr onClick={() => setExpanded(e => !e)} style={{ cursor: 'pointer' }}>
                 <td>{trade.tradeRef}</td>
                 <td>{trade.instrumentId}</td>
-                <td>{trade.status}</td>
+                <StatusBadge status={trade.status} />
             </tr>
             {expanded && (
                 <tr>
