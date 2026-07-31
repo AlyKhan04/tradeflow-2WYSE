@@ -2,6 +2,7 @@ package com.dbtraining.tradeflow.service;
 
 import com.dbtraining.tradeflow.dto.Discrepancy;
 import com.dbtraining.tradeflow.dto.ReconReport;
+import com.dbtraining.tradeflow.dto.ReconResultDto;
 import com.dbtraining.tradeflow.dto.ReconSummary;
 import com.dbtraining.tradeflow.exception.TradeNotFoundException;
 import com.dbtraining.tradeflow.model.BaseTrade;
@@ -23,33 +24,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * ============================================================================
- * ReconciliationService — TICKET-I034 + TICKET-I035 + TICKET-I036
- * ============================================================================
- * WHAT:    The heart of the system. Compares internal vs external trade lists,
- *          classifies discrepancies, persists results.
- * HOW:     Pure-Java on Day 3 (matchTrades + generateReport). On Day 5 this
- *          becomes a @Service injected with TradeRepository + ReconResultRepository.
- * WHY:     Single class with one job — find breaks. Easy to unit-test
- *          (Day 4 tests target this directly).
- * OBSERVE: Given the same input twice, the output is identical (pure function
- *          property — important for testability).
- *
- *  TICKET-I034: matchTrades(internal, external) -> ReconReport
- *  TICKET-I035: classify each pair: PRICE_MISMATCH / QUANTITY_MISMATCH /
- *               DATE_MISMATCH / MISSING_TRADE
- *  TICKET-I036: generateReport() -> ReconSummary
- * ============================================================================
- *
- * HINTS:
- *  - Build a Map<String, BaseTrade> externalByRef before the loop — O(1) lookup
- *    beats O(n²) nested iteration.
- *  - BigDecimal comparisons: NEVER `.equals()` (1.0 != 1.00). Use `compareTo() == 0`.
- *  - One trade can have multiple discrepancy types — your DTO must allow a List.
- *  - Keep this class < 200 lines. Pull helpers into private methods.
- * ============================================================================
- */
 @Service
 public class ReconciliationService {
 
