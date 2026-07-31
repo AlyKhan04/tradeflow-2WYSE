@@ -217,6 +217,15 @@ button {
     border-left: 4px solid var(--db-navy);
 }
 
+/* ---------- Pagination (TICKET-I087) ---------- */
+.pagination {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
 /* ---------- Responsive (TICKET-I091) ---------- */
 @media (max-width: 600px) {
     .layout { grid-template-columns: 1fr; }
