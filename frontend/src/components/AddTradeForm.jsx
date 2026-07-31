@@ -39,14 +39,12 @@ export default function AddTradeForm() {
             await createTrade(data);
             navigate('/trades');
         } catch (e) {
-            // TODO(TICKET-I106): map server-side field errors back to RHF.
-            if (e instanceof ApiError && e.body?.fieldErrors) {
-                Object.entries(e.body.fieldErrors).forEach(([field, msg]) =>
+            if (e instanceof ApiError && e.body?.details) {
+                Object.entries(e.body.details).forEach(([field, msg]) =>
                     setError(field, { message: msg })
                 );
-            } else {
-                setError('root.serverError', { message: e.message });
             }
+            setError('root.serverError', { message: e.message });
         }
     };
 
@@ -82,6 +80,7 @@ export default function AddTradeForm() {
             <label>Quantity
                 <input type="number" step="0.0001" {...register('quantity', {
                     required: 'required',
+                    valueAsNumber: true,
                     min: { value: 0.0001, message: 'must be > 0' }
                 })} />
                 {errors.quantity && <span className="field-error">{errors.quantity.message}</span>}
@@ -90,6 +89,7 @@ export default function AddTradeForm() {
             <label>Price
                 <input type="number" step="0.0001" {...register('price', {
                     required: 'required',
+                    valueAsNumber: true,
                     min: { value: 0.0001, message: 'must be > 0' }
                 })} />
                 {errors.price && <span className="field-error">{errors.price.message}</span>}
