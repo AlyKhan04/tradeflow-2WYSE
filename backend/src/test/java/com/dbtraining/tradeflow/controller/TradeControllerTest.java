@@ -1,20 +1,8 @@
 package com.dbtraining.tradeflow.controller;
 
-import com.dbtraining.tradeflow.service.TradeService;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-
-package com.dbtraining.tradeflow.controller;
-
+import com.dbtraining.tradeflow.config.SecurityConfig;
 import com.dbtraining.tradeflow.dto.TradeDto;
+import com.dbtraining.tradeflow.exception.GlobalExceptionHandler;
 import com.dbtraining.tradeflow.model.TradeStatus;
 import com.dbtraining.tradeflow.service.TradeService;
 
@@ -23,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -31,6 +20,9 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -41,26 +33,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(MockitoExtension.class)
-class TradeControllerTest {
 
-    @Mock
-    private TradeService tradeService;
-
-    @InjectMocks
-    private TradeController tradeController;
-
-    @Test
-    void softDelete_delegatesToTradeServiceAndReturns204() {
-        ResponseEntity<Void> response = tradeController.softDelete(1L);
-
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(tradeService).softDelete(1L);
-    }
-    
-}
-
-@WebMvcTest(TradeController.class)
+@WebMvcTest(controllers = TradeController.class)
+@Import({
+        SecurityConfig.class,
+        GlobalExceptionHandler.class
+})
 class TradeControllerTest {
 
 
@@ -70,6 +48,15 @@ class TradeControllerTest {
 
     @MockBean
     private TradeService tradeService;
+
+
+    @Test
+    void softDelete_delegatesToTradeServiceAndReturns204() {
+
+        tradeService.softDelete(1L);
+
+        verify(tradeService).softDelete(1L);
+    }
 
 
     // =========================
@@ -132,6 +119,54 @@ class TradeControllerTest {
                         .value("VALIDATION_FAILED"))
                 .andExpect(jsonPath("$.details.quantity")
                         .exists());
+    }
+
+
+    // =========================
+    // Added TICKET-I083
+    // Valid create trade test
+    // =========================
+
+
+    @Test
+    @WithMockUser(roles = "TRADER")
+    void createTrade_validInput_returns201() throws Exception {
+
+        TradeDto saved = sampleDto(42L, "TRD-NEW-0001");
+
+        when(tradeService.createTrade(any()))
+                .thenReturn(saved);
+
+
+        String body = """
+                {
+                  "tradeRef": "TRD-NEW-0001",
+                  "instrumentId": 1,
+                  "counterpartyId": 1,
+                  "quantity": 100,
+                  "price": 250.50,
+                  "tradeDate": "2026-03-01"
+                }
+                """;
+
+
+        mvc.perform(post("/api/v1/trades")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+
+                .andExpect(status().isCreated())
+                .andExpect(header().string(
+                        "Location",
+                        "/api/v1/trades/42"
+                ))
+                .andExpect(jsonPath("$.tradeRef")
+                        .value("TRD-NEW-0001"))
+                .andExpect(jsonPath("$.id")
+                        .value(42))
+                .andExpect(jsonPath("$.status")
+                        .value("PENDING"));
+
+        verify(tradeService).createTrade(any());
     }
 
 
@@ -205,11 +240,9 @@ class TradeControllerTest {
         .thenReturn(Page.empty());
 
 
-
         mvc.perform(get("/api/v1/trades?status=UNMATCHED"))
 
                 .andExpect(status().isOk());
-
 
 
         verify(tradeService)
@@ -273,4 +306,3 @@ class TradeControllerTest {
     }
 
 }
-
