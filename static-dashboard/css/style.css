@@ -37,6 +37,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 .topbar .logo {
     font-weight: 700;
@@ -155,6 +156,7 @@ body {
 .badge-pending   { background: var(--status-pending); }
 .badge-resolved  { background: var(--status-matched); }
 .badge-open      { background: var(--status-unmatched); }
+.badge:hover     { filter: brightness(1.1); }
 
 /* ---------- Forms ---------- */
 form {
