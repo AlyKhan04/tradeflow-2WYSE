@@ -16,21 +16,21 @@
  *    - Day-6 Spring Security / DTOs (you'll surface this via the REST API)
  * ============================================================================
  */
-<span class="fc" id="L19">public enum TradeStatus {</span>
+<span class="nc" id="L19">public enum TradeStatus {</span>
 
-<span class="fc" id="L21">    PENDING,</span>
-<span class="fc" id="L22">    MATCHED,</span>
-<span class="fc" id="L23">    UNMATCHED,</span>
-<span class="fc" id="L24">    DISPUTED,</span>
-<span class="fc" id="L25">    CANCELLED;</span>
+<span class="nc" id="L21">    PENDING,</span>
+<span class="nc" id="L22">    MATCHED,</span>
+<span class="nc" id="L23">    UNMATCHED,</span>
+<span class="nc" id="L24">    DISPUTED,</span>
+<span class="nc" id="L25">    SETTLED,</span>
+<span class="nc" id="L26">    CANCELLED;</span>
 
     /**
-     * TODO(TICKET-I019): implement isTerminal().
-     * A &quot;terminal&quot; status means no further state transitions are allowed.
-     * MATCHED and CANCELLED are terminal; the others are not.
+     * A terminal status means no further state transitions are allowed.
+     * Per the Day 6 README, CANCELLED and SETTLED are terminal.
      */
     public boolean isTerminal() {
-<span class="nc bnc" id="L33" title="All 4 branches missed.">        return this == MATCHED || this == CANCELLED;</span>
+<span class="nc bnc" id="L33" title="All 6 branches missed.">        return this == MATCHED || this == SETTLED || this == CANCELLED;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

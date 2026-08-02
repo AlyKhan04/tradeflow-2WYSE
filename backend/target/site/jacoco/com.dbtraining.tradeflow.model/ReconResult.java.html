@@ -52,7 +52,7 @@ public class ReconResult {
     @Column(nullable = false, length = 20)
     private Status status;
 
-    @Column(name = &quot;detected_at&quot;, nullable = false, updatable = false)
+    @Column(name = &quot;created_at&quot;, nullable = false, updatable = false)
     private Instant detectedAt;
 
     @Column(name = &quot;resolved_at&quot;)
@@ -60,15 +60,15 @@ public class ReconResult {
 
 <span class="nc" id="L61">    protected ReconResult() {}</span>
 
-<span class="fc" id="L63">    private ReconResult(Builder b) {</span>
-<span class="fc" id="L64">        this.trade           = b.trade;</span>
-<span class="fc" id="L65">        this.discrepancyType = b.discrepancyType;</span>
-<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        this.status          = b.status != null ? b.status : Status.OPEN;</span>
-<span class="pc bpc" id="L67" title="1 of 2 branches missed.">        this.detectedAt      = b.detectedAt != null ? b.detectedAt : Instant.now();</span>
-<span class="fc" id="L68">        this.resolvedAt      = b.resolvedAt;</span>
-<span class="fc" id="L69">    }</span>
+<span class="nc" id="L63">    private ReconResult(Builder b) {</span>
+<span class="nc" id="L64">        this.trade           = b.trade;</span>
+<span class="nc" id="L65">        this.discrepancyType = b.discrepancyType;</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        this.status          = b.status != null ? b.status : Status.OPEN;</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        this.detectedAt      = b.detectedAt != null ? b.detectedAt : Instant.now();</span>
+<span class="nc" id="L68">        this.resolvedAt      = b.resolvedAt;</span>
+<span class="nc" id="L69">    }</span>
 
-<span class="fc" id="L71">    public static Builder builder() { return new Builder(); }</span>
+<span class="nc" id="L71">    public static Builder builder() { return new Builder(); }</span>
 
 <span class="fc" id="L73">    public static final class Builder {</span>
         private Trade trade;
@@ -96,8 +96,8 @@ public class ReconResult {
 
 <span class="nc" id="L97">    public Long getId()                          { return id; }</span>
 <span class="nc" id="L98">    public Trade getTrade()                      { return trade; }</span>
-<span class="fc" id="L99">    public DiscrepancyType getDiscrepancyType()  { return discrepancyType; }</span>
-<span class="fc" id="L100">    public Status getStatus()                    { return status; }</span>
+<span class="nc" id="L99">    public DiscrepancyType getDiscrepancyType()  { return discrepancyType; }</span>
+<span class="nc" id="L100">    public Status getStatus()                    { return status; }</span>
 <span class="nc" id="L101">    public Instant getDetectedAt()               { return detectedAt; }</span>
 <span class="nc" id="L102">    public Instant getResolvedAt()               { return resolvedAt; }</span>
 

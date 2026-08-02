@@ -2,6 +2,8 @@
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
@@ -28,9 +30,11 @@ import java.time.LocalDate;
  *    - status: optional — default to PENDING in the service if null
  * ============================================================================
  */
-<span class="nc" id="L31">public record TradeRequest(</span>
+<span class="nc" id="L33">public record TradeRequest(</span>
 
         @NotBlank
+        @Pattern(regexp = &quot;TRD-\\d{4}-\\d{4}&quot;,
+                 message = &quot;must match the format TRD-YYYY-NNNN&quot;)
         String tradeRef,
 
         @NotNull @Positive
@@ -45,7 +49,7 @@ import java.time.LocalDate;
         @NotNull @Positive
         BigDecimal price,
 
-        @NotNull
+        @NotNull @PastOrPresent
         LocalDate tradeDate
 
         // TODO(TICKET-I069): add `status` if you want clients to pass it,

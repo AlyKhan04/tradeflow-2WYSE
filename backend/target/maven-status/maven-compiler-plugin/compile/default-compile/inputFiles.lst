@@ -32,6 +32,7 @@
 /Users/alykhan/Documents/tradeflow-2WYSE/backend/src/main/java/com/dbtraining/tradeflow/repository/TradeDAO.java
 /Users/alykhan/Documents/tradeflow-2WYSE/backend/src/main/java/com/dbtraining/tradeflow/model/AuditLog.java
 /Users/alykhan/Documents/tradeflow-2WYSE/backend/src/main/java/com/dbtraining/tradeflow/service/TradeProcessor.java
+/Users/alykhan/Documents/tradeflow-2WYSE/backend/src/main/java/com/dbtraining/tradeflow/dto/ReconResultDto.java
 /Users/alykhan/Documents/tradeflow-2WYSE/backend/src/main/java/com/dbtraining/tradeflow/repository/CounterpartyRepository.java
 /Users/alykhan/Documents/tradeflow-2WYSE/backend/src/main/java/com/dbtraining/tradeflow/model/Instrument.java
 /Users/alykhan/Documents/tradeflow-2WYSE/backend/src/main/java/com/dbtraining/tradeflow/exception/InsufficientDataException.java

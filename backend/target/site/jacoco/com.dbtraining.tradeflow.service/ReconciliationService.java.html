@@ -2,11 +2,23 @@
 
 import com.dbtraining.tradeflow.dto.Discrepancy;
 import com.dbtraining.tradeflow.dto.ReconReport;
+import com.dbtraining.tradeflow.dto.ReconResultDto;
 import com.dbtraining.tradeflow.dto.ReconSummary;
+import com.dbtraining.tradeflow.exception.TradeNotFoundException;
 import com.dbtraining.tradeflow.model.BaseTrade;
 import com.dbtraining.tradeflow.model.DiscrepancyType;
+import com.dbtraining.tradeflow.model.ReconResult;
+import com.dbtraining.tradeflow.repository.ReconResultRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -15,113 +27,162 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * ============================================================================
- * ReconciliationService — TICKET-I034 + TICKET-I035 + TICKET-I036
- * ============================================================================
- * WHAT:    The heart of the system. Compares internal vs external trade lists,
- *          classifies discrepancies, persists results.
- * HOW:     Pure-Java on Day 3 (matchTrades + generateReport). On Day 5 this
- *          becomes a @Service injected with TradeRepository + ReconResultRepository.
- * WHY:     Single class with one job — find breaks. Easy to unit-test
- *          (Day 4 tests target this directly).
- * OBSERVE: Given the same input twice, the output is identical (pure function
- *          property — important for testability).
- *
- *  TICKET-I034: matchTrades(internal, external) -&gt; ReconReport
- *  TICKET-I035: classify each pair: PRICE_MISMATCH / QUANTITY_MISMATCH /
- *               DATE_MISMATCH / MISSING_TRADE
- *  TICKET-I036: generateReport() -&gt; ReconSummary
- * ============================================================================
- *
- * HINTS:
- *  - Build a Map&lt;String, BaseTrade&gt; externalByRef before the loop — O(1) lookup
- *    beats O(n²) nested iteration.
- *  - BigDecimal comparisons: NEVER `.equals()` (1.0 != 1.00). Use `compareTo() == 0`.
- *  - One trade can have multiple discrepancy types — your DTO must allow a List.
- *  - Keep this class &lt; 200 lines. Pull helpers into private methods.
- * ============================================================================
- */
 @Service
-<span class="fc" id="L46">public class ReconciliationService {</span>
+public class ReconciliationService {
+
+    private final ReconResultRepository reconResultRepository;
+    private final Counter reconResolvedCounter;
+    private final Timer reconRunTimer;
+
+    public ReconciliationService() {
+<span class="nc" id="L38">        this(null, null);</span>
+<span class="nc" id="L39">    }</span>
+
+    @Autowired
+<span class="nc" id="L42">    public ReconciliationService(ReconResultRepository reconResultRepository, MeterRegistry registry) {</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        this.reconRunTimer = (registry == null)</span>
+<span class="nc" id="L44">                ? null</span>
+<span class="nc" id="L45">                : Timer.builder(&quot;tradeflow_recon_run_seconds&quot;)</span>
+<span class="nc" id="L46">                .description(&quot;Time taken for a full reconciliation run&quot;)</span>
+<span class="nc" id="L47">                .publishPercentiles(0.5, 0.95, 0.99)</span>
+<span class="nc" id="L48">                .publishPercentileHistogram()</span>
+<span class="nc" id="L49">                .register(registry);</span>
+<span class="nc" id="L50">        this.reconResultRepository = reconResultRepository;</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        this.reconResolvedCounter = (registry == null)</span>
+<span class="nc" id="L52">                ? null</span>
+<span class="nc" id="L53">                : Counter.builder(&quot;tradeflow_recon_resolved_total&quot;)</span>
+<span class="nc" id="L54">                .description(&quot;Total reconciliation breaks resolved&quot;)</span>
+<span class="nc" id="L55">                .register(registry);</span>
+<span class="nc" id="L56">    }</span>
 
     public ReconReport matchTrades(List&lt;BaseTrade&gt; internal, List&lt;BaseTrade&gt; external) {
-<span class="fc" id="L49">        Objects.requireNonNull(internal, &quot;internal list required&quot;);</span>
-<span class="fc" id="L50">        Objects.requireNonNull(external, &quot;external list required&quot;);</span>
+<span class="nc" id="L59">        Objects.requireNonNull(internal, &quot;internal list required&quot;);</span>
+<span class="nc" id="L60">        Objects.requireNonNull(external, &quot;external list required&quot;);</span>
 
-<span class="fc" id="L52">        Map&lt;String, BaseTrade&gt; externalByRef = external.stream()</span>
-<span class="pc" id="L53">                .collect(Collectors.toMap(BaseTrade::getTradeRef, t -&gt; t, (a, b) -&gt; a));</span>
+<span class="nc" id="L62">        Map&lt;String, BaseTrade&gt; externalByRef = external.stream()</span>
+<span class="nc" id="L63">                .collect(Collectors.toMap(BaseTrade::getTradeRef, t -&gt; t, (a, b) -&gt; a));</span>
 
-<span class="fc" id="L55">        List&lt;BaseTrade&gt; matched = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L56">        List&lt;Discrepancy&gt; discrepancies = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L65">        List&lt;BaseTrade&gt; matched = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L66">        List&lt;Discrepancy&gt; discrepancies = new ArrayList&lt;&gt;();</span>
 
-<span class="fc bfc" id="L58" title="All 2 branches covered.">        for (BaseTrade in : internal) {</span>
-<span class="fc" id="L59">            BaseTrade out = externalByRef.remove(in.getTradeRef());</span>
-<span class="fc bfc" id="L60" title="All 2 branches covered.">            if (out == null) {</span>
-<span class="fc" id="L61">                discrepancies.add(new Discrepancy(in.getTradeRef(), List.of(DiscrepancyType.MISSING_TRADE)));</span>
-<span class="fc" id="L62">                continue;</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        for (BaseTrade in : internal) {</span>
+<span class="nc" id="L69">            BaseTrade out = externalByRef.remove(in.getTradeRef());</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">            if (out == null) {</span>
+<span class="nc" id="L71">                discrepancies.add(new Discrepancy(in.getTradeRef(), List.of(DiscrepancyType.MISSING_TRADE)));</span>
+<span class="nc" id="L72">                continue;</span>
             }
-<span class="fc" id="L64">            List&lt;DiscrepancyType&gt; diffs = classify(in, out);</span>
-<span class="fc bfc" id="L65" title="All 2 branches covered.">            if (diffs.isEmpty()) {</span>
-<span class="fc" id="L66">                matched.add(in);</span>
+<span class="nc" id="L74">            List&lt;DiscrepancyType&gt; diffs = classify(in, out);</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">            if (diffs.isEmpty()) {</span>
+<span class="nc" id="L76">                matched.add(in);</span>
             } else {
-<span class="fc" id="L68">                discrepancies.add(new Discrepancy(in.getTradeRef(), diffs));</span>
+<span class="nc" id="L78">                discrepancies.add(new Discrepancy(in.getTradeRef(), diffs));</span>
             }
-<span class="fc" id="L70">        }</span>
+<span class="nc" id="L80">        }</span>
 
-<span class="fc bfc" id="L72" title="All 2 branches covered.">        for (BaseTrade leftover : externalByRef.values()) {</span>
-<span class="fc" id="L73">            discrepancies.add(new Discrepancy(leftover.getTradeRef(),</span>
-<span class="fc" id="L74">                    List.of(DiscrepancyType.MISSING_TRADE)));</span>
-<span class="fc" id="L75">        }</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        for (BaseTrade leftover : externalByRef.values()) {</span>
+<span class="nc" id="L83">            discrepancies.add(new Discrepancy(leftover.getTradeRef(),</span>
+<span class="nc" id="L84">                    List.of(DiscrepancyType.MISSING_TRADE)));</span>
+<span class="nc" id="L85">        }</span>
 
-<span class="fc" id="L77">        return new ReconReport(internal.size(), external.size(), matched, discrepancies);</span>
+<span class="nc" id="L87">        return new ReconReport(internal.size(), external.size(), matched, discrepancies);</span>
     }
 
     private List&lt;DiscrepancyType&gt; classify(BaseTrade in, BaseTrade out) {
-<span class="fc" id="L81">        List&lt;DiscrepancyType&gt; diffs = new ArrayList&lt;&gt;(2);</span>
-<span class="fc bfc" id="L82" title="All 2 branches covered.">        if (in.getPrice().compareTo(out.getPrice()) != 0) {</span>
-<span class="fc" id="L83">            diffs.add(DiscrepancyType.PRICE_MISMATCH);</span>
+<span class="nc" id="L91">        List&lt;DiscrepancyType&gt; diffs = new ArrayList&lt;&gt;(2);</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">        if (in.getPrice().compareTo(out.getPrice()) != 0) {</span>
+<span class="nc" id="L93">            diffs.add(DiscrepancyType.PRICE_MISMATCH);</span>
         }
-<span class="pc bpc" id="L85" title="1 of 2 branches missed.">        if (in.getQuantity().compareTo(out.getQuantity()) != 0) {</span>
-<span class="nc" id="L86">            diffs.add(DiscrepancyType.QUANTITY_MISMATCH);</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">        if (in.getQuantity().compareTo(out.getQuantity()) != 0) {</span>
+<span class="nc" id="L96">            diffs.add(DiscrepancyType.QUANTITY_MISMATCH);</span>
         }
-<span class="pc bpc" id="L88" title="1 of 2 branches missed.">        if (!Objects.equals(in.getTradeDate(), out.getTradeDate())) {</span>
-<span class="nc" id="L89">            diffs.add(DiscrepancyType.DATE_MISMATCH);</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        if (!Objects.equals(in.getTradeDate(), out.getTradeDate())) {</span>
+<span class="nc" id="L99">            diffs.add(DiscrepancyType.DATE_MISMATCH);</span>
         }
-<span class="fc" id="L91">        return diffs;</span>
+<span class="nc" id="L101">        return diffs;</span>
     }
 
     public ReconSummary generateReport(ReconReport report) {
-<span class="fc" id="L95">        Objects.requireNonNull(report, &quot;report required&quot;);</span>
+<span class="nc" id="L105">        Objects.requireNonNull(report, &quot;report required&quot;);</span>
 
-<span class="fc" id="L97">        Map&lt;DiscrepancyType, Integer&gt; breakdown = new EnumMap&lt;&gt;(DiscrepancyType.class);</span>
-<span class="fc bfc" id="L98" title="All 2 branches covered.">        for (DiscrepancyType t : DiscrepancyType.values()) {</span>
-<span class="fc" id="L99">            breakdown.put(t, 0);</span>
+<span class="nc" id="L107">        Map&lt;DiscrepancyType, Integer&gt; breakdown = new EnumMap&lt;&gt;(DiscrepancyType.class);</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">        for (DiscrepancyType t : DiscrepancyType.values()) {</span>
+<span class="nc" id="L109">            breakdown.put(t, 0);</span>
         }
-<span class="fc bfc" id="L101" title="All 2 branches covered.">        for (Discrepancy d : report.discrepancies()) {</span>
-<span class="fc bfc" id="L102" title="All 2 branches covered.">            for (DiscrepancyType t : d.types()) {</span>
-<span class="fc" id="L103">                breakdown.merge(t, 1, Integer::sum);</span>
-<span class="fc" id="L104">            }</span>
-<span class="fc" id="L105">        }</span>
-<span class="fc" id="L106">        return new ReconSummary(</span>
-<span class="fc" id="L107">                report.totalInternal(),</span>
-<span class="fc" id="L108">                report.totalExternal(),</span>
-<span class="fc" id="L109">                report.matched().size(),</span>
-<span class="fc" id="L110">                report.discrepancies().size(),</span>
-<span class="fc" id="L111">                Collections.unmodifiableMap(breakdown));</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">        for (Discrepancy d : report.discrepancies()) {</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">            for (DiscrepancyType t : d.types()) {</span>
+<span class="nc" id="L113">                breakdown.merge(t, 1, Integer::sum);</span>
+<span class="nc" id="L114">            }</span>
+<span class="nc" id="L115">        }</span>
+<span class="nc" id="L116">        return new ReconSummary(</span>
+<span class="nc" id="L117">                report.totalInternal(),</span>
+<span class="nc" id="L118">                report.totalExternal(),</span>
+<span class="nc" id="L119">                report.matched().size(),</span>
+<span class="nc" id="L120">                report.discrepancies().size(),</span>
+<span class="nc" id="L121">                Collections.unmodifiableMap(breakdown));</span>
     }
 
     public String render(ReconSummary s) {
-<span class="nc" id="L115">        StringBuilder sb = new StringBuilder();</span>
-<span class="nc" id="L116">        sb.append(&quot;Reconciliation summary\n----------------------\n&quot;)</span>
-<span class="nc" id="L117">                .append(String.format(&quot;  Internal trades : %d%n&quot;, s.totalInternal()))</span>
-<span class="nc" id="L118">                .append(String.format(&quot;  External trades : %d%n&quot;, s.totalExternal()))</span>
-<span class="nc" id="L119">                .append(String.format(&quot;  Matched         : %d%n&quot;, s.matchedCount()))</span>
-<span class="nc" id="L120">                .append(String.format(&quot;  With breaks     : %d%n&quot;, s.unmatchedCount()))</span>
-<span class="nc" id="L121">                .append(&quot;  Breakdown:\n&quot;);</span>
-<span class="nc" id="L122">        s.breakdownByType().forEach((type, count) -&gt;</span>
-<span class="nc" id="L123">                sb.append(String.format(&quot;    - %-20s %d%n&quot;, type, count)));</span>
-<span class="nc" id="L124">        return sb.toString();</span>
+<span class="nc" id="L125">        StringBuilder sb = new StringBuilder();</span>
+<span class="nc" id="L126">        sb.append(&quot;Reconciliation summary\n----------------------\n&quot;)</span>
+<span class="nc" id="L127">                .append(String.format(&quot;  Internal trades : %d%n&quot;, s.totalInternal()))</span>
+<span class="nc" id="L128">                .append(String.format(&quot;  External trades : %d%n&quot;, s.totalExternal()))</span>
+<span class="nc" id="L129">                .append(String.format(&quot;  Matched         : %d%n&quot;, s.matchedCount()))</span>
+<span class="nc" id="L130">                .append(String.format(&quot;  With breaks     : %d%n&quot;, s.unmatchedCount()))</span>
+<span class="nc" id="L131">                .append(&quot;  Breakdown:\n&quot;);</span>
+<span class="nc" id="L132">        s.breakdownByType().forEach((type, count) -&gt;</span>
+<span class="nc" id="L133">                sb.append(String.format(&quot;    - %-20s %d%n&quot;, type, count)));</span>
+<span class="nc" id="L134">        return sb.toString();</span>
     }
+
+    @Transactional(readOnly = true)
+    public ReconSummary runForAll() {
+<span class="nc bnc" id="L139" title="All 2 branches missed.">        if (reconRunTimer != null) {</span>
+<span class="nc" id="L140">            return reconRunTimer.record(() -&gt; buildSummaryFromRepository());</span>
+        }
+<span class="nc" id="L142">        return buildSummaryFromRepository();</span>
+    }
+
+    @Transactional(readOnly = true)
+    public Page&lt;ReconResultDto&gt; listBreaks(ReconResult.Status status, Long counterpartyId, Pageable pageable) {
+<span class="nc bnc" id="L147" title="All 2 branches missed.">        Page&lt;ReconResult&gt; page = (counterpartyId == null)</span>
+<span class="nc" id="L148">                ? reconResultRepository.findByStatus(status, pageable)</span>
+<span class="nc" id="L149">                : reconResultRepository.findByStatusAndCounterpartyId(status, counterpartyId, pageable);</span>
+<span class="nc" id="L150">        return page.map(ReconResultDto::from);</span>
+    }
+
+    private ReconSummary buildSummaryFromRepository() {
+<span class="nc" id="L154">        long matched = reconResultRepository.countByStatus(ReconResult.Status.RESOLVED);</span>
+<span class="nc" id="L155">        long unmatched = reconResultRepository.countByStatus(ReconResult.Status.OPEN);</span>
+
+<span class="nc" id="L157">        Map&lt;DiscrepancyType, Integer&gt; breakdown = new EnumMap&lt;&gt;(DiscrepancyType.class);</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">        for (DiscrepancyType type : DiscrepancyType.values()) {</span>
+<span class="nc" id="L159">            breakdown.put(type, 0);</span>
+        }
+<span class="nc bnc" id="L161" title="All 2 branches missed.">        for (ReconResult result : reconResultRepository.findByStatus(ReconResult.Status.OPEN)) {</span>
+<span class="nc" id="L162">            breakdown.merge(result.getDiscrepancyType(), 1, Integer::sum);</span>
+<span class="nc" id="L163">        }</span>
+
+<span class="nc" id="L165">        int total = (int) (matched + unmatched);</span>
+<span class="nc" id="L166">        return new ReconSummary(total, total, (int) matched, (int) unmatched, breakdown);</span>
+    }
+
+    @Transactional
+    public void resolveBreak(Long id) {
+<span class="nc bnc" id="L171" title="All 2 branches missed.">        if (reconResultRepository == null) {</span>
+<span class="nc" id="L172">            throw new IllegalStateException(&quot;ReconResultRepository is not configured&quot;);</span>
+        }
+<span class="nc bnc" id="L174" title="All 2 branches missed.">        if (reconResolvedCounter == null) {</span>
+<span class="nc" id="L175">            throw new IllegalStateException(&quot;MeterRegistry is not configured&quot;);</span>
+        }
+
+<span class="nc" id="L178">        ReconResult r = reconResultRepository.findById(id)</span>
+<span class="nc" id="L179">                .orElseThrow(() -&gt; new TradeNotFoundException(&quot;Recon break &quot; + id + &quot; not found&quot;));</span>
+<span class="nc bnc" id="L180" title="All 2 branches missed.">        if (r.getStatus() == ReconResult.Status.RESOLVED) {</span>
+<span class="nc" id="L181">            return;  // idempotent</span>
+        }
+<span class="nc" id="L183">        r.resolve();</span>
+<span class="nc" id="L184">        reconResolvedCounter.increment();</span>
+        // Audit row is written by the Day-2 DB trigger on UPDATE.
+<span class="nc" id="L186">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

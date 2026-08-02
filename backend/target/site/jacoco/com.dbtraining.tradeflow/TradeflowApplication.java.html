@@ -8,9 +8,16 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -20,115 +27,133 @@ import java.util.List;
  * ============================================================================
  */
 @SpringBootApplication
-<span class="nc" id="L23">public class TradeflowApplication {</span>
+<span class="nc" id="L30">public class TradeflowApplication {</span>
 
     /** Shared by the header and every data row, so columns align by construction. */
     private static final String ROW_FORMAT =
             &quot;%-15s | %-13s | %-5s | %10s | %10s | %-12s | %-10s%n&quot;;
 
     public static void main(String[] args) {
-<span class="nc" id="L30">        printBanner();</span>
-<span class="nc" id="L31">        verifyTradeEquality();</span>
-<span class="nc" id="L32">        printDay2Demo();</span>
-<span class="nc" id="L33">        SpringApplication.run(TradeflowApplication.class, args);</span>
-<span class="nc" id="L34">    }</span>
+<span class="nc" id="L37">        printBanner();</span>
+<span class="nc" id="L38">        verifyTradeEquality();</span>
+<span class="nc" id="L39">        printDay2Demo();</span>
+<span class="nc" id="L40">        SpringApplication.run(TradeflowApplication.class, args);</span>
+<span class="nc" id="L41">    }</span>
 
     @Bean
-    CommandLineRunner reconDemoRunner(TradeProcessor processor) {
-<span class="nc" id="L38">        return args -&gt; {</span>
-<span class="nc" id="L39">            Path internal = Path.of(&quot;src/test/resources/internal-trades.csv&quot;);</span>
-<span class="nc" id="L40">            Path external = Path.of(&quot;src/test/resources/external-trades.csv&quot;);</span>
-<span class="nc" id="L41">            ReconSummary summary = processor.process(internal, external);</span>
-<span class="nc" id="L42">            System.out.println();</span>
-<span class="nc" id="L43">            System.out.println(&quot;== Day-3 recon demo (TICKET-I040) ==================================================&quot;);</span>
-<span class="nc" id="L44">            System.out.println(summary);</span>
-<span class="nc" id="L45">            System.out.println(&quot;====================================================================================&quot;);</span>
-<span class="nc" id="L46">        };</span>
+    CommandLineRunner reconDemoRunner(TradeProcessor processor, ResourceLoader resourceLoader) {
+<span class="nc" id="L45">        return args -&gt; {</span>
+<span class="nc" id="L46">            Path internal = loadDemoCsvFile(resourceLoader, &quot;internal-trades.csv&quot;);</span>
+<span class="nc" id="L47">            Path external = loadDemoCsvFile(resourceLoader, &quot;external-trades.csv&quot;);</span>
+            try {
+<span class="nc" id="L49">                ReconSummary summary = processor.process(internal, external);</span>
+<span class="nc" id="L50">                System.out.println();</span>
+<span class="nc" id="L51">                System.out.println(&quot;== Day-3 recon demo (TICKET-I040) ==================================================&quot;);</span>
+<span class="nc" id="L52">                System.out.println(summary);</span>
+<span class="nc" id="L53">                System.out.println(&quot;====================================================================================&quot;);</span>
+            } finally {
+<span class="nc" id="L55">                Files.deleteIfExists(internal);</span>
+<span class="nc" id="L56">                Files.deleteIfExists(external);</span>
+            }
+<span class="nc" id="L58">        };</span>
+    }
+
+    static Path loadDemoCsvFile(ResourceLoader resourceLoader, String fileName) throws IOException {
+<span class="nc" id="L62">        Resource resource = resourceLoader.getResource(&quot;classpath:&quot; + fileName);</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        if (!resource.exists()) {</span>
+<span class="nc" id="L64">            throw new FileNotFoundException(&quot;Demo CSV resource not found on classpath: &quot; + fileName);</span>
+        }
+
+<span class="nc" id="L67">        Path tempFile = Files.createTempFile(fileName.replace(&quot;.csv&quot;, &quot;&quot;), &quot;.csv&quot;);</span>
+<span class="nc" id="L68">        try (InputStream inputStream = resource.getInputStream()) {</span>
+<span class="nc" id="L69">            Files.copy(inputStream, tempFile, StandardCopyOption.REPLACE_EXISTING);</span>
+        }
+<span class="nc" id="L71">        return tempFile;</span>
     }
 
     private static void verifyTradeEquality() {
-<span class="nc" id="L50">        Trade a = Trade.builder()</span>
-<span class="nc" id="L51">                .tradeRef(&quot;TRD-1&quot;)</span>
-<span class="nc" id="L52">                .instrumentId(1L).counterpartyId(1L)</span>
-<span class="nc" id="L53">                .quantity(new BigDecimal(&quot;100&quot;)).price(new BigDecimal(&quot;50.00&quot;))</span>
-<span class="nc" id="L54">                .tradeDate(LocalDate.now()).status(TradeStatus.PENDING)</span>
-<span class="nc" id="L55">                .build();</span>
+<span class="nc" id="L75">        Trade a = Trade.builder()</span>
+<span class="nc" id="L76">                .tradeRef(&quot;TRD-1&quot;)</span>
+<span class="nc" id="L77">                .instrumentId(1L).counterpartyId(1L)</span>
+<span class="nc" id="L78">                .quantity(new BigDecimal(&quot;100&quot;)).price(new BigDecimal(&quot;50.00&quot;))</span>
+<span class="nc" id="L79">                .tradeDate(LocalDate.now()).status(TradeStatus.PENDING)</span>
+<span class="nc" id="L80">                .build();</span>
 
-<span class="nc" id="L57">        Trade b = Trade.builder()</span>
-<span class="nc" id="L58">                .tradeRef(&quot;TRD-1&quot;)</span>
-<span class="nc" id="L59">                .instrumentId(2L).counterpartyId(9L)</span>
-<span class="nc" id="L60">                .quantity(new BigDecimal(&quot;200&quot;)).price(new BigDecimal(&quot;99.99&quot;))</span>
-<span class="nc" id="L61">                .tradeDate(LocalDate.now()).status(TradeStatus.MATCHED)</span>
-<span class="nc" id="L62">                .build();</span>
+<span class="nc" id="L82">        Trade b = Trade.builder()</span>
+<span class="nc" id="L83">                .tradeRef(&quot;TRD-1&quot;)</span>
+<span class="nc" id="L84">                .instrumentId(2L).counterpartyId(9L)</span>
+<span class="nc" id="L85">                .quantity(new BigDecimal(&quot;200&quot;)).price(new BigDecimal(&quot;99.99&quot;))</span>
+<span class="nc" id="L86">                .tradeDate(LocalDate.now()).status(TradeStatus.MATCHED)</span>
+<span class="nc" id="L87">                .build();</span>
 
-<span class="nc" id="L64">        Trade c = Trade.builder()</span>
-<span class="nc" id="L65">                .tradeRef(&quot;TRD-2&quot;)</span>
-<span class="nc" id="L66">                .instrumentId(1L).counterpartyId(1L)</span>
-<span class="nc" id="L67">                .quantity(new BigDecimal(&quot;100&quot;)).price(new BigDecimal(&quot;50.00&quot;))</span>
-<span class="nc" id="L68">                .tradeDate(LocalDate.now()).status(TradeStatus.PENDING)</span>
-<span class="nc" id="L69">                .build();</span>
+<span class="nc" id="L89">        Trade c = Trade.builder()</span>
+<span class="nc" id="L90">                .tradeRef(&quot;TRD-2&quot;)</span>
+<span class="nc" id="L91">                .instrumentId(1L).counterpartyId(1L)</span>
+<span class="nc" id="L92">                .quantity(new BigDecimal(&quot;100&quot;)).price(new BigDecimal(&quot;50.00&quot;))</span>
+<span class="nc" id="L93">                .tradeDate(LocalDate.now()).status(TradeStatus.PENDING)</span>
+<span class="nc" id="L94">                .build();</span>
 
-<span class="nc bnc" id="L71" title="All 2 branches missed.">        if (!a.equals(b))                 throw new AssertionError(&quot;equals broken: same tradeRef must be equal&quot;);</span>
-<span class="nc bnc" id="L72" title="All 2 branches missed.">        if (a.hashCode() != b.hashCode()) throw new AssertionError(&quot;hashCode broken: equal objects must share a hash&quot;);</span>
-<span class="nc bnc" id="L73" title="All 2 branches missed.">        if (a.equals(c))                  throw new AssertionError(&quot;equals broken: different tradeRef must not be equal&quot;);</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">        if (!a.equals(b))                 throw new AssertionError(&quot;equals broken: same tradeRef must be equal&quot;);</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        if (a.hashCode() != b.hashCode()) throw new AssertionError(&quot;hashCode broken: equal objects must share a hash&quot;);</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        if (a.equals(c))                  throw new AssertionError(&quot;equals broken: different tradeRef must not be equal&quot;);</span>
 
-<span class="nc" id="L75">        System.out.println(&quot;  [I025] equals/hashCode contract verified on tradeRef.&quot;);</span>
-<span class="nc" id="L76">        System.out.println();</span>
-<span class="nc" id="L77">    }</span>
+<span class="nc" id="L100">        System.out.println(&quot;  [I025] equals/hashCode contract verified on tradeRef.&quot;);</span>
+<span class="nc" id="L101">        System.out.println();</span>
+<span class="nc" id="L102">    }</span>
 
     private static void printDay2Demo() {
-<span class="nc" id="L80">        List&lt;Trade&gt; trades = List.of(</span>
-<span class="nc" id="L81">                Trade.builder().tradeRef(&quot;TRD-2026-0001&quot;)</span>
-<span class="nc" id="L82">                        .instrumentId(1L).counterpartyId(1L)</span>
-<span class="nc" id="L83">                        .quantity(new BigDecimal(&quot;1000.00&quot;)).price(new BigDecimal(&quot;245.50&quot;))</span>
-<span class="nc" id="L84">                        .tradeDate(LocalDate.of(2026, 3, 1)).status(TradeStatus.MATCHED).build(),</span>
-<span class="nc" id="L85">                Trade.builder().tradeRef(&quot;TRD-2026-0002&quot;)</span>
-<span class="nc" id="L86">                        .instrumentId(1L).counterpartyId(2L)</span>
-<span class="nc" id="L87">                        .quantity(new BigDecimal(&quot;500.00&quot;)).price(new BigDecimal(&quot;246.00&quot;))</span>
-<span class="nc" id="L88">                        .tradeDate(LocalDate.of(2026, 3, 1)).status(TradeStatus.UNMATCHED).build(),</span>
-<span class="nc" id="L89">                Trade.builder().tradeRef(&quot;TRD-2026-0003&quot;)</span>
-<span class="nc" id="L90">                        .instrumentId(2L).counterpartyId(1L)</span>
-<span class="nc" id="L91">                        .quantity(new BigDecimal(&quot;100000.00&quot;)).price(new BigDecimal(&quot;99.50&quot;))</span>
-<span class="nc" id="L92">                        .tradeDate(LocalDate.of(2026, 3, 2)).status(TradeStatus.MATCHED).build(),</span>
-<span class="nc" id="L93">                Trade.builder().tradeRef(&quot;TRD-2026-0004&quot;)</span>
-<span class="nc" id="L94">                        .instrumentId(3L).counterpartyId(2L)</span>
-<span class="nc" id="L95">                        .quantity(new BigDecimal(&quot;10.00&quot;)).price(new BigDecimal(&quot;2125.75&quot;))</span>
-<span class="nc" id="L96">                        .tradeDate(LocalDate.of(2026, 3, 3)).status(TradeStatus.DISPUTED).build(),</span>
-<span class="nc" id="L97">                Trade.builder().tradeRef(&quot;TRD-2026-0005&quot;)</span>
-<span class="nc" id="L98">                        .instrumentId(2L).counterpartyId(3L)</span>
-<span class="nc" id="L99">                        .quantity(new BigDecimal(&quot;750.00&quot;)).price(new BigDecimal(&quot;100.25&quot;))</span>
-<span class="nc" id="L100">                        .tradeDate(LocalDate.of(2026, 3, 4)).status(TradeStatus.PENDING).build()</span>
+<span class="nc" id="L105">        List&lt;Trade&gt; trades = List.of(</span>
+<span class="nc" id="L106">                Trade.builder().tradeRef(&quot;TRD-2026-0001&quot;)</span>
+<span class="nc" id="L107">                        .instrumentId(1L).counterpartyId(1L)</span>
+<span class="nc" id="L108">                        .quantity(new BigDecimal(&quot;1000.00&quot;)).price(new BigDecimal(&quot;245.50&quot;))</span>
+<span class="nc" id="L109">                        .tradeDate(LocalDate.of(2026, 3, 1)).status(TradeStatus.MATCHED).build(),</span>
+<span class="nc" id="L110">                Trade.builder().tradeRef(&quot;TRD-2026-0002&quot;)</span>
+<span class="nc" id="L111">                        .instrumentId(1L).counterpartyId(2L)</span>
+<span class="nc" id="L112">                        .quantity(new BigDecimal(&quot;500.00&quot;)).price(new BigDecimal(&quot;246.00&quot;))</span>
+<span class="nc" id="L113">                        .tradeDate(LocalDate.of(2026, 3, 1)).status(TradeStatus.UNMATCHED).build(),</span>
+<span class="nc" id="L114">                Trade.builder().tradeRef(&quot;TRD-2026-0003&quot;)</span>
+<span class="nc" id="L115">                        .instrumentId(2L).counterpartyId(1L)</span>
+<span class="nc" id="L116">                        .quantity(new BigDecimal(&quot;100000.00&quot;)).price(new BigDecimal(&quot;99.50&quot;))</span>
+<span class="nc" id="L117">                        .tradeDate(LocalDate.of(2026, 3, 2)).status(TradeStatus.MATCHED).build(),</span>
+<span class="nc" id="L118">                Trade.builder().tradeRef(&quot;TRD-2026-0004&quot;)</span>
+<span class="nc" id="L119">                        .instrumentId(3L).counterpartyId(2L)</span>
+<span class="nc" id="L120">                        .quantity(new BigDecimal(&quot;10.00&quot;)).price(new BigDecimal(&quot;2125.75&quot;))</span>
+<span class="nc" id="L121">                        .tradeDate(LocalDate.of(2026, 3, 3)).status(TradeStatus.DISPUTED).build(),</span>
+<span class="nc" id="L122">                Trade.builder().tradeRef(&quot;TRD-2026-0005&quot;)</span>
+<span class="nc" id="L123">                        .instrumentId(2L).counterpartyId(3L)</span>
+<span class="nc" id="L124">                        .quantity(new BigDecimal(&quot;750.00&quot;)).price(new BigDecimal(&quot;100.25&quot;))</span>
+<span class="nc" id="L125">                        .tradeDate(LocalDate.of(2026, 3, 4)).status(TradeStatus.PENDING).build()</span>
         );
 
-<span class="nc" id="L103">        System.out.println(&quot;== Day-2 domain-model demo (TICKET-I026) ==========================================&quot;);</span>
-<span class="nc" id="L104">        System.out.printf(ROW_FORMAT,</span>
+<span class="nc" id="L128">        System.out.println(&quot;== Day-2 domain-model demo (TICKET-I026) ==========================================&quot;);</span>
+<span class="nc" id="L129">        System.out.printf(ROW_FORMAT,</span>
                 &quot;TRADE_REF&quot;, &quot;INSTRUMENT_ID&quot;, &quot;CP_ID&quot;, &quot;QTY&quot;, &quot;PRICE&quot;, &quot;DATE&quot;, &quot;STATUS&quot;);
-<span class="nc" id="L106">        System.out.println(&quot;-&quot;.repeat(95));</span>
+<span class="nc" id="L131">        System.out.println(&quot;-&quot;.repeat(95));</span>
 
-<span class="nc" id="L108">        trades.forEach(t -&gt; System.out.printf(ROW_FORMAT,</span>
-<span class="nc" id="L109">                t.getTradeRef(),</span>
-<span class="nc" id="L110">                t.getInstrumentId(),</span>
-<span class="nc" id="L111">                t.getCounterpartyId(),</span>
-<span class="nc" id="L112">                t.getQuantity(),</span>
-<span class="nc" id="L113">                t.getPrice(),</span>
-<span class="nc" id="L114">                t.getTradeDate(),</span>
-<span class="nc" id="L115">                t.getStatus()));</span>
+<span class="nc" id="L133">        trades.forEach(t -&gt; System.out.printf(ROW_FORMAT,</span>
+<span class="nc" id="L134">                t.getTradeRef(),</span>
+<span class="nc" id="L135">                t.getInstrumentId(),</span>
+<span class="nc" id="L136">                t.getCounterpartyId(),</span>
+<span class="nc" id="L137">                t.getQuantity(),</span>
+<span class="nc" id="L138">                t.getPrice(),</span>
+<span class="nc" id="L139">                t.getTradeDate(),</span>
+<span class="nc" id="L140">                t.getStatus()));</span>
 
-<span class="nc" id="L117">        System.out.println(&quot;=&quot;.repeat(95));</span>
-<span class="nc" id="L118">        System.out.println();</span>
-<span class="nc" id="L119">    }</span>
+<span class="nc" id="L142">        System.out.println(&quot;=&quot;.repeat(95));</span>
+<span class="nc" id="L143">        System.out.println();</span>
+<span class="nc" id="L144">    }</span>
 
     private static void printBanner() {
-<span class="nc" id="L122">        System.out.println();</span>
-<span class="nc" id="L123">        System.out.println(&quot;  ████████ ██████   █████  ██████  ███████ ███████ ██       ██████  ██     ██&quot;);</span>
-<span class="nc" id="L124">        System.out.println(&quot;     ██    ██   ██ ██   ██ ██   ██ ██      ██      ██      ██    ██ ██     ██&quot;);</span>
-<span class="nc" id="L125">        System.out.println(&quot;     ██    ██████  ███████ ██   ██ █████   █████   ██      ██    ██ ██  █  ██&quot;);</span>
-<span class="nc" id="L126">        System.out.println(&quot;     ██    ██   ██ ██   ██ ██   ██ ██      ██      ██      ██    ██ ██ ███ ██&quot;);</span>
-<span class="nc" id="L127">        System.out.println(&quot;     ██    ██   ██ ██   ██ ██████  ███████ ██      ███████  ██████   ███ ███&quot;);</span>
-<span class="nc" id="L128">        System.out.println();</span>
-<span class="nc" id="L129">        System.out.println(&quot;  Deutsche Bank — TDI 2026 Graduate Technical Training&quot;);</span>
-<span class="nc" id="L130">        System.out.println(&quot;  Intermediate Track — Case Study: Trade Reconciliation&quot;);</span>
-<span class="nc" id="L131">        System.out.println();</span>
-<span class="nc" id="L132">    }</span>
+<span class="nc" id="L147">        System.out.println();</span>
+<span class="nc" id="L148">        System.out.println(&quot;  ████████ ██████   █████  ██████  ███████ ███████ ██       ██████  ██     ██&quot;);</span>
+<span class="nc" id="L149">        System.out.println(&quot;     ██    ██   ██ ██   ██ ██   ██ ██      ██      ██      ██    ██ ██     ██&quot;);</span>
+<span class="nc" id="L150">        System.out.println(&quot;     ██    ██████  ███████ ██   ██ █████   █████   ██      ██    ██ ██  █  ██&quot;);</span>
+<span class="nc" id="L151">        System.out.println(&quot;     ██    ██   ██ ██   ██ ██   ██ ██      ██      ██      ██    ██ ██ ███ ██&quot;);</span>
+<span class="nc" id="L152">        System.out.println(&quot;     ██    ██   ██ ██   ██ ██████  ███████ ██      ███████  ██████   ███ ███&quot;);</span>
+<span class="nc" id="L153">        System.out.println();</span>
+<span class="nc" id="L154">        System.out.println(&quot;  Deutsche Bank — TDI 2026 Graduate Technical Training&quot;);</span>
+<span class="nc" id="L155">        System.out.println(&quot;  Intermediate Track — Case Study: Trade Reconciliation&quot;);</span>
+<span class="nc" id="L156">        System.out.println();</span>
+<span class="nc" id="L157">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
