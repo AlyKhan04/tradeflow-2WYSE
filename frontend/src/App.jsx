@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard.jsx';
 import Trades from './pages/Trades.jsx';
 import AddTradeForm from './components/AddTradeForm.jsx';
 import Recon from './pages/Recon.jsx'
+import ErrorBoundary from './components/ErrorBoundary.jsx';
 
 export default function App() {
     return (
@@ -26,11 +27,46 @@ export default function App() {
                 <section className="content">
                     <Routes>
                         <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/trades" element={<Trades />} />
-                        <Route path="/trades/new" element={<AddTradeForm />} />
-                        <Route path="/recon" element={<Recon />} />
-                        <Route path="*" element={<NotFound />} />
+                        <Route
+                            path="/dashboard"
+                            element={
+                                <ErrorBoundary>
+                                    <Dashboard />
+                                </ErrorBoundary>
+                            }
+                        />
+                        <Route
+                            path="/trades"
+                            element={
+                                <ErrorBoundary>
+                                    <Trades />
+                                </ErrorBoundary>
+                            }
+                        />
+                        <Route
+                            path="/trades/new"
+                            element={
+                                <ErrorBoundary>
+                                    <AddTradeForm />
+                                </ErrorBoundary>
+                            }
+                        />
+                        <Route
+                            path="/recon"
+                            element={
+                                <ErrorBoundary>
+                                    <Recon />
+                                </ErrorBoundary>
+                            }
+                        />
+                        <Route
+                            path="*"
+                            element={
+                                <ErrorBoundary>
+                                    <NotFound />
+                                </ErrorBoundary>
+                            }
+                        />
                     </Routes>
                 </section>
             </div>

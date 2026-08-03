@@ -10,6 +10,9 @@ import { useMemo, useReducer } from 'react';
 import { initialFilters, tradeFilterReducer } from '../hooks/tradeFilterReducer.js';
 import { useTradeData } from '../hooks/useTradeData.js';
 import TradeTable from '../components/TradeTable.jsx';
+import { withAuditLog } from '../hoc/withAuditLog.jsx';
+
+const AuditLoggedTradeTable = withAuditLog(TradeTable, 'TradeTable');
 
 export default function Trades() {
     const [filters, dispatch] = useReducer(tradeFilterReducer, initialFilters);
@@ -47,7 +50,7 @@ export default function Trades() {
 
             {error && <div className="error">{error.message}</div>}
 
-            <TradeTable
+            <AuditLoggedTradeTable
                 trades={trades}
                 loading={loading}
                 sortField={filters.sortField}
