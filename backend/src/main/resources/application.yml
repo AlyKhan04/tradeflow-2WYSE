@@ -5,6 +5,44 @@ spring:
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
 
+  # ==========================================================================
+  # Day 9 — Kafka (TICKET-I113)
+  # ==========================================================================
+  # WHAT:    Broker address + JSON (de)serialization for the trade-events topic.
+  # WHY:     I115's producer and I116/I117/I119's consumers all read this at
+  #          startup. `trusted.packages` is mandatory — JsonDeserializer
+  #          refuses any class outside the trusted list by design, to stop
+  #          deserialization-gadget attacks.
+  # OBSERVE: Startup log prints "Bootstrap servers: [localhost:9092]" and a
+  #          ConsumerConfig block listing the JsonDeserializer.
+  # ==========================================================================
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: recon-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.dbtraining.tradeflow.*"
+        spring.json.value.default.type: "com.dbtraining.tradeflow.dto.TradeEvent"
+    producer:
+      acks: all
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    listener:
+      ack-mode: record            # at-least-once
+      observation-enabled: true   # Micrometer metrics for I120
+
+# Topic names — referenced by I115's producer and I116/I117/I119's consumers.
+tradeflow:
+  kafka:
+    topics:
+      trades: trade-events
+      dlt: trade-events.DLT
+
 management:
   endpoints:
     web:
