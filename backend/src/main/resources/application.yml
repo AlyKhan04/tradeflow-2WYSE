@@ -58,3 +58,4 @@ management:
     metrics:
       export:
         step: 10s   # aligns with prometheus.yml scrape_interval: 10s
+
