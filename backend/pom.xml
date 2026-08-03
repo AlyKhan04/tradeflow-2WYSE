@@ -118,8 +118,6 @@
         <!-- ============================================================ -->
         <!-- Day 9 — Kafka (TICKET-I112)                                  -->
         <!-- ============================================================ -->
-        <!-- TODO(TICKET-I112): uncomment to enable Kafka. -->
-        <!--
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
@@ -129,7 +127,6 @@
             <artifactId>spring-kafka-test</artifactId>
             <scope>test</scope>
         </dependency>
-        -->
 
         <!-- ============================================================ -->
         <!-- Day 8 — Distributed tracing (Zipkin, Sprint 3)               -->
