@@ -1,19 +1,6 @@
-/**
- * ============================================================================
- * Recon.jsx — TICKET-I107
- * ============================================================================
- * WHAT:    Recon-breaks page.
- * WHY:     Where Ops users actually resolve breaks.
- * ============================================================================
- *
- *  TODO(TICKET-I107):
- *    - filter pills All / OPEN / RESOLVED
- *    - resolve button calls apiService.resolveBreak(id)
- *    - optimistic UI: mark row resolved locally, rollback on error
- * ============================================================================
- */
 import { useState } from 'react';
 import StatusBadge from '../components/StatusBadge.jsx';
+import ResolveBreakModal from '../components/ResolveBreakModal.jsx';
 import { useReconResults } from '../hooks/useReconResults.js';
 import { resolveBreak } from '../services/apiService.js';
 
@@ -21,19 +8,49 @@ export default function Recon() {
     const [filter, setFilter] = useState('OPEN');
     const { results, loading, error, refetch } = useReconResults(filter);
     const [optimistic, setOptimistic] = useState({});
+    const [selectedBreak, setSelectedBreak] = useState(null);
+    const [resolutionNote, setResolutionNote] = useState('');
+    const [modalError, setModalError] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
 
-    const doResolve = async (id) => {
-        setOptimistic(prev => ({ ...prev, [id]: 'RESOLVED' }));
+    const openModal = (breakItem) => {
+        setSelectedBreak(breakItem);
+        setResolutionNote('');
+        setModalError('');
+    };
+
+    const closeModal = () => {
+        setSelectedBreak(null);
+        setResolutionNote('');
+        setModalError('');
+        setIsSaving(false);
+    };
+
+    const confirmResolve = async () => {
+        if (!selectedBreak) return;
+
+        if (resolutionNote.trim().length < 5) {
+            setModalError('Please enter at least 5 characters.');
+            return;
+        }
+
+        setOptimistic(prev => ({ ...prev, [selectedBreak.id]: 'RESOLVED' }));
+        setIsSaving(true);
+        setModalError('');
+
         try {
-            await resolveBreak(id);
+            await resolveBreak(selectedBreak.id);
+            closeModal();
             refetch();
         } catch (e) {
             setOptimistic(prev => {
                 const next = { ...prev };
-                delete next[id];
+                delete next[selectedBreak.id];
                 return next;
             });
-            window.alert('Resolve failed: ' + e.message);
+            setModalError('Resolve failed: ' + (e.message || 'Please try again.'));
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -78,7 +95,9 @@ export default function Recon() {
                                 <td>{detected}</td>
                                 <td>
                                     {status === 'OPEN' && (
-                                        <button onClick={() => doResolve(r.id)}>Resolve</button>
+                                        <button onClick={() => openModal(r)}>
+                                            Resolve
+                                        </button>
                                     )}
                                 </td>
                             </tr>
@@ -86,6 +105,17 @@ export default function Recon() {
                     })}
                 </tbody>
             </table>
+
+            <ResolveBreakModal
+                open={Boolean(selectedBreak)}
+                breakItem={selectedBreak}
+                note={resolutionNote}
+                onNoteChange={setResolutionNote}
+                onClose={closeModal}
+                onConfirm={confirmResolve}
+                error={modalError}
+                isSaving={isSaving}
+            />
         </>
     );
 }
