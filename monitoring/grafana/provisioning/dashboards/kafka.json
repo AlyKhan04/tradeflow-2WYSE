@@ -1,21 +1,57 @@
 {
-  "_comment_what":  "TICKET-I121 — Kafka dashboard",
-  "_todo":          "Panels: consumer lag by group, messages produced per minute, DLT alert.",
-  "annotations": { "list": [] },
-  "editable": true,
+  "title": "TradeFlow — Kafka",
+  "uid": "tradeflow-kafka",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "10s",
+  "time": { "from": "now-30m", "to": "now" },
+  "tags": ["tradeflow", "kafka"],
   "panels": [
     {
-      "title": "TODO — Kafka consumer lag by group",
+      "id": 1,
+      "title": "Consumer lag by group",
       "type": "timeseries",
-      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 8 }
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{
+        "refId": "A",
+        "expr": "sum(kafka_consumer_fetch_manager_records_lag{topic=\"trade-events\"}) by (client_id)",
+        "legendFormat": "{{client_id}}"
+      }]
     },
     {
-      "title": "TODO — Messages produced per minute",
+      "id": 2,
+      "title": "Records produced per second",
       "type": "timeseries",
-      "gridPos": { "x": 0, "y": 8, "w": 24, "h": 6 }
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{
+        "refId": "A",
+        "expr": "sum(rate(kafka_producer_record_send_total[1m])) by (client_id)",
+        "legendFormat": "{{client_id}}"
+      }]
+    },
+    {
+      "id": 3,
+      "title": "DLT messages (last 5m)",
+      "type": "stat",
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          }
+        }
+      },
+      "targets": [{
+        "refId": "A",
+        "expr": "sum(increase(kafka_producer_record_send_total{topic=\"trade-events.DLT\"}[5m]))"
+      }]
     }
-  ],
-  "schemaVersion": 38,
-  "title": "TradeFlow — Kafka",
-  "version": 1
+  ]
 }
