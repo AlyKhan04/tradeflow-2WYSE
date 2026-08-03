@@ -36,5 +36,6 @@
     <include file="db/changelog/changes/011-create-views.xml"/>
     <include file="db/changelog/changes/012-create-audit-log.xml"/>
     <include file="db/changelog/changes/013-add-instrument-isin.xml"/>
+    <include file="db/changelog/changes/014-add-instrument-isin-if-missing.xml"/>
 
 </databaseChangeLog>

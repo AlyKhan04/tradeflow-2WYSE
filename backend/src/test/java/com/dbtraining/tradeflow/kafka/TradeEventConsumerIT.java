@@ -94,6 +94,11 @@ class TradeEventConsumerIT {
 
     @TestConfiguration
     static class TestKafkaConfig {
+        @Bean
+        KafkaProperties kafkaProperties() {
+            return new KafkaProperties();
+        }
+
         @Bean KafkaTemplate<String, TradeEvent> kafkaTemplate(
                 ProducerFactory<String, TradeEvent> pf) {
             return new KafkaTemplate<>(pf);

@@ -3,6 +3,7 @@ import StatusBadge from '../components/StatusBadge.jsx';
 import ResolveBreakModal from '../components/ResolveBreakModal.jsx';
 import { useReconResults } from '../hooks/useReconResults.js';
 import { resolveBreak } from '../services/apiService.js';
+import { useBreaks } from '../context/BreakContext.jsx';
 
 export default function Recon() {
     const [filter, setFilter] = useState('OPEN');
@@ -12,6 +13,7 @@ export default function Recon() {
     const [resolutionNote, setResolutionNote] = useState('');
     const [modalError, setModalError] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+    const { openCount, dispatch } = useBreaks();
 
     const openModal = (breakItem) => {
         setSelectedBreak(breakItem);
@@ -35,6 +37,7 @@ export default function Recon() {
         }
 
         setOptimistic(prev => ({ ...prev, [selectedBreak.id]: 'RESOLVED' }));
+        dispatch({ type: 'RESOLVE' });
         setIsSaving(true);
         setModalError('');
 
@@ -43,6 +46,7 @@ export default function Recon() {
             closeModal();
             refetch();
         } catch (e) {
+            dispatch({ type: 'REOPEN' });
             setOptimistic(prev => {
                 const next = { ...prev };
                 delete next[selectedBreak.id];
@@ -56,7 +60,10 @@ export default function Recon() {
 
     return (
         <>
-            <h1>Reconciliation Breaks</h1>
+            <div className="breaks-header">
+                <h1>Reconciliation Breaks</h1>
+                <span className="badge">Open breaks: {openCount}</span>
+            </div>
 
             <div className="filters">
                 {['OPEN', 'RESOLVED', 'SUPPRESSED'].map(s => (

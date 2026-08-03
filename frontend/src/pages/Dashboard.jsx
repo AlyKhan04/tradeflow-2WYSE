@@ -16,12 +16,14 @@
 import StatCard from '../components/StatCard.jsx';
 import { useTradeData } from '../hooks/useTradeData.js';
 import { useReconResults } from '../hooks/useReconResults.js';
+import { useBreaks } from '../context/BreakContext.jsx';
 
 export default function Dashboard() {
-    const filters = useMemo(() => ({ size: 100 }), []);
+    const filters = useMemo(() => ({ size: 500 }), []);
     const { trades, loading, refetch: refetchTrades } = useTradeData(filters);
     const { results: openBreaks, refetch: refetchBreaks } = useReconResults('OPEN');
     const { results: resolvedBreaks } = useReconResults('RESOLVED');
+    const { openCount, dispatch } = useBreaks();
 
 useEffect(() => {
     const id = setInterval(() => {
@@ -31,6 +33,12 @@ useEffect(() => {
 
     return () => clearInterval(id);
 }, [refetchTrades, refetchBreaks]);
+
+useEffect(() => {
+    if (openBreaks.length) {
+        dispatch({ type: 'HYDRATE', payload: openBreaks.length });
+    }
+}, [dispatch, openBreaks.length]);
 
 const total = trades.length;
     const matched = trades.filter(t => t.status === 'MATCHED').length;
@@ -43,7 +51,7 @@ const total = trades.length;
             <section className="cards">
                 <StatCard caption="Total Trades"        value={loading ? '…' : total} />
                 <StatCard caption="Matched %"           value={loading ? '…' : matchedPct} />
-                <StatCard caption="Unmatched Count"     value={openBreaks.length} />
+                <StatCard caption="Unmatched Count"     value={openCount || openBreaks.length} />
                 <StatCard caption="Avg Resolution Hrs" value={avgHours} />
                 {/* TODO(TICKET-I103): wire avg processing time from /api/v1/recon/results. */}
             </section>
