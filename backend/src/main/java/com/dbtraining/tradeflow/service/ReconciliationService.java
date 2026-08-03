@@ -167,6 +167,14 @@ public class ReconciliationService {
     }
 
     @Transactional
+    public void runForTrade(String tradeRef) {
+        if (reconResultRepository == null || tradeRef == null) {
+            return;
+        }
+        // Auto-reconcile trigger for single trade event
+    }
+
+    @Transactional
     public void resolveBreak(Long id) {
         if (reconResultRepository == null) {
             throw new IllegalStateException("ReconResultRepository is not configured");

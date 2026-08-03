@@ -18,6 +18,11 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Gauge;
 
+import com.dbtraining.tradeflow.dto.TradeEvent;
+import com.dbtraining.tradeflow.kafka.TradeEventProducer;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -28,28 +33,39 @@ public class TradeService {
     private final InstrumentRepository instrumentRepository;
     private final CounterpartyRepository counterpartyRepository;
     private final Counter tradesCreatedCounter;
+    private final TradeEventProducer tradeEventProducer;
 
+    @Autowired
     public TradeService(TradeRepository tradeRepository,
                         InstrumentRepository instrumentRepository,
                         CounterpartyRepository counterpartyRepository,
-                        MeterRegistry meterRegistry) {
+                        MeterRegistry meterRegistry,
+                        @Autowired(required = false) TradeEventProducer tradeEventProducer) {
         this.tradeRepository = tradeRepository;
         this.instrumentRepository = instrumentRepository;
         this.counterpartyRepository = counterpartyRepository;
+        this.tradeEventProducer = tradeEventProducer;
 
         this.tradesCreatedCounter = Counter.builder("tradeflow_trades_created_total")
                 .description("Total trades successfully created via POST /api/v1/trades")
                 .register(meterRegistry);
 
-                // TradeService.java — inside the constructor (TICKET-I081)
-for (TradeStatus status : TradeStatus.values()) {
-    Gauge.builder("tradeflow_trades_by_status",
-                    tradeRepository,
-                    r -> (double) r.countByStatus(status))
-            .description("Live count of trades per status")
-            .tag("status", status.name())
-            .register(meterRegistry);
-}
+        // TradeService.java — inside the constructor (TICKET-I081)
+        for (TradeStatus status : TradeStatus.values()) {
+            Gauge.builder("tradeflow_trades_by_status",
+                            tradeRepository,
+                            r -> (double) r.countByStatus(status))
+                    .description("Live count of trades per status")
+                    .tag("status", status.name())
+                    .register(meterRegistry);
+        }
+    }
+
+    public TradeService(TradeRepository tradeRepository,
+                        InstrumentRepository instrumentRepository,
+                        CounterpartyRepository counterpartyRepository,
+                        MeterRegistry meterRegistry) {
+        this(tradeRepository, instrumentRepository, counterpartyRepository, meterRegistry, null);
     }
 
     @Transactional(readOnly = true)
@@ -116,7 +132,15 @@ for (TradeStatus status : TradeStatus.values()) {
 
         Trade saved = tradeRepository.save(trade);
         tradesCreatedCounter.increment();
-        return TradeDto.from(saved);        
+        TradeDto dto = TradeDto.from(saved);
+        if (tradeEventProducer != null) {
+            tradeEventProducer.publish(new TradeEvent(
+                    saved.getTradeRef(),
+                    TradeEvent.Action.CREATED,
+                    Instant.now(),
+                    dto));
+        }
+        return dto;        
     }
 
     @Transactional
@@ -148,7 +172,15 @@ for (TradeStatus status : TradeStatus.values()) {
         }
 
         trade.setStatus(newStatus);
-        return TradeDto.from(trade);
+        TradeDto dto = TradeDto.from(trade);
+        if (tradeEventProducer != null) {
+            tradeEventProducer.publish(new TradeEvent(
+                    trade.getTradeRef(),
+                    TradeEvent.Action.UPDATED,
+                    Instant.now(),
+                    dto));
+        }
+        return dto;
     }
 
     @Transactional
@@ -157,5 +189,12 @@ for (TradeStatus status : TradeStatus.values()) {
                 .orElseThrow(() -> new TradeNotFoundException("Trade " + id + " not found"));
         trade.setStatus(TradeStatus.CANCELLED);
         // JPA dirty-checking flushes the UPDATE at commit — no explicit save() needed.
+        if (tradeEventProducer != null) {
+            tradeEventProducer.publish(new TradeEvent(
+                    trade.getTradeRef(),
+                    TradeEvent.Action.CANCELLED,
+                    Instant.now(),
+                    TradeDto.from(trade)));
+        }
     }
 }
