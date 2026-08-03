@@ -1,6 +1,12 @@
 package com.dbtraining.tradeflow.kafka;
 
+
 import com.dbtraining.tradeflow.dto.TradeEvent;
+import com.dbtraining.tradeflow.service.AuditService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Component;
 
 /**
  * ============================================================================
@@ -20,9 +26,23 @@ import com.dbtraining.tradeflow.dto.TradeEvent;
  *  HINT: use Jackson to serialize event.payload() to JSON for the new_value column.
  * ============================================================================
  */
+@Component
 public class AuditEventConsumer {
 
+    private static final Logger log = LoggerFactory.getLogger(AuditEventConsumer.class);
+
+    private final AuditService auditService;
+
+    public AuditEventConsumer(AuditService auditService) {
+        this.auditService = auditService;
+    }
+
+    @KafkaListener(
+            topics = "${tradeflow.kafka.topics.trades:trade-events}",
+            groupId = "audit-group",
+            containerFactory = "kafkaListenerContainerFactory")
     public void onEvent(TradeEvent event) {
-        throw new UnsupportedOperationException("TICKET-I119");
+        log.debug("Auditing tradeRef={} action={}", event.tradeRef(), event.action());
+        auditService.record(event);
     }
 }
