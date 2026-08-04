@@ -32,7 +32,7 @@ async function request(path, options = {}) {
 
 // ----- Trades --------------------------------------------------------------
 export const getTrades       = (params = {}) =>
-    request('/trades?' + new URLSearchParams(params).toString());
+    request('/trades?' + new URLSearchParams({ size: 100, ...params }).toString());
 
 export const createTrade     = (body) =>
     request('/trades', { method: 'POST', body: JSON.stringify(body) });

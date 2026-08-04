@@ -19,7 +19,7 @@ import { useReconResults } from '../hooks/useReconResults.js';
 import { useBreaks } from '../context/BreakContext.jsx';
 
 export default function Dashboard() {
-    const filters = useMemo(() => ({ size: 500 }), []);
+    const filters = useMemo(() => ({ size: 100 }), []);
     const { trades, loading, refetch: refetchTrades } = useTradeData(filters);
     const { results: openBreaks, refetch: refetchBreaks } = useReconResults('OPEN');
     const { results: resolvedBreaks } = useReconResults('RESOLVED');

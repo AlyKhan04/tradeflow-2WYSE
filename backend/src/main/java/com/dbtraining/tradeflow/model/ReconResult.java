@@ -52,7 +52,7 @@ public class ReconResult {
     @Column(nullable = false, length = 20)
     private Status status;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "detected_at", nullable = false, updatable = false)
     private Instant detectedAt;
 
     @Column(name = "resolved_at")
