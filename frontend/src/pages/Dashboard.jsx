@@ -12,10 +12,12 @@
  *    - refresh every 30s (useEffect + setInterval, cleared on unmount)
  * ============================================================================
  */
- import { useEffect, useMemo } from 'react';
+
+import { useEffect, useMemo } from 'react';
 import StatCard from '../components/StatCard.jsx';
 import { useTradeData } from '../hooks/useTradeData.js';
 import { useReconResults } from '../hooks/useReconResults.js';
+import { useBreaks } from '../context/BreakContext.jsx';
 
 export default function Dashboard() {
     const filters = useMemo(() => ({ size: 100 }), []);
@@ -23,16 +25,25 @@ export default function Dashboard() {
     const { results: openBreaks, refetch: refetchBreaks } = useReconResults('OPEN');
     const { results: resolvedBreaks } = useReconResults('RESOLVED');
 
-useEffect(() => {
-    const id = setInterval(() => {
-        refetchTrades();
-        refetchBreaks();
-    }, 30_000);
+    const { openCount, dispatch } = useBreaks();
 
-    return () => clearInterval(id);
-}, [refetchTrades, refetchBreaks]);
+    useEffect(() => {
+        dispatch({
+            type: "HYDRATE",
+            payload: openBreaks.length
+        });
+    }, [openBreaks, dispatch]);
 
-const total = trades.length;
+    useEffect(() => {
+        const id = setInterval(() => {
+            refetchTrades();
+            refetchBreaks();
+        }, 30_000);
+
+        return () => clearInterval(id);
+    }, [refetchTrades, refetchBreaks]);
+
+    const total = trades.length;
     const matched = trades.filter(t => t.status === 'MATCHED').length;
     const matchedPct = total ? Math.round((matched / total) * 100) + '%' : '—';
     const avgHours = computeAvgResolutionHours(resolvedBreaks);
@@ -40,11 +51,13 @@ const total = trades.length;
     return (
         <>
             <h1>Operations Dashboard</h1>
+
             <section className="cards">
-                <StatCard caption="Total Trades"        value={loading ? '…' : total} />
-                <StatCard caption="Matched %"           value={loading ? '…' : matchedPct} />
-                <StatCard caption="Unmatched Count"     value={openBreaks.length} />
+                <StatCard caption="Total Trades" value={loading ? '…' : total} />
+                <StatCard caption="Matched %" value={loading ? '…' : matchedPct} />
+                <StatCard caption="Unmatched Count" value={openCount} />
                 <StatCard caption="Avg Resolution Hrs" value={avgHours} />
+
                 {/* TODO(TICKET-I103): wire avg processing time from /api/v1/recon/results. */}
             </section>
         </>

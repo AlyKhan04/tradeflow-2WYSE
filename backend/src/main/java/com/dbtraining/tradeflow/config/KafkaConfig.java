@@ -60,6 +60,7 @@ import java.util.Map;
  */
 @Configuration
 @EnableKafka
+@EnableConfigurationProperties(KafkaProperties.class)
 public class KafkaConfig {
 
     private final KafkaProperties kafkaProperties;
