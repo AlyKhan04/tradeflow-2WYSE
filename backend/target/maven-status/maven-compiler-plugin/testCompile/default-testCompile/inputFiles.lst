@@ -3,6 +3,9 @@
 /Users/alykhan/Documents/tradeflow-2WYSE/backend/src/test/java/com/dbtraining/tradeflow/controller/ReconControllerTest.java
 /Users/alykhan/Documents/tradeflow-2WYSE/backend/src/test/java/com/dbtraining/tradeflow/model/ReconResultTest.java
 /Users/alykhan/Documents/tradeflow-2WYSE/backend/src/test/java/com/dbtraining/tradeflow/TradeflowApplicationTest.java
+/Users/alykhan/Documents/tradeflow-2WYSE/backend/src/test/java/com/dbtraining/tradeflow/DatabaseMigrationH2Test.java
+/Users/alykhan/Documents/tradeflow-2WYSE/backend/src/test/java/com/dbtraining/tradeflow/kafka/TradeEventConsumerIT.java
 /Users/alykhan/Documents/tradeflow-2WYSE/backend/src/test/java/com/dbtraining/tradeflow/repository/InstrumentSchemaTest.java
+/Users/alykhan/Documents/tradeflow-2WYSE/backend/src/test/java/com/dbtraining/tradeflow/service/AuditServiceTest.java
 /Users/alykhan/Documents/tradeflow-2WYSE/backend/src/test/java/com/dbtraining/tradeflow/service/TradeServiceTest.java
 /Users/alykhan/Documents/tradeflow-2WYSE/backend/src/test/java/com/dbtraining/tradeflow/service/ReconciliationServiceTest.java

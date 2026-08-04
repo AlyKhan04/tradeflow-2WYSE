@@ -9,14 +9,10 @@ import com.dbtraining.tradeflow.service.ReconciliationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
@@ -37,17 +33,17 @@ import static org.mockito.Mockito.verifyNoInteractions;
         TradeEventProducer.class,
         TradeEventConsumer.class,
         ReconEventConsumer.class,
-        AuditEventConsumer.class
+        AuditEventConsumer.class,
+        TradeEventConsumerIT.TestKafkaConfig.class
 })
 @EmbeddedKafka(partitions = 1, topics = { "trade-events", "trade-events.DLT" })
-@Import(TradeEventConsumerIT.TestKafkaConfig.class)
 @TestPropertySource(properties = {
         "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}",
         "tradeflow.kafka.topics.trades=trade-events",
         "tradeflow.kafka.topics.dlt=trade-events.DLT",
         "spring.kafka.consumer.auto-offset-reset=earliest"
 })
-@DirtiesContext
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class TradeEventConsumerIT {
 
     @Autowired private TradeEventProducer producer;
@@ -64,6 +60,8 @@ class TradeEventConsumerIT {
 
         producer.publish(event);
 
+        Thread.sleep(2_000L);
+
         await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
             verify(reconciliationService).runForTrade(eq("TRD-IT-0001"));
             verify(auditService).record(any(TradeEvent.class));
@@ -71,7 +69,7 @@ class TradeEventConsumerIT {
     }
 
     @Test
-    void updatedEvent_skipsReconButStillAudits() {
+    void updatedEvent_skipsReconButStillAudits() throws InterruptedException {
         TradeEvent event = new TradeEvent(
                 "TRD-IT-0002",
                 TradeEvent.Action.UPDATED,
@@ -79,6 +77,8 @@ class TradeEventConsumerIT {
                 samplePayload("TRD-IT-0002"));
 
         producer.publish(event);
+
+        Thread.sleep(2_000L);
 
         await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
             verify(auditService).record(any(TradeEvent.class));
@@ -93,22 +93,7 @@ class TradeEventConsumerIT {
     }
 
     @TestConfiguration
+    @EnableConfigurationProperties(KafkaProperties.class)
     static class TestKafkaConfig {
-        @Bean
-        KafkaProperties kafkaProperties() {
-            return new KafkaProperties();
-        }
-
-        @Bean KafkaTemplate<String, TradeEvent> kafkaTemplate(
-                ProducerFactory<String, TradeEvent> pf) {
-            return new KafkaTemplate<>(pf);
-        }
-        @Bean ProducerFactory<String, TradeEvent> producerFactory(KafkaProperties props) {
-            return new DefaultKafkaProducerFactory<>(props.buildProducerProperties());
-        }
-        @Bean KafkaTemplate<String, Object> dltKafkaTemplate(KafkaProperties props) {
-            return new KafkaTemplate<>(
-                    new DefaultKafkaProducerFactory<>(props.buildProducerProperties()));
-        }
     }
 }

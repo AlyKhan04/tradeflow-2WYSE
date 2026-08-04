@@ -1,0 +1,16 @@
+-------------------------------------------------------------------------------
+Test set: com.dbtraining.tradeflow.repository.InstrumentSchemaTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 16.06 s <<< FAILURE! -- in com.dbtraining.tradeflow.repository.InstrumentSchemaTest
+com.dbtraining.tradeflow.repository.InstrumentSchemaTest.instrumentsTable_containsIsinColumn -- Time elapsed: 0.875 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: The instruments table must expose an ISIN column for the JPA entity mapping ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at com.dbtraining.tradeflow.repository.InstrumentSchemaTest.instrumentsTable_containsIsinColumn(InstrumentSchemaTest.java:25)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+

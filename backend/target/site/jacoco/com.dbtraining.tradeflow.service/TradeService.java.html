@@ -18,6 +18,11 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Gauge;
 
+import com.dbtraining.tradeflow.dto.TradeEvent;
+import com.dbtraining.tradeflow.kafka.TradeEventProducer;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -28,135 +33,169 @@ public class TradeService {
     private final InstrumentRepository instrumentRepository;
     private final CounterpartyRepository counterpartyRepository;
     private final Counter tradesCreatedCounter;
+    private final TradeEventProducer tradeEventProducer;
+
+    @Autowired
+    public TradeService(TradeRepository tradeRepository,
+                        InstrumentRepository instrumentRepository,
+                        CounterpartyRepository counterpartyRepository,
+                        MeterRegistry meterRegistry,
+<span class="fc" id="L43">                        @Autowired(required = false) TradeEventProducer tradeEventProducer) {</span>
+<span class="fc" id="L44">        this.tradeRepository = tradeRepository;</span>
+<span class="fc" id="L45">        this.instrumentRepository = instrumentRepository;</span>
+<span class="fc" id="L46">        this.counterpartyRepository = counterpartyRepository;</span>
+<span class="fc" id="L47">        this.tradeEventProducer = tradeEventProducer;</span>
+
+<span class="fc" id="L49">        this.tradesCreatedCounter = Counter.builder(&quot;tradeflow_trades_created_total&quot;)</span>
+<span class="fc" id="L50">                .description(&quot;Total trades successfully created via POST /api/v1/trades&quot;)</span>
+<span class="fc" id="L51">                .register(meterRegistry);</span>
+
+        // TradeService.java — inside the constructor (TICKET-I081)
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        for (TradeStatus status : TradeStatus.values()) {</span>
+<span class="fc" id="L55">            Gauge.builder(&quot;tradeflow_trades_by_status&quot;,</span>
+                            tradeRepository,
+<span class="nc" id="L57">                            r -&gt; (double) r.countByStatus(status))</span>
+<span class="fc" id="L58">                    .description(&quot;Live count of trades per status&quot;)</span>
+<span class="fc" id="L59">                    .tag(&quot;status&quot;, status.name())</span>
+<span class="fc" id="L60">                    .register(meterRegistry);</span>
+        }
+<span class="fc" id="L62">    }</span>
 
     public TradeService(TradeRepository tradeRepository,
                         InstrumentRepository instrumentRepository,
                         CounterpartyRepository counterpartyRepository,
-<span class="nc" id="L35">                        MeterRegistry meterRegistry) {</span>
-<span class="nc" id="L36">        this.tradeRepository = tradeRepository;</span>
-<span class="nc" id="L37">        this.instrumentRepository = instrumentRepository;</span>
-<span class="nc" id="L38">        this.counterpartyRepository = counterpartyRepository;</span>
-
-<span class="nc" id="L40">        this.tradesCreatedCounter = Counter.builder(&quot;tradeflow_trades_created_total&quot;)</span>
-<span class="nc" id="L41">                .description(&quot;Total trades successfully created via POST /api/v1/trades&quot;)</span>
-<span class="nc" id="L42">                .register(meterRegistry);</span>
-
-                // TradeService.java — inside the constructor (TICKET-I081)
-<span class="nc bnc" id="L45" title="All 2 branches missed.">for (TradeStatus status : TradeStatus.values()) {</span>
-<span class="nc" id="L46">    Gauge.builder(&quot;tradeflow_trades_by_status&quot;,</span>
-                    tradeRepository,
-<span class="nc" id="L48">                    r -&gt; (double) r.countByStatus(status))</span>
-<span class="nc" id="L49">            .description(&quot;Live count of trades per status&quot;)</span>
-<span class="nc" id="L50">            .tag(&quot;status&quot;, status.name())</span>
-<span class="nc" id="L51">            .register(meterRegistry);</span>
-}
-<span class="nc" id="L53">    }</span>
+                        MeterRegistry meterRegistry) {
+<span class="nc" id="L68">        this(tradeRepository, instrumentRepository, counterpartyRepository, meterRegistry, null);</span>
+<span class="nc" id="L69">    }</span>
 
     @Transactional(readOnly = true)
     public List&lt;TradeDto&gt; findAll() {
-<span class="nc" id="L57">        return tradeRepository.findAll().stream().map(TradeDto::from).toList();</span>
+<span class="nc" id="L73">        return tradeRepository.findAll().stream().map(TradeDto::from).toList();</span>
     }
 
     @Transactional(readOnly = true)
     public Page&lt;TradeDto&gt; findAll(Pageable pageable) {
-<span class="nc" id="L62">        return tradeRepository.findAll(pageable).map(TradeDto::from);</span>
+<span class="nc" id="L78">        return tradeRepository.findAll(pageable).map(TradeDto::from);</span>
     }
 
     @Transactional(readOnly = true)
     public TradeDto findById(Long id) {
-<span class="nc" id="L67">        return tradeRepository.findById(id).map(TradeDto::from)</span>
-<span class="nc" id="L68">                .orElseThrow(() -&gt; new TradeNotFoundException(&quot;Trade &quot; + id + &quot; not found&quot;));</span>
+<span class="nc" id="L83">        return tradeRepository.findById(id).map(TradeDto::from)</span>
+<span class="nc" id="L84">                .orElseThrow(() -&gt; new TradeNotFoundException(&quot;Trade &quot; + id + &quot; not found&quot;));</span>
     }
 
     @Transactional(readOnly = true)
     public List&lt;TradeDto&gt; findByStatus(TradeStatus status) {
-<span class="nc" id="L73">        return tradeRepository.findByStatus(status).stream().map(TradeDto::from).toList();</span>
+<span class="nc" id="L89">        return tradeRepository.findByStatus(status).stream().map(TradeDto::from).toList();</span>
     }
 
     @Transactional(readOnly = true)
     public Page&lt;TradeDto&gt; findPageByStatus(TradeStatus status, Pageable pageable) {
-<span class="nc" id="L78">        return tradeRepository.findByStatus(status, pageable).map(TradeDto::from);</span>
+<span class="nc" id="L94">        return tradeRepository.findByStatus(status, pageable).map(TradeDto::from);</span>
     }
 
     @Transactional(readOnly = true)
     public List&lt;TradeDto&gt; findByDateRange(LocalDate from, LocalDate to) {
-<span class="nc" id="L83">        return tradeRepository.findByTradeDateBetween(from, to).stream().map(TradeDto::from).toList();</span>
+<span class="nc" id="L99">        return tradeRepository.findByTradeDateBetween(from, to).stream().map(TradeDto::from).toList();</span>
     }
 
     // TICKET-I068: paged date-range lookup backing GET /api/v1/trades/by-date.
     @Transactional(readOnly = true)
     public Page&lt;TradeDto&gt; findByTradeDateBetween(LocalDate from, LocalDate to, Pageable pageable) {
-<span class="nc bnc" id="L89" title="All 6 branches missed.">        if (from != null &amp;&amp; to != null &amp;&amp; from.isAfter(to)) {</span>
-<span class="nc" id="L90">            throw new IllegalArgumentException(&quot;'from' must not be after 'to'&quot;);</span>
+<span class="nc bnc" id="L105" title="All 6 branches missed.">        if (from != null &amp;&amp; to != null &amp;&amp; from.isAfter(to)) {</span>
+<span class="nc" id="L106">            throw new IllegalArgumentException(&quot;'from' must not be after 'to'&quot;);</span>
         }
-<span class="nc" id="L92">        return tradeRepository.findByTradeDateBetween(from, to, pageable).map(TradeDto::from);</span>
+<span class="nc" id="L108">        return tradeRepository.findByTradeDateBetween(from, to, pageable).map(TradeDto::from);</span>
     }
 
     @Transactional
     public TradeDto createTrade(TradeRequest request) {
-<span class="nc bnc" id="L97" title="All 2 branches missed.">        if (tradeRepository.existsByTradeRef(request.tradeRef())) {</span>
-<span class="nc" id="L98">            throw new IllegalStateException(&quot;Trade with tradeRef '&quot; + request.tradeRef() + &quot;' already exists&quot;);</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">        if (tradeRepository.existsByTradeRef(request.tradeRef())) {</span>
+<span class="nc" id="L114">            throw new IllegalStateException(&quot;Trade with tradeRef '&quot; + request.tradeRef() + &quot;' already exists&quot;);</span>
         }
-<span class="nc" id="L100">        Instrument instrument = instrumentRepository.findById(request.instrumentId())</span>
-<span class="nc" id="L101">                .orElseThrow(() -&gt; new IllegalArgumentException(</span>
-<span class="nc" id="L102">                        &quot;instrumentId &quot; + request.instrumentId() + &quot; not found&quot;));</span>
-<span class="nc" id="L103">        Counterparty counterparty = counterpartyRepository.findById(request.counterpartyId())</span>
-<span class="nc" id="L104">                .orElseThrow(() -&gt; new IllegalArgumentException(</span>
-<span class="nc" id="L105">                        &quot;counterpartyId &quot; + request.counterpartyId() + &quot; not found&quot;));</span>
+<span class="nc" id="L116">        Instrument instrument = instrumentRepository.findById(request.instrumentId())</span>
+<span class="nc" id="L117">                .orElseThrow(() -&gt; new IllegalArgumentException(</span>
+<span class="nc" id="L118">                        &quot;instrumentId &quot; + request.instrumentId() + &quot; not found&quot;));</span>
+<span class="nc" id="L119">        Counterparty counterparty = counterpartyRepository.findById(request.counterpartyId())</span>
+<span class="nc" id="L120">                .orElseThrow(() -&gt; new IllegalArgumentException(</span>
+<span class="nc" id="L121">                        &quot;counterpartyId &quot; + request.counterpartyId() + &quot; not found&quot;));</span>
 
-<span class="nc" id="L107">        Trade trade = Trade.builder()</span>
-<span class="nc" id="L108">                .tradeRef(request.tradeRef())</span>
-<span class="nc" id="L109">                .instrument(instrument)</span>
-<span class="nc" id="L110">                .counterparty(counterparty)</span>
-<span class="nc" id="L111">                .quantity(request.quantity())</span>
-<span class="nc" id="L112">                .price(request.price())</span>
-<span class="nc" id="L113">                .tradeDate(request.tradeDate())</span>
-<span class="nc" id="L114">                .status(TradeStatus.PENDING)</span>
-<span class="nc" id="L115">                .build();</span>
+<span class="nc" id="L123">        Trade trade = Trade.builder()</span>
+<span class="nc" id="L124">                .tradeRef(request.tradeRef())</span>
+<span class="nc" id="L125">                .instrument(instrument)</span>
+<span class="nc" id="L126">                .counterparty(counterparty)</span>
+<span class="nc" id="L127">                .quantity(request.quantity())</span>
+<span class="nc" id="L128">                .price(request.price())</span>
+<span class="nc" id="L129">                .tradeDate(request.tradeDate())</span>
+<span class="nc" id="L130">                .status(TradeStatus.PENDING)</span>
+<span class="nc" id="L131">                .build();</span>
 
-<span class="nc" id="L117">        Trade saved = tradeRepository.save(trade);</span>
-<span class="nc" id="L118">        tradesCreatedCounter.increment();</span>
-<span class="nc" id="L119">        return TradeDto.from(saved);        </span>
+<span class="nc" id="L133">        Trade saved = tradeRepository.save(trade);</span>
+<span class="nc" id="L134">        tradesCreatedCounter.increment();</span>
+<span class="nc" id="L135">        TradeDto dto = TradeDto.from(saved);</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        if (tradeEventProducer != null) {</span>
+<span class="nc" id="L137">            tradeEventProducer.publish(new TradeEvent(</span>
+<span class="nc" id="L138">                    saved.getTradeRef(),</span>
+                    TradeEvent.Action.CREATED,
+<span class="nc" id="L140">                    Instant.now(),</span>
+                    dto));
+        }
+<span class="nc" id="L143">        return dto;        </span>
     }
 
     @Transactional
     public TradeDto updateStatus(Long id, TradeStatus newStatus) {
-<span class="nc" id="L124">        Trade trade = tradeRepository.findById(id)</span>
-<span class="nc" id="L125">                .orElseThrow(() -&gt; new TradeNotFoundException(&quot;Trade &quot; + id + &quot; not found&quot;));</span>
-<span class="nc bnc" id="L126" title="All 4 branches missed.">        if (trade.getStatus() != null &amp;&amp; trade.getStatus().isTerminal()) {</span>
-<span class="nc" id="L127">            throw new IllegalStateException(</span>
-<span class="nc" id="L128">                    &quot;Trade &quot; + id + &quot; is in terminal status &quot; + trade.getStatus() + &quot; and cannot transition&quot;);</span>
+<span class="nc" id="L148">        Trade trade = tradeRepository.findById(id)</span>
+<span class="nc" id="L149">                .orElseThrow(() -&gt; new TradeNotFoundException(&quot;Trade &quot; + id + &quot; not found&quot;));</span>
+<span class="nc bnc" id="L150" title="All 4 branches missed.">        if (trade.getStatus() != null &amp;&amp; trade.getStatus().isTerminal()) {</span>
+<span class="nc" id="L151">            throw new IllegalStateException(</span>
+<span class="nc" id="L152">                    &quot;Trade &quot; + id + &quot; is in terminal status &quot; + trade.getStatus() + &quot; and cannot transition&quot;);</span>
         }
 
-<span class="nc" id="L131">        TradeStatus current = trade.getStatus();</span>
-<span class="nc" id="L132">        boolean allowed = false;</span>
-<span class="nc bnc" id="L133" title="All 2 branches missed.">        if (current == null) {</span>
-<span class="nc" id="L134">            allowed = false;</span>
+<span class="nc" id="L155">        TradeStatus current = trade.getStatus();</span>
+<span class="nc" id="L156">        boolean allowed = false;</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">        if (current == null) {</span>
+<span class="nc" id="L158">            allowed = false;</span>
         } else {
-<span class="nc bnc" id="L136" title="All 5 branches missed.">            allowed = switch (current) {</span>
-<span class="nc bnc" id="L137" title="All 4 branches missed.">                case PENDING -&gt; newStatus == TradeStatus.MATCHED || newStatus == TradeStatus.CANCELLED;</span>
-<span class="nc bnc" id="L138" title="All 4 branches missed.">                case MATCHED -&gt; newStatus == TradeStatus.SETTLED || newStatus == TradeStatus.CANCELLED;</span>
-<span class="nc bnc" id="L139" title="All 4 branches missed.">                case UNMATCHED -&gt; newStatus == TradeStatus.MATCHED || newStatus == TradeStatus.CANCELLED;</span>
-<span class="nc bnc" id="L140" title="All 4 branches missed.">                case DISPUTED -&gt; newStatus == TradeStatus.MATCHED || newStatus == TradeStatus.CANCELLED;</span>
-<span class="nc" id="L141">                case SETTLED, CANCELLED -&gt; false;</span>
+<span class="nc bnc" id="L160" title="All 5 branches missed.">            allowed = switch (current) {</span>
+<span class="nc bnc" id="L161" title="All 4 branches missed.">                case PENDING -&gt; newStatus == TradeStatus.MATCHED || newStatus == TradeStatus.CANCELLED;</span>
+<span class="nc bnc" id="L162" title="All 4 branches missed.">                case MATCHED -&gt; newStatus == TradeStatus.SETTLED || newStatus == TradeStatus.CANCELLED;</span>
+<span class="nc bnc" id="L163" title="All 4 branches missed.">                case UNMATCHED -&gt; newStatus == TradeStatus.MATCHED || newStatus == TradeStatus.CANCELLED;</span>
+<span class="nc bnc" id="L164" title="All 4 branches missed.">                case DISPUTED -&gt; newStatus == TradeStatus.MATCHED || newStatus == TradeStatus.CANCELLED;</span>
+<span class="nc" id="L165">                case SETTLED, CANCELLED -&gt; false;</span>
             };
         }
 
-<span class="nc bnc" id="L145" title="All 2 branches missed.">        if (!allowed) {</span>
-<span class="nc" id="L146">            throw new IllegalStateException(</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">        if (!allowed) {</span>
+<span class="nc" id="L170">            throw new IllegalStateException(</span>
                     &quot;Illegal transition &quot; + current + &quot; -&gt; &quot; + newStatus);
         }
 
-<span class="nc" id="L150">        trade.setStatus(newStatus);</span>
-<span class="nc" id="L151">        return TradeDto.from(trade);</span>
+<span class="nc" id="L174">        trade.setStatus(newStatus);</span>
+<span class="nc" id="L175">        TradeDto dto = TradeDto.from(trade);</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">        if (tradeEventProducer != null) {</span>
+<span class="nc" id="L177">            tradeEventProducer.publish(new TradeEvent(</span>
+<span class="nc" id="L178">                    trade.getTradeRef(),</span>
+                    TradeEvent.Action.UPDATED,
+<span class="nc" id="L180">                    Instant.now(),</span>
+                    dto));
+        }
+<span class="nc" id="L183">        return dto;</span>
     }
 
     @Transactional
     public void softDelete(Long id) {
-<span class="nc" id="L156">        Trade trade = tradeRepository.findById(id)</span>
-<span class="nc" id="L157">                .orElseThrow(() -&gt; new TradeNotFoundException(&quot;Trade &quot; + id + &quot; not found&quot;));</span>
-<span class="nc" id="L158">        trade.setStatus(TradeStatus.CANCELLED);</span>
+<span class="nc" id="L188">        Trade trade = tradeRepository.findById(id)</span>
+<span class="nc" id="L189">                .orElseThrow(() -&gt; new TradeNotFoundException(&quot;Trade &quot; + id + &quot; not found&quot;));</span>
+<span class="nc" id="L190">        trade.setStatus(TradeStatus.CANCELLED);</span>
         // JPA dirty-checking flushes the UPDATE at commit — no explicit save() needed.
-<span class="nc" id="L160">    }</span>
+<span class="nc bnc" id="L192" title="All 2 branches missed.">        if (tradeEventProducer != null) {</span>
+<span class="nc" id="L193">            tradeEventProducer.publish(new TradeEvent(</span>
+<span class="nc" id="L194">                    trade.getTradeRef(),</span>
+                    TradeEvent.Action.CANCELLED,
+<span class="nc" id="L196">                    Instant.now(),</span>
+<span class="nc" id="L197">                    TradeDto.from(trade)));</span>
+        }
+<span class="nc" id="L199">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

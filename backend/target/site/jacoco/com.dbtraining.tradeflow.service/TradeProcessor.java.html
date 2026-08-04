@@ -34,7 +34,7 @@ import java.util.List;
 @Service
 public class TradeProcessor {
 
-<span class="nc" id="L37">    private static final Logger log = LoggerFactory.getLogger(TradeProcessor.class);</span>
+<span class="fc" id="L37">    private static final Logger log = LoggerFactory.getLogger(TradeProcessor.class);</span>
 
     private final TradeParser parser;
     private final TradeValidator validator;
@@ -42,28 +42,28 @@ public class TradeProcessor {
     private final ReconReportExporter exporter;
 
     public TradeProcessor(TradeParser parser, TradeValidator validator,
-<span class="nc" id="L45">                          ReconciliationService recon, ReconReportExporter exporter) {</span>
-<span class="nc" id="L46">        this.parser = parser; this.validator = validator;</span>
-<span class="nc" id="L47">        this.recon  = recon;  this.exporter  = exporter;</span>
-<span class="nc" id="L48">    }</span>
+<span class="fc" id="L45">                          ReconciliationService recon, ReconReportExporter exporter) {</span>
+<span class="fc" id="L46">        this.parser = parser; this.validator = validator;</span>
+<span class="fc" id="L47">        this.recon  = recon;  this.exporter  = exporter;</span>
+<span class="fc" id="L48">    }</span>
 
     public ReconSummary process(Path internalCsv, Path externalCsv) {
-<span class="nc" id="L51">        log.info(&quot;Parsing internal feed: {}&quot;, internalCsv);</span>
-<span class="nc" id="L52">        List&lt;BaseTrade&gt; internal = parser.parseCsv(internalCsv);</span>
-<span class="nc" id="L53">        log.info(&quot;Parsing external feed: {}&quot;, externalCsv);</span>
-<span class="nc" id="L54">        List&lt;BaseTrade&gt; external = parser.parseCsv(externalCsv);</span>
+<span class="fc" id="L51">        log.info(&quot;Parsing internal feed: {}&quot;, internalCsv);</span>
+<span class="fc" id="L52">        List&lt;BaseTrade&gt; internal = parser.parseCsv(internalCsv);</span>
+<span class="fc" id="L53">        log.info(&quot;Parsing external feed: {}&quot;, externalCsv);</span>
+<span class="fc" id="L54">        List&lt;BaseTrade&gt; external = parser.parseCsv(externalCsv);</span>
 
-<span class="nc bnc" id="L56" title="All 2 branches missed.">        for (TradeValidationException finding : validator.validateAll(internal)) {</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        for (TradeValidationException finding : validator.validateAll(internal)) {</span>
 <span class="nc" id="L57">            log.warn(&quot;internal validation finding: [{}] {}&quot;, finding.getCode(), finding.getMessage());</span>
 <span class="nc" id="L58">        }</span>
-<span class="nc bnc" id="L59" title="All 2 branches missed.">        for (TradeValidationException finding : validator.validateAll(external)) {</span>
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        for (TradeValidationException finding : validator.validateAll(external)) {</span>
 <span class="nc" id="L60">            log.warn(&quot;external validation finding: [{}] {}&quot;, finding.getCode(), finding.getMessage());</span>
 <span class="nc" id="L61">        }</span>
 
-<span class="nc" id="L63">        ReconReport report = recon.matchTrades(internal, external);</span>
-<span class="nc" id="L64">        ReconSummary summary = recon.generateReport(report);</span>
-<span class="nc" id="L65">        log.info(&quot;\n{}&quot;, recon.render(summary));</span>
-<span class="nc" id="L66">        return summary;</span>
+<span class="fc" id="L63">        ReconReport report = recon.matchTrades(internal, external);</span>
+<span class="fc" id="L64">        ReconSummary summary = recon.generateReport(report);</span>
+<span class="fc" id="L65">        log.info(&quot;\n{}&quot;, recon.render(summary));</span>
+<span class="fc" id="L66">        return summary;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

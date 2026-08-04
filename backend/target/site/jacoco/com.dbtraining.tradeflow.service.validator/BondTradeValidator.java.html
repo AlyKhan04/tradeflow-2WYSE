@@ -7,26 +7,26 @@ import com.dbtraining.tradeflow.model.BondTrade;
 import org.springframework.stereotype.Component;
 
 @Component
-<span class="nc" id="L10">public class BondTradeValidator implements ITradeValidator {</span>
+<span class="fc" id="L10">public class BondTradeValidator implements ITradeValidator {</span>
 
     @Override
     public void validate(BaseTrade trade) throws TradeValidationException {
-<span class="nc bnc" id="L14" title="All 2 branches missed.">        if (!(trade instanceof BondTrade bond)) {</span>
+<span class="pc bpc" id="L14" title="1 of 2 branches missed.">        if (!(trade instanceof BondTrade bond)) {</span>
 <span class="nc" id="L15">            throw new TradeValidationException(Code.INVALID_VALUE,</span>
                     &quot;BondTradeValidator only accepts BondTrade&quot;);
         }
-<span class="nc bnc" id="L18" title="All 2 branches missed.">        if (bond.getCouponRate() == null) {</span>
+<span class="pc bpc" id="L18" title="1 of 2 branches missed.">        if (bond.getCouponRate() == null) {</span>
 <span class="nc" id="L19">            throw new TradeValidationException(Code.MISSING_FIELD, &quot;couponRate is required&quot;);</span>
         }
-<span class="nc bnc" id="L21" title="All 4 branches missed.">        if (bond.getCouponRate().signum() &lt; 0 || bond.getCouponRate().compareTo(new java.math.BigDecimal(&quot;100&quot;)) &gt; 0) {</span>
+<span class="pc bpc" id="L21" title="2 of 4 branches missed.">        if (bond.getCouponRate().signum() &lt; 0 || bond.getCouponRate().compareTo(new java.math.BigDecimal(&quot;100&quot;)) &gt; 0) {</span>
 <span class="nc" id="L22">            throw new TradeValidationException(Code.INVALID_VALUE, &quot;couponRate must be between 0 and 100&quot;);</span>
         }
-<span class="nc bnc" id="L24" title="All 4 branches missed.">        if (bond.getMaturityDate() == null || !bond.getMaturityDate().isAfter(bond.getTradeDate())) {</span>
+<span class="pc bpc" id="L24" title="2 of 4 branches missed.">        if (bond.getMaturityDate() == null || !bond.getMaturityDate().isAfter(bond.getTradeDate())) {</span>
 <span class="nc" id="L25">            throw new TradeValidationException(Code.INVALID_VALUE, &quot;maturityDate must be after tradeDate&quot;);</span>
         }
-<span class="nc bnc" id="L27" title="All 4 branches missed.">        if (bond.getFaceValue() == null || bond.getFaceValue().signum() &lt;= 0) {</span>
+<span class="pc bpc" id="L27" title="2 of 4 branches missed.">        if (bond.getFaceValue() == null || bond.getFaceValue().signum() &lt;= 0) {</span>
 <span class="nc" id="L28">            throw new TradeValidationException(Code.INVALID_VALUE, &quot;faceValue must be &gt; 0&quot;);</span>
         }
-<span class="nc" id="L30">    }</span>
+<span class="fc" id="L30">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

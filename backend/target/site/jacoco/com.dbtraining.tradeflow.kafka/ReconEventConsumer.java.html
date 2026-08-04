@@ -1,39 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReconEventConsumer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tradeflow</a> &gt; <a href="index.source.html" class="el_package">com.dbtraining.tradeflow.kafka</a> &gt; <span class="el_source">ReconEventConsumer.java</span></div><h1>ReconEventConsumer.java</h1><pre class="source lang-java linenums">package com.dbtraining.tradeflow.kafka;
 
 import com.dbtraining.tradeflow.dto.TradeEvent;
+import com.dbtraining.tradeflow.service.ReconciliationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Component;
 
-/**
- * ============================================================================
- * ReconEventConsumer — TICKET-I117
- * ============================================================================
- * WHAT:    On every CREATED TradeEvent, runs reconciliation for that trade
- *          and writes a ReconResult.
- * HOW:     @KafkaListener with consumer group `recon-group`. Calls
- *          ReconciliationService.runForTrade(tradeRef).
- * WHY:     Real-time recon — the moment a trade lands, we know if it has a
- *          counterpart.
- * OBSERVE: Postgres `recon_results` table grows in real time as you post
- *          trades from the UI.
- * ============================================================================
- *
- *  TODO(TICKET-I117):
- *    @Component
- *    public class ReconEventConsumer {
- *        private final ReconciliationService recon;
- *
- *        @KafkaListener(topics = &quot;${tradeflow.kafka.topics.trades}&quot;,
- *                       groupId = &quot;recon-group&quot;)
- *        public void onEvent(TradeEvent e) {
- *            if (e.action() != Action.CREATED) return;
- *            recon.runForTrade(e.tradeRef());
- *        }
- *    }
- * ============================================================================
- */
-<span class="nc" id="L33">public class ReconEventConsumer {</span>
+@Component
+public class ReconEventConsumer {
 
+<span class="fc" id="L13">    private static final Logger log = LoggerFactory.getLogger(ReconEventConsumer.class);</span>
+
+    private final ReconciliationService reconService;
+
+<span class="fc" id="L17">    public ReconEventConsumer(ReconciliationService reconService) {</span>
+<span class="fc" id="L18">        this.reconService = reconService;</span>
+<span class="fc" id="L19">    }</span>
+
+    @KafkaListener(
+            topics = &quot;${tradeflow.kafka.topics.trades:trade-events}&quot;,
+            groupId = &quot;recon-group&quot;,
+            containerFactory = &quot;kafkaListenerContainerFactory&quot;)
     public void onEvent(TradeEvent event) {
-<span class="nc" id="L36">        throw new UnsupportedOperationException(&quot;TICKET-I117&quot;);</span>
-    }
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        if (event.action() != TradeEvent.Action.CREATED) {</span>
+<span class="fc" id="L27">            return;  // only newly-created trades get auto-reconciled</span>
+        }
+<span class="fc" id="L29">        log.info(&quot;Reconciling tradeRef={}&quot;, event.tradeRef());</span>
+<span class="fc" id="L30">        reconService.runForTrade(event.tradeRef());</span>
+<span class="fc" id="L31">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

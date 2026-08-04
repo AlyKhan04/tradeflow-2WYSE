@@ -1,0 +1,605 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.dbtraining.tradeflow.DatabaseMigrationH2Test" time="16.89" tests="1" errors="0" skipped="0" failures="0">
+  <properties>
+    <property name="java.specification.version" value="21"/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+    <property name="java.class.path" value="/Users/alykhan/Documents/tradeflow-2WYSE/backend/target/test-classes:/Users/alykhan/Documents/tradeflow-2WYSE/backend/target/classes:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter-web/3.2.4/spring-boot-starter-web-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter/3.2.4/spring-boot-starter-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot/3.2.4/spring-boot-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/3.2.4/spring-boot-autoconfigure-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter-logging/3.2.4/spring-boot-starter-logging-3.2.4.jar:/Users/alykhan/.m2/repository/org/apache/logging/log4j/log4j-to-slf4j/2.21.1/log4j-to-slf4j-2.21.1.jar:/Users/alykhan/.m2/repository/org/apache/logging/log4j/log4j-api/2.21.1/log4j-api-2.21.1.jar:/Users/alykhan/.m2/repository/org/slf4j/jul-to-slf4j/2.0.12/jul-to-slf4j-2.0.12.jar:/Users/alykhan/.m2/repository/jakarta/annotation/jakarta.annotation-api/2.1.1/jakarta.annotation-api-2.1.1.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter-json/3.2.4/spring-boot-starter-json-3.2.4.jar:/Users/alykhan/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.15.4/jackson-databind-2.15.4.jar:/Users/alykhan/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.15.4/jackson-annotations-2.15.4.jar:/Users/alykhan/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.15.4/jackson-core-2.15.4.jar:/Users/alykhan/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jdk8/2.15.4/jackson-datatype-jdk8-2.15.4.jar:/Users/alykhan/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.15.4/jackson-datatype-jsr310-2.15.4.jar:/Users/alykhan/.m2/repository/com/fasterxml/jackson/module/jackson-module-parameter-names/2.15.4/jackson-module-parameter-names-2.15.4.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter-tomcat/3.2.4/spring-boot-starter-tomcat-3.2.4.jar:/Users/alykhan/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.19/tomcat-embed-core-10.1.19.jar:/Users/alykhan/.m2/repository/org/apache/tomcat/embed/tomcat-embed-websocket/10.1.19/tomcat-embed-websocket-10.1.19.jar:/Users/alykhan/.m2/repository/org/springframework/spring-web/6.1.5/spring-web-6.1.5.jar:/Users/alykhan/.m2/repository/org/springframework/spring-beans/6.1.5/spring-beans-6.1.5.jar:/Users/alykhan/.m2/repository/org/springframework/spring-webmvc/6.1.5/spring-webmvc-6.1.5.jar:/Users/alykhan/.m2/repository/org/springframework/spring-expression/6.1.5/spring-expression-6.1.5.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter-data-jpa/3.2.4/spring-boot-starter-data-jpa-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter-aop/3.2.4/spring-boot-starter-aop-3.2.4.jar:/Users/alykhan/.m2/repository/org/aspectj/aspectjweaver/1.9.21/aspectjweaver-1.9.21.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter-jdbc/3.2.4/spring-boot-starter-jdbc-3.2.4.jar:/Users/alykhan/.m2/repository/com/zaxxer/HikariCP/5.0.1/HikariCP-5.0.1.jar:/Users/alykhan/.m2/repository/org/springframework/spring-jdbc/6.1.5/spring-jdbc-6.1.5.jar:/Users/alykhan/.m2/repository/org/hibernate/orm/hibernate-core/6.4.4.Final/hibernate-core-6.4.4.Final.jar:/Users/alykhan/.m2/repository/jakarta/persistence/jakarta.persistence-api/3.1.0/jakarta.persistence-api-3.1.0.jar:/Users/alykhan/.m2/repository/jakarta/transaction/jakarta.transaction-api/2.0.1/jakarta.transaction-api-2.0.1.jar:/Users/alykhan/.m2/repository/org/jboss/logging/jboss-logging/3.5.3.Final/jboss-logging-3.5.3.Final.jar:/Users/alykhan/.m2/repository/org/hibernate/common/hibernate-commons-annotations/6.0.6.Final/hibernate-commons-annotations-6.0.6.Final.jar:/Users/alykhan/.m2/repository/io/smallrye/jandex/3.1.2/jandex-3.1.2.jar:/Users/alykhan/.m2/repository/com/fasterxml/classmate/1.6.0/classmate-1.6.0.jar:/Users/alykhan/.m2/repository/net/bytebuddy/byte-buddy/1.14.12/byte-buddy-1.14.12.jar:/Users/alykhan/.m2/repository/org/glassfish/jaxb/jaxb-runtime/4.0.5/jaxb-runtime-4.0.5.jar:/Users/alykhan/.m2/repository/org/glassfish/jaxb/jaxb-core/4.0.5/jaxb-core-4.0.5.jar:/Users/alykhan/.m2/repository/org/eclipse/angus/angus-activation/2.0.2/angus-activation-2.0.2.jar:/Users/alykhan/.m2/repository/org/glassfish/jaxb/txw2/4.0.5/txw2-4.0.5.jar:/Users/alykhan/.m2/repository/com/sun/istack/istack-commons-runtime/4.1.2/istack-commons-runtime-4.1.2.jar:/Users/alykhan/.m2/repository/jakarta/inject/jakarta.inject-api/2.0.1/jakarta.inject-api-2.0.1.jar:/Users/alykhan/.m2/repository/org/antlr/antlr4-runtime/4.13.0/antlr4-runtime-4.13.0.jar:/Users/alykhan/.m2/repository/org/springframework/data/spring-data-jpa/3.2.4/spring-data-jpa-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/data/spring-data-commons/3.2.4/spring-data-commons-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/spring-orm/6.1.5/spring-orm-6.1.5.jar:/Users/alykhan/.m2/repository/org/slf4j/slf4j-api/2.0.12/slf4j-api-2.0.12.jar:/Users/alykhan/.m2/repository/org/springframework/spring-aspects/6.1.5/spring-aspects-6.1.5.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter-validation/3.2.4/spring-boot-starter-validation-3.2.4.jar:/Users/alykhan/.m2/repository/org/apache/tomcat/embed/tomcat-embed-el/10.1.19/tomcat-embed-el-10.1.19.jar:/Users/alykhan/.m2/repository/org/hibernate/validator/hibernate-validator/8.0.1.Final/hibernate-validator-8.0.1.Final.jar:/Users/alykhan/.m2/repository/jakarta/validation/jakarta.validation-api/3.0.2/jakarta.validation-api-3.0.2.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter-actuator/3.2.4/spring-boot-starter-actuator-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-actuator-autoconfigure/3.2.4/spring-boot-actuator-autoconfigure-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-actuator/3.2.4/spring-boot-actuator-3.2.4.jar:/Users/alykhan/.m2/repository/io/micrometer/micrometer-observation/1.12.4/micrometer-observation-1.12.4.jar:/Users/alykhan/.m2/repository/io/micrometer/micrometer-commons/1.12.4/micrometer-commons-1.12.4.jar:/Users/alykhan/.m2/repository/io/micrometer/micrometer-jakarta9/1.12.4/micrometer-jakarta9-1.12.4.jar:/Users/alykhan/.m2/repository/org/postgresql/postgresql/42.6.2/postgresql-42.6.2.jar:/Users/alykhan/.m2/repository/org/checkerframework/checker-qual/3.31.0/checker-qual-3.31.0.jar:/Users/alykhan/.m2/repository/com/h2database/h2/2.2.224/h2-2.2.224.jar:/Users/alykhan/.m2/repository/org/liquibase/liquibase-core/4.24.0/liquibase-core-4.24.0.jar:/Users/alykhan/.m2/repository/com/opencsv/opencsv/5.8/opencsv-5.8.jar:/Users/alykhan/.m2/repository/org/apache/commons/commons-lang3/3.13.0/commons-lang3-3.13.0.jar:/Users/alykhan/.m2/repository/org/apache/commons/commons-text/1.10.0/commons-text-1.10.0.jar:/Users/alykhan/.m2/repository/org/apache/commons/commons-collections4/4.4/commons-collections4-4.4.jar:/Users/alykhan/.m2/repository/org/yaml/snakeyaml/2.2/snakeyaml-2.2.jar:/Users/alykhan/.m2/repository/javax/xml/bind/jaxb-api/2.3.1/jaxb-api-2.3.1.jar:/Users/alykhan/.m2/repository/org/springdoc/springdoc-openapi-starter-webmvc-ui/2.3.0/springdoc-openapi-starter-webmvc-ui-2.3.0.jar:/Users/alykhan/.m2/repository/org/springdoc/springdoc-openapi-starter-webmvc-api/2.3.0/springdoc-openapi-starter-webmvc-api-2.3.0.jar:/Users/alykhan/.m2/repository/org/springdoc/springdoc-openapi-starter-common/2.3.0/springdoc-openapi-starter-common-2.3.0.jar:/Users/alykhan/.m2/repository/io/swagger/core/v3/swagger-core-jakarta/2.2.19/swagger-core-jakarta-2.2.19.jar:/Users/alykhan/.m2/repository/io/swagger/core/v3/swagger-annotations-jakarta/2.2.19/swagger-annotations-jakarta-2.2.19.jar:/Users/alykhan/.m2/repository/io/swagger/core/v3/swagger-models-jakarta/2.2.19/swagger-models-jakarta-2.2.19.jar:/Users/alykhan/.m2/repository/com/fasterxml/jackson/dataformat/jackson-dataformat-yaml/2.15.4/jackson-dataformat-yaml-2.15.4.jar:/Users/alykhan/.m2/repository/org/webjars/swagger-ui/5.10.3/swagger-ui-5.10.3.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter-security/3.2.4/spring-boot-starter-security-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/spring-aop/6.1.5/spring-aop-6.1.5.jar:/Users/alykhan/.m2/repository/org/springframework/security/spring-security-config/6.2.3/spring-security-config-6.2.3.jar:/Users/alykhan/.m2/repository/org/springframework/security/spring-security-web/6.2.3/spring-security-web-6.2.3.jar:/Users/alykhan/.m2/repository/io/micrometer/micrometer-registry-prometheus/1.12.4/micrometer-registry-prometheus-1.12.4.jar:/Users/alykhan/.m2/repository/io/micrometer/micrometer-core/1.12.4/micrometer-core-1.12.4.jar:/Users/alykhan/.m2/repository/org/hdrhistogram/HdrHistogram/2.1.12/HdrHistogram-2.1.12.jar:/Users/alykhan/.m2/repository/org/latencyutils/LatencyUtils/2.0.3/LatencyUtils-2.0.3.jar:/Users/alykhan/.m2/repository/io/prometheus/simpleclient_common/0.16.0/simpleclient_common-0.16.0.jar:/Users/alykhan/.m2/repository/io/prometheus/simpleclient/0.16.0/simpleclient-0.16.0.jar:/Users/alykhan/.m2/repository/io/prometheus/simpleclient_tracer_otel/0.16.0/simpleclient_tracer_otel-0.16.0.jar:/Users/alykhan/.m2/repository/io/prometheus/simpleclient_tracer_common/0.16.0/simpleclient_tracer_common-0.16.0.jar:/Users/alykhan/.m2/repository/io/prometheus/simpleclient_tracer_otel_agent/0.16.0/simpleclient_tracer_otel_agent-0.16.0.jar:/Users/alykhan/.m2/repository/org/springframework/kafka/spring-kafka/3.1.3/spring-kafka-3.1.3.jar:/Users/alykhan/.m2/repository/org/springframework/spring-context/6.1.5/spring-context-6.1.5.jar:/Users/alykhan/.m2/repository/org/springframework/spring-messaging/6.1.5/spring-messaging-6.1.5.jar:/Users/alykhan/.m2/repository/org/springframework/spring-tx/6.1.5/spring-tx-6.1.5.jar:/Users/alykhan/.m2/repository/org/springframework/retry/spring-retry/2.0.5/spring-retry-2.0.5.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-clients/3.6.1/kafka-clients-3.6.1.jar:/Users/alykhan/.m2/repository/com/github/luben/zstd-jni/1.5.5-1/zstd-jni-1.5.5-1.jar:/Users/alykhan/.m2/repository/org/lz4/lz4-java/1.8.0/lz4-java-1.8.0.jar:/Users/alykhan/.m2/repository/org/xerial/snappy/snappy-java/1.1.10.5/snappy-java-1.1.10.5.jar:/Users/alykhan/.m2/repository/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar:/Users/alykhan/.m2/repository/org/springframework/kafka/spring-kafka-test/3.1.3/spring-kafka-test-3.1.3.jar:/Users/alykhan/.m2/repository/org/springframework/spring-test/6.1.5/spring-test-6.1.5.jar:/Users/alykhan/.m2/repository/org/apache/zookeeper/zookeeper/3.8.4/zookeeper-3.8.4.jar:/Users/alykhan/.m2/repository/org/apache/zookeeper/zookeeper-jute/3.8.4/zookeeper-jute-3.8.4.jar:/Users/alykhan/.m2/repository/org/apache/yetus/audience-annotations/0.12.0/audience-annotations-0.12.0.jar:/Users/alykhan/.m2/repository/io/netty/netty-handler/4.1.107.Final/netty-handler-4.1.107.Final.jar:/Users/alykhan/.m2/repository/io/netty/netty-common/4.1.107.Final/netty-common-4.1.107.Final.jar:/Users/alykhan/.m2/repository/io/netty/netty-resolver/4.1.107.Final/netty-resolver-4.1.107.Final.jar:/Users/alykhan/.m2/repository/io/netty/netty-buffer/4.1.107.Final/netty-buffer-4.1.107.Final.jar:/Users/alykhan/.m2/repository/io/netty/netty-transport/4.1.107.Final/netty-transport-4.1.107.Final.jar:/Users/alykhan/.m2/repository/io/netty/netty-transport-native-unix-common/4.1.107.Final/netty-transport-native-unix-common-4.1.107.Final.jar:/Users/alykhan/.m2/repository/io/netty/netty-codec/4.1.107.Final/netty-codec-4.1.107.Final.jar:/Users/alykhan/.m2/repository/io/netty/netty-transport-native-epoll/4.1.107.Final/netty-transport-native-epoll-4.1.107.Final.jar:/Users/alykhan/.m2/repository/io/netty/netty-transport-classes-epoll/4.1.107.Final/netty-transport-classes-epoll-4.1.107.Final.jar:/Users/alykhan/.m2/repository/ch/qos/logback/logback-core/1.4.14/logback-core-1.4.14.jar:/Users/alykhan/.m2/repository/ch/qos/logback/logback-classic/1.4.14/logback-classic-1.4.14.jar:/Users/alykhan/.m2/repository/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-clients/3.6.1/kafka-clients-3.6.1-test.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-metadata/3.6.1/kafka-metadata-3.6.1.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-raft/3.6.1/kafka-raft-3.6.1.jar:/Users/alykhan/.m2/repository/com/yammer/metrics/metrics-core/2.2.0/metrics-core-2.2.0.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-server-common/3.6.1/kafka-server-common-3.6.1.jar:/Users/alykhan/.m2/repository/net/sf/jopt-simple/jopt-simple/5.0.4/jopt-simple-5.0.4.jar:/Users/alykhan/.m2/repository/org/pcollections/pcollections/4.0.1/pcollections-4.0.1.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-server-common/3.6.1/kafka-server-common-3.6.1-test.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-streams-test-utils/3.6.1/kafka-streams-test-utils-3.6.1.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-streams/3.6.1/kafka-streams-3.6.1.jar:/Users/alykhan/.m2/repository/org/rocksdb/rocksdbjni/7.9.2/rocksdbjni-7.9.2.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka_2.13/3.6.1/kafka_2.13-3.6.1.jar:/Users/alykhan/.m2/repository/org/scala-lang/scala-library/2.13.11/scala-library-2.13.11.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-group-coordinator/3.6.1/kafka-group-coordinator-3.6.1.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-storage-api/3.6.1/kafka-storage-api-3.6.1.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-tools-api/3.6.1/kafka-tools-api-3.6.1.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-storage/3.6.1/kafka-storage-3.6.1.jar:/Users/alykhan/.m2/repository/com/github/ben-manes/caffeine/caffeine/3.1.8/caffeine-3.1.8.jar:/Users/alykhan/.m2/repository/com/google/errorprone/error_prone_annotations/2.21.1/error_prone_annotations-2.21.1.jar:/Users/alykhan/.m2/repository/net/sourceforge/argparse4j/argparse4j/0.7.0/argparse4j-0.7.0.jar:/Users/alykhan/.m2/repository/commons-validator/commons-validator/1.7/commons-validator-1.7.jar:/Users/alykhan/.m2/repository/commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.jar:/Users/alykhan/.m2/repository/commons-digester/commons-digester/2.1/commons-digester-2.1.jar:/Users/alykhan/.m2/repository/commons-collections/commons-collections/3.2.2/commons-collections-3.2.2.jar:/Users/alykhan/.m2/repository/com/fasterxml/jackson/module/jackson-module-scala_2.13/2.15.4/jackson-module-scala_2.13-2.15.4.jar:/Users/alykhan/.m2/repository/com/thoughtworks/paranamer/paranamer/2.8/paranamer-2.8.jar:/Users/alykhan/.m2/repository/com/fasterxml/jackson/dataformat/jackson-dataformat-csv/2.15.4/jackson-dataformat-csv-2.15.4.jar:/Users/alykhan/.m2/repository/org/bitbucket/b_c/jose4j/0.9.3/jose4j-0.9.3.jar:/Users/alykhan/.m2/repository/org/scala-lang/modules/scala-collection-compat_2.13/2.10.0/scala-collection-compat_2.13-2.10.0.jar:/Users/alykhan/.m2/repository/org/scala-lang/modules/scala-java8-compat_2.13/1.0.2/scala-java8-compat_2.13-1.0.2.jar:/Users/alykhan/.m2/repository/org/scala-lang/scala-reflect/2.13.11/scala-reflect-2.13.11.jar:/Users/alykhan/.m2/repository/com/typesafe/scala-logging/scala-logging_2.13/3.9.4/scala-logging_2.13-3.9.4.jar:/Users/alykhan/.m2/repository/io/dropwizard/metrics/metrics-core/4.2.25/metrics-core-4.2.25.jar:/Users/alykhan/.m2/repository/commons-cli/commons-cli/1.4/commons-cli-1.4.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka_2.13/3.6.1/kafka_2.13-3.6.1-test.jar:/Users/alykhan/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.10.2/junit-jupiter-api-5.10.2.jar:/Users/alykhan/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/Users/alykhan/.m2/repository/org/junit/platform/junit-platform-commons/1.10.2/junit-platform-commons-1.10.2.jar:/Users/alykhan/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/Users/alykhan/.m2/repository/org/junit/platform/junit-platform-launcher/1.10.2/junit-platform-launcher-1.10.2.jar:/Users/alykhan/.m2/repository/org/junit/platform/junit-platform-engine/1.10.2/junit-platform-engine-1.10.2.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter-test/3.2.4/spring-boot-starter-test-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-test/3.2.4/spring-boot-test-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-test-autoconfigure/3.2.4/spring-boot-test-autoconfigure-3.2.4.jar:/Users/alykhan/.m2/repository/com/jayway/jsonpath/json-path/2.9.0/json-path-2.9.0.jar:/Users/alykhan/.m2/repository/jakarta/xml/bind/jakarta.xml.bind-api/4.0.2/jakarta.xml.bind-api-4.0.2.jar:/Users/alykhan/.m2/repository/jakarta/activation/jakarta.activation-api/2.1.3/jakarta.activation-api-2.1.3.jar:/Users/alykhan/.m2/repository/net/minidev/json-smart/2.5.0/json-smart-2.5.0.jar:/Users/alykhan/.m2/repository/net/minidev/accessors-smart/2.5.0/accessors-smart-2.5.0.jar:/Users/alykhan/.m2/repository/org/ow2/asm/asm/9.3/asm-9.3.jar:/Users/alykhan/.m2/repository/org/assertj/assertj-core/3.24.2/assertj-core-3.24.2.jar:/Users/alykhan/.m2/repository/org/awaitility/awaitility/4.2.0/awaitility-4.2.0.jar:/Users/alykhan/.m2/repository/org/hamcrest/hamcrest/2.2/hamcrest-2.2.jar:/Users/alykhan/.m2/repository/org/junit/jupiter/junit-jupiter/5.10.2/junit-jupiter-5.10.2.jar:/Users/alykhan/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.10.2/junit-jupiter-params-5.10.2.jar:/Users/alykhan/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.10.2/junit-jupiter-engine-5.10.2.jar:/Users/alykhan/.m2/repository/org/mockito/mockito-core/5.7.0/mockito-core-5.7.0.jar:/Users/alykhan/.m2/repository/net/bytebuddy/byte-buddy-agent/1.14.12/byte-buddy-agent-1.14.12.jar:/Users/alykhan/.m2/repository/org/objenesis/objenesis/3.3/objenesis-3.3.jar:/Users/alykhan/.m2/repository/org/mockito/mockito-junit-jupiter/5.7.0/mockito-junit-jupiter-5.7.0.jar:/Users/alykhan/.m2/repository/org/skyscreamer/jsonassert/1.5.1/jsonassert-1.5.1.jar:/Users/alykhan/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar:/Users/alykhan/.m2/repository/org/springframework/spring-core/6.1.5/spring-core-6.1.5.jar:/Users/alykhan/.m2/repository/org/springframework/spring-jcl/6.1.5/spring-jcl-6.1.5.jar:/Users/alykhan/.m2/repository/org/xmlunit/xmlunit-core/2.9.1/xmlunit-core-2.9.1.jar:/Users/alykhan/.m2/repository/org/springframework/security/spring-security-test/6.2.3/spring-security-test-6.2.3.jar:/Users/alykhan/.m2/repository/org/springframework/security/spring-security-core/6.2.3/spring-security-core-6.2.3.jar:/Users/alykhan/.m2/repository/org/springframework/security/spring-security-crypto/6.2.3/spring-security-crypto-6.2.3.jar:/Users/alykhan/.m2/repository/org/testcontainers/junit-jupiter/1.19.7/junit-jupiter-1.19.7.jar:/Users/alykhan/.m2/repository/org/testcontainers/testcontainers/1.19.7/testcontainers-1.19.7.jar:/Users/alykhan/.m2/repository/junit/junit/4.13.2/junit-4.13.2.jar:/Users/alykhan/.m2/repository/org/hamcrest/hamcrest-core/2.2/hamcrest-core-2.2.jar:/Users/alykhan/.m2/repository/org/apache/commons/commons-compress/1.24.0/commons-compress-1.24.0.jar:/Users/alykhan/.m2/repository/org/rnorth/duct-tape/duct-tape/1.0.8/duct-tape-1.0.8.jar:/Users/alykhan/.m2/repository/org/jetbrains/annotations/17.0.0/annotations-17.0.0.jar:/Users/alykhan/.m2/repository/com/github/docker-java/docker-java-api/3.3.6/docker-java-api-3.3.6.jar:/Users/alykhan/.m2/repository/com/github/docker-java/docker-java-transport-zerodep/3.3.6/docker-java-transport-zerodep-3.3.6.jar:/Users/alykhan/.m2/repository/com/github/docker-java/docker-java-transport/3.3.6/docker-java-transport-3.3.6.jar:/Users/alykhan/.m2/repository/net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar:/Users/alykhan/.m2/repository/org/testcontainers/postgresql/1.19.7/postgresql-1.19.7.jar:/Users/alykhan/.m2/repository/org/testcontainers/jdbc/1.19.7/jdbc-1.19.7.jar:/Users/alykhan/.m2/repository/org/testcontainers/database-commons/1.19.7/database-commons-1.19.7.jar:"/>
+    <property name="java.vm.vendor" value="Amazon.com Inc."/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="net.bytebuddy.experimental" value="true"/>
+    <property name="java.vendor.url" value="https://aws.amazon.com/corretto/"/>
+    <property name="user.timezone" value="Europe/London"/>
+    <property name="org.jboss.logging.provider" value="slf4j"/>
+    <property name="os.name" value="Mac OS X"/>
+    <property name="java.vm.specification.version" value="21"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="US"/>
+    <property name="sun.boot.library.path" value="/Users/alykhan/Library/Java/JavaVirtualMachines/corretto-21.0.3/Contents/Home/lib"/>
+    <property name="sun.java.command" value="/Users/alykhan/Documents/tradeflow-2WYSE/backend/target/surefire/surefirebooter-20260804121648508_3.jar /Users/alykhan/Documents/tradeflow-2WYSE/backend/target/surefire 2026-08-04T12-16-48_422-jvmRun1 surefire-20260804121648508_1tmp surefire_0-20260804121648508_2tmp"/>
+    <property name="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="test" value="TradeEventConsumerIT,DatabaseMigrationH2Test"/>
+    <property name="surefire.test.class.path" value="/Users/alykhan/Documents/tradeflow-2WYSE/backend/target/test-classes:/Users/alykhan/Documents/tradeflow-2WYSE/backend/target/classes:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter-web/3.2.4/spring-boot-starter-web-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter/3.2.4/spring-boot-starter-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot/3.2.4/spring-boot-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/3.2.4/spring-boot-autoconfigure-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter-logging/3.2.4/spring-boot-starter-logging-3.2.4.jar:/Users/alykhan/.m2/repository/org/apache/logging/log4j/log4j-to-slf4j/2.21.1/log4j-to-slf4j-2.21.1.jar:/Users/alykhan/.m2/repository/org/apache/logging/log4j/log4j-api/2.21.1/log4j-api-2.21.1.jar:/Users/alykhan/.m2/repository/org/slf4j/jul-to-slf4j/2.0.12/jul-to-slf4j-2.0.12.jar:/Users/alykhan/.m2/repository/jakarta/annotation/jakarta.annotation-api/2.1.1/jakarta.annotation-api-2.1.1.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter-json/3.2.4/spring-boot-starter-json-3.2.4.jar:/Users/alykhan/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.15.4/jackson-databind-2.15.4.jar:/Users/alykhan/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.15.4/jackson-annotations-2.15.4.jar:/Users/alykhan/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.15.4/jackson-core-2.15.4.jar:/Users/alykhan/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jdk8/2.15.4/jackson-datatype-jdk8-2.15.4.jar:/Users/alykhan/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.15.4/jackson-datatype-jsr310-2.15.4.jar:/Users/alykhan/.m2/repository/com/fasterxml/jackson/module/jackson-module-parameter-names/2.15.4/jackson-module-parameter-names-2.15.4.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter-tomcat/3.2.4/spring-boot-starter-tomcat-3.2.4.jar:/Users/alykhan/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.19/tomcat-embed-core-10.1.19.jar:/Users/alykhan/.m2/repository/org/apache/tomcat/embed/tomcat-embed-websocket/10.1.19/tomcat-embed-websocket-10.1.19.jar:/Users/alykhan/.m2/repository/org/springframework/spring-web/6.1.5/spring-web-6.1.5.jar:/Users/alykhan/.m2/repository/org/springframework/spring-beans/6.1.5/spring-beans-6.1.5.jar:/Users/alykhan/.m2/repository/org/springframework/spring-webmvc/6.1.5/spring-webmvc-6.1.5.jar:/Users/alykhan/.m2/repository/org/springframework/spring-expression/6.1.5/spring-expression-6.1.5.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter-data-jpa/3.2.4/spring-boot-starter-data-jpa-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter-aop/3.2.4/spring-boot-starter-aop-3.2.4.jar:/Users/alykhan/.m2/repository/org/aspectj/aspectjweaver/1.9.21/aspectjweaver-1.9.21.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter-jdbc/3.2.4/spring-boot-starter-jdbc-3.2.4.jar:/Users/alykhan/.m2/repository/com/zaxxer/HikariCP/5.0.1/HikariCP-5.0.1.jar:/Users/alykhan/.m2/repository/org/springframework/spring-jdbc/6.1.5/spring-jdbc-6.1.5.jar:/Users/alykhan/.m2/repository/org/hibernate/orm/hibernate-core/6.4.4.Final/hibernate-core-6.4.4.Final.jar:/Users/alykhan/.m2/repository/jakarta/persistence/jakarta.persistence-api/3.1.0/jakarta.persistence-api-3.1.0.jar:/Users/alykhan/.m2/repository/jakarta/transaction/jakarta.transaction-api/2.0.1/jakarta.transaction-api-2.0.1.jar:/Users/alykhan/.m2/repository/org/jboss/logging/jboss-logging/3.5.3.Final/jboss-logging-3.5.3.Final.jar:/Users/alykhan/.m2/repository/org/hibernate/common/hibernate-commons-annotations/6.0.6.Final/hibernate-commons-annotations-6.0.6.Final.jar:/Users/alykhan/.m2/repository/io/smallrye/jandex/3.1.2/jandex-3.1.2.jar:/Users/alykhan/.m2/repository/com/fasterxml/classmate/1.6.0/classmate-1.6.0.jar:/Users/alykhan/.m2/repository/net/bytebuddy/byte-buddy/1.14.12/byte-buddy-1.14.12.jar:/Users/alykhan/.m2/repository/org/glassfish/jaxb/jaxb-runtime/4.0.5/jaxb-runtime-4.0.5.jar:/Users/alykhan/.m2/repository/org/glassfish/jaxb/jaxb-core/4.0.5/jaxb-core-4.0.5.jar:/Users/alykhan/.m2/repository/org/eclipse/angus/angus-activation/2.0.2/angus-activation-2.0.2.jar:/Users/alykhan/.m2/repository/org/glassfish/jaxb/txw2/4.0.5/txw2-4.0.5.jar:/Users/alykhan/.m2/repository/com/sun/istack/istack-commons-runtime/4.1.2/istack-commons-runtime-4.1.2.jar:/Users/alykhan/.m2/repository/jakarta/inject/jakarta.inject-api/2.0.1/jakarta.inject-api-2.0.1.jar:/Users/alykhan/.m2/repository/org/antlr/antlr4-runtime/4.13.0/antlr4-runtime-4.13.0.jar:/Users/alykhan/.m2/repository/org/springframework/data/spring-data-jpa/3.2.4/spring-data-jpa-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/data/spring-data-commons/3.2.4/spring-data-commons-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/spring-orm/6.1.5/spring-orm-6.1.5.jar:/Users/alykhan/.m2/repository/org/slf4j/slf4j-api/2.0.12/slf4j-api-2.0.12.jar:/Users/alykhan/.m2/repository/org/springframework/spring-aspects/6.1.5/spring-aspects-6.1.5.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter-validation/3.2.4/spring-boot-starter-validation-3.2.4.jar:/Users/alykhan/.m2/repository/org/apache/tomcat/embed/tomcat-embed-el/10.1.19/tomcat-embed-el-10.1.19.jar:/Users/alykhan/.m2/repository/org/hibernate/validator/hibernate-validator/8.0.1.Final/hibernate-validator-8.0.1.Final.jar:/Users/alykhan/.m2/repository/jakarta/validation/jakarta.validation-api/3.0.2/jakarta.validation-api-3.0.2.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter-actuator/3.2.4/spring-boot-starter-actuator-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-actuator-autoconfigure/3.2.4/spring-boot-actuator-autoconfigure-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-actuator/3.2.4/spring-boot-actuator-3.2.4.jar:/Users/alykhan/.m2/repository/io/micrometer/micrometer-observation/1.12.4/micrometer-observation-1.12.4.jar:/Users/alykhan/.m2/repository/io/micrometer/micrometer-commons/1.12.4/micrometer-commons-1.12.4.jar:/Users/alykhan/.m2/repository/io/micrometer/micrometer-jakarta9/1.12.4/micrometer-jakarta9-1.12.4.jar:/Users/alykhan/.m2/repository/org/postgresql/postgresql/42.6.2/postgresql-42.6.2.jar:/Users/alykhan/.m2/repository/org/checkerframework/checker-qual/3.31.0/checker-qual-3.31.0.jar:/Users/alykhan/.m2/repository/com/h2database/h2/2.2.224/h2-2.2.224.jar:/Users/alykhan/.m2/repository/org/liquibase/liquibase-core/4.24.0/liquibase-core-4.24.0.jar:/Users/alykhan/.m2/repository/com/opencsv/opencsv/5.8/opencsv-5.8.jar:/Users/alykhan/.m2/repository/org/apache/commons/commons-lang3/3.13.0/commons-lang3-3.13.0.jar:/Users/alykhan/.m2/repository/org/apache/commons/commons-text/1.10.0/commons-text-1.10.0.jar:/Users/alykhan/.m2/repository/org/apache/commons/commons-collections4/4.4/commons-collections4-4.4.jar:/Users/alykhan/.m2/repository/org/yaml/snakeyaml/2.2/snakeyaml-2.2.jar:/Users/alykhan/.m2/repository/javax/xml/bind/jaxb-api/2.3.1/jaxb-api-2.3.1.jar:/Users/alykhan/.m2/repository/org/springdoc/springdoc-openapi-starter-webmvc-ui/2.3.0/springdoc-openapi-starter-webmvc-ui-2.3.0.jar:/Users/alykhan/.m2/repository/org/springdoc/springdoc-openapi-starter-webmvc-api/2.3.0/springdoc-openapi-starter-webmvc-api-2.3.0.jar:/Users/alykhan/.m2/repository/org/springdoc/springdoc-openapi-starter-common/2.3.0/springdoc-openapi-starter-common-2.3.0.jar:/Users/alykhan/.m2/repository/io/swagger/core/v3/swagger-core-jakarta/2.2.19/swagger-core-jakarta-2.2.19.jar:/Users/alykhan/.m2/repository/io/swagger/core/v3/swagger-annotations-jakarta/2.2.19/swagger-annotations-jakarta-2.2.19.jar:/Users/alykhan/.m2/repository/io/swagger/core/v3/swagger-models-jakarta/2.2.19/swagger-models-jakarta-2.2.19.jar:/Users/alykhan/.m2/repository/com/fasterxml/jackson/dataformat/jackson-dataformat-yaml/2.15.4/jackson-dataformat-yaml-2.15.4.jar:/Users/alykhan/.m2/repository/org/webjars/swagger-ui/5.10.3/swagger-ui-5.10.3.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter-security/3.2.4/spring-boot-starter-security-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/spring-aop/6.1.5/spring-aop-6.1.5.jar:/Users/alykhan/.m2/repository/org/springframework/security/spring-security-config/6.2.3/spring-security-config-6.2.3.jar:/Users/alykhan/.m2/repository/org/springframework/security/spring-security-web/6.2.3/spring-security-web-6.2.3.jar:/Users/alykhan/.m2/repository/io/micrometer/micrometer-registry-prometheus/1.12.4/micrometer-registry-prometheus-1.12.4.jar:/Users/alykhan/.m2/repository/io/micrometer/micrometer-core/1.12.4/micrometer-core-1.12.4.jar:/Users/alykhan/.m2/repository/org/hdrhistogram/HdrHistogram/2.1.12/HdrHistogram-2.1.12.jar:/Users/alykhan/.m2/repository/org/latencyutils/LatencyUtils/2.0.3/LatencyUtils-2.0.3.jar:/Users/alykhan/.m2/repository/io/prometheus/simpleclient_common/0.16.0/simpleclient_common-0.16.0.jar:/Users/alykhan/.m2/repository/io/prometheus/simpleclient/0.16.0/simpleclient-0.16.0.jar:/Users/alykhan/.m2/repository/io/prometheus/simpleclient_tracer_otel/0.16.0/simpleclient_tracer_otel-0.16.0.jar:/Users/alykhan/.m2/repository/io/prometheus/simpleclient_tracer_common/0.16.0/simpleclient_tracer_common-0.16.0.jar:/Users/alykhan/.m2/repository/io/prometheus/simpleclient_tracer_otel_agent/0.16.0/simpleclient_tracer_otel_agent-0.16.0.jar:/Users/alykhan/.m2/repository/org/springframework/kafka/spring-kafka/3.1.3/spring-kafka-3.1.3.jar:/Users/alykhan/.m2/repository/org/springframework/spring-context/6.1.5/spring-context-6.1.5.jar:/Users/alykhan/.m2/repository/org/springframework/spring-messaging/6.1.5/spring-messaging-6.1.5.jar:/Users/alykhan/.m2/repository/org/springframework/spring-tx/6.1.5/spring-tx-6.1.5.jar:/Users/alykhan/.m2/repository/org/springframework/retry/spring-retry/2.0.5/spring-retry-2.0.5.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-clients/3.6.1/kafka-clients-3.6.1.jar:/Users/alykhan/.m2/repository/com/github/luben/zstd-jni/1.5.5-1/zstd-jni-1.5.5-1.jar:/Users/alykhan/.m2/repository/org/lz4/lz4-java/1.8.0/lz4-java-1.8.0.jar:/Users/alykhan/.m2/repository/org/xerial/snappy/snappy-java/1.1.10.5/snappy-java-1.1.10.5.jar:/Users/alykhan/.m2/repository/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar:/Users/alykhan/.m2/repository/org/springframework/kafka/spring-kafka-test/3.1.3/spring-kafka-test-3.1.3.jar:/Users/alykhan/.m2/repository/org/springframework/spring-test/6.1.5/spring-test-6.1.5.jar:/Users/alykhan/.m2/repository/org/apache/zookeeper/zookeeper/3.8.4/zookeeper-3.8.4.jar:/Users/alykhan/.m2/repository/org/apache/zookeeper/zookeeper-jute/3.8.4/zookeeper-jute-3.8.4.jar:/Users/alykhan/.m2/repository/org/apache/yetus/audience-annotations/0.12.0/audience-annotations-0.12.0.jar:/Users/alykhan/.m2/repository/io/netty/netty-handler/4.1.107.Final/netty-handler-4.1.107.Final.jar:/Users/alykhan/.m2/repository/io/netty/netty-common/4.1.107.Final/netty-common-4.1.107.Final.jar:/Users/alykhan/.m2/repository/io/netty/netty-resolver/4.1.107.Final/netty-resolver-4.1.107.Final.jar:/Users/alykhan/.m2/repository/io/netty/netty-buffer/4.1.107.Final/netty-buffer-4.1.107.Final.jar:/Users/alykhan/.m2/repository/io/netty/netty-transport/4.1.107.Final/netty-transport-4.1.107.Final.jar:/Users/alykhan/.m2/repository/io/netty/netty-transport-native-unix-common/4.1.107.Final/netty-transport-native-unix-common-4.1.107.Final.jar:/Users/alykhan/.m2/repository/io/netty/netty-codec/4.1.107.Final/netty-codec-4.1.107.Final.jar:/Users/alykhan/.m2/repository/io/netty/netty-transport-native-epoll/4.1.107.Final/netty-transport-native-epoll-4.1.107.Final.jar:/Users/alykhan/.m2/repository/io/netty/netty-transport-classes-epoll/4.1.107.Final/netty-transport-classes-epoll-4.1.107.Final.jar:/Users/alykhan/.m2/repository/ch/qos/logback/logback-core/1.4.14/logback-core-1.4.14.jar:/Users/alykhan/.m2/repository/ch/qos/logback/logback-classic/1.4.14/logback-classic-1.4.14.jar:/Users/alykhan/.m2/repository/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-clients/3.6.1/kafka-clients-3.6.1-test.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-metadata/3.6.1/kafka-metadata-3.6.1.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-raft/3.6.1/kafka-raft-3.6.1.jar:/Users/alykhan/.m2/repository/com/yammer/metrics/metrics-core/2.2.0/metrics-core-2.2.0.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-server-common/3.6.1/kafka-server-common-3.6.1.jar:/Users/alykhan/.m2/repository/net/sf/jopt-simple/jopt-simple/5.0.4/jopt-simple-5.0.4.jar:/Users/alykhan/.m2/repository/org/pcollections/pcollections/4.0.1/pcollections-4.0.1.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-server-common/3.6.1/kafka-server-common-3.6.1-test.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-streams-test-utils/3.6.1/kafka-streams-test-utils-3.6.1.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-streams/3.6.1/kafka-streams-3.6.1.jar:/Users/alykhan/.m2/repository/org/rocksdb/rocksdbjni/7.9.2/rocksdbjni-7.9.2.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka_2.13/3.6.1/kafka_2.13-3.6.1.jar:/Users/alykhan/.m2/repository/org/scala-lang/scala-library/2.13.11/scala-library-2.13.11.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-group-coordinator/3.6.1/kafka-group-coordinator-3.6.1.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-storage-api/3.6.1/kafka-storage-api-3.6.1.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-tools-api/3.6.1/kafka-tools-api-3.6.1.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka-storage/3.6.1/kafka-storage-3.6.1.jar:/Users/alykhan/.m2/repository/com/github/ben-manes/caffeine/caffeine/3.1.8/caffeine-3.1.8.jar:/Users/alykhan/.m2/repository/com/google/errorprone/error_prone_annotations/2.21.1/error_prone_annotations-2.21.1.jar:/Users/alykhan/.m2/repository/net/sourceforge/argparse4j/argparse4j/0.7.0/argparse4j-0.7.0.jar:/Users/alykhan/.m2/repository/commons-validator/commons-validator/1.7/commons-validator-1.7.jar:/Users/alykhan/.m2/repository/commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.jar:/Users/alykhan/.m2/repository/commons-digester/commons-digester/2.1/commons-digester-2.1.jar:/Users/alykhan/.m2/repository/commons-collections/commons-collections/3.2.2/commons-collections-3.2.2.jar:/Users/alykhan/.m2/repository/com/fasterxml/jackson/module/jackson-module-scala_2.13/2.15.4/jackson-module-scala_2.13-2.15.4.jar:/Users/alykhan/.m2/repository/com/thoughtworks/paranamer/paranamer/2.8/paranamer-2.8.jar:/Users/alykhan/.m2/repository/com/fasterxml/jackson/dataformat/jackson-dataformat-csv/2.15.4/jackson-dataformat-csv-2.15.4.jar:/Users/alykhan/.m2/repository/org/bitbucket/b_c/jose4j/0.9.3/jose4j-0.9.3.jar:/Users/alykhan/.m2/repository/org/scala-lang/modules/scala-collection-compat_2.13/2.10.0/scala-collection-compat_2.13-2.10.0.jar:/Users/alykhan/.m2/repository/org/scala-lang/modules/scala-java8-compat_2.13/1.0.2/scala-java8-compat_2.13-1.0.2.jar:/Users/alykhan/.m2/repository/org/scala-lang/scala-reflect/2.13.11/scala-reflect-2.13.11.jar:/Users/alykhan/.m2/repository/com/typesafe/scala-logging/scala-logging_2.13/3.9.4/scala-logging_2.13-3.9.4.jar:/Users/alykhan/.m2/repository/io/dropwizard/metrics/metrics-core/4.2.25/metrics-core-4.2.25.jar:/Users/alykhan/.m2/repository/commons-cli/commons-cli/1.4/commons-cli-1.4.jar:/Users/alykhan/.m2/repository/org/apache/kafka/kafka_2.13/3.6.1/kafka_2.13-3.6.1-test.jar:/Users/alykhan/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.10.2/junit-jupiter-api-5.10.2.jar:/Users/alykhan/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/Users/alykhan/.m2/repository/org/junit/platform/junit-platform-commons/1.10.2/junit-platform-commons-1.10.2.jar:/Users/alykhan/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/Users/alykhan/.m2/repository/org/junit/platform/junit-platform-launcher/1.10.2/junit-platform-launcher-1.10.2.jar:/Users/alykhan/.m2/repository/org/junit/platform/junit-platform-engine/1.10.2/junit-platform-engine-1.10.2.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-starter-test/3.2.4/spring-boot-starter-test-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-test/3.2.4/spring-boot-test-3.2.4.jar:/Users/alykhan/.m2/repository/org/springframework/boot/spring-boot-test-autoconfigure/3.2.4/spring-boot-test-autoconfigure-3.2.4.jar:/Users/alykhan/.m2/repository/com/jayway/jsonpath/json-path/2.9.0/json-path-2.9.0.jar:/Users/alykhan/.m2/repository/jakarta/xml/bind/jakarta.xml.bind-api/4.0.2/jakarta.xml.bind-api-4.0.2.jar:/Users/alykhan/.m2/repository/jakarta/activation/jakarta.activation-api/2.1.3/jakarta.activation-api-2.1.3.jar:/Users/alykhan/.m2/repository/net/minidev/json-smart/2.5.0/json-smart-2.5.0.jar:/Users/alykhan/.m2/repository/net/minidev/accessors-smart/2.5.0/accessors-smart-2.5.0.jar:/Users/alykhan/.m2/repository/org/ow2/asm/asm/9.3/asm-9.3.jar:/Users/alykhan/.m2/repository/org/assertj/assertj-core/3.24.2/assertj-core-3.24.2.jar:/Users/alykhan/.m2/repository/org/awaitility/awaitility/4.2.0/awaitility-4.2.0.jar:/Users/alykhan/.m2/repository/org/hamcrest/hamcrest/2.2/hamcrest-2.2.jar:/Users/alykhan/.m2/repository/org/junit/jupiter/junit-jupiter/5.10.2/junit-jupiter-5.10.2.jar:/Users/alykhan/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.10.2/junit-jupiter-params-5.10.2.jar:/Users/alykhan/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.10.2/junit-jupiter-engine-5.10.2.jar:/Users/alykhan/.m2/repository/org/mockito/mockito-core/5.7.0/mockito-core-5.7.0.jar:/Users/alykhan/.m2/repository/net/bytebuddy/byte-buddy-agent/1.14.12/byte-buddy-agent-1.14.12.jar:/Users/alykhan/.m2/repository/org/objenesis/objenesis/3.3/objenesis-3.3.jar:/Users/alykhan/.m2/repository/org/mockito/mockito-junit-jupiter/5.7.0/mockito-junit-jupiter-5.7.0.jar:/Users/alykhan/.m2/repository/org/skyscreamer/jsonassert/1.5.1/jsonassert-1.5.1.jar:/Users/alykhan/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar:/Users/alykhan/.m2/repository/org/springframework/spring-core/6.1.5/spring-core-6.1.5.jar:/Users/alykhan/.m2/repository/org/springframework/spring-jcl/6.1.5/spring-jcl-6.1.5.jar:/Users/alykhan/.m2/repository/org/xmlunit/xmlunit-core/2.9.1/xmlunit-core-2.9.1.jar:/Users/alykhan/.m2/repository/org/springframework/security/spring-security-test/6.2.3/spring-security-test-6.2.3.jar:/Users/alykhan/.m2/repository/org/springframework/security/spring-security-core/6.2.3/spring-security-core-6.2.3.jar:/Users/alykhan/.m2/repository/org/springframework/security/spring-security-crypto/6.2.3/spring-security-crypto-6.2.3.jar:/Users/alykhan/.m2/repository/org/testcontainers/junit-jupiter/1.19.7/junit-jupiter-1.19.7.jar:/Users/alykhan/.m2/repository/org/testcontainers/testcontainers/1.19.7/testcontainers-1.19.7.jar:/Users/alykhan/.m2/repository/junit/junit/4.13.2/junit-4.13.2.jar:/Users/alykhan/.m2/repository/org/hamcrest/hamcrest-core/2.2/hamcrest-core-2.2.jar:/Users/alykhan/.m2/repository/org/apache/commons/commons-compress/1.24.0/commons-compress-1.24.0.jar:/Users/alykhan/.m2/repository/org/rnorth/duct-tape/duct-tape/1.0.8/duct-tape-1.0.8.jar:/Users/alykhan/.m2/repository/org/jetbrains/annotations/17.0.0/annotations-17.0.0.jar:/Users/alykhan/.m2/repository/com/github/docker-java/docker-java-api/3.3.6/docker-java-api-3.3.6.jar:/Users/alykhan/.m2/repository/com/github/docker-java/docker-java-transport-zerodep/3.3.6/docker-java-transport-zerodep-3.3.6.jar:/Users/alykhan/.m2/repository/com/github/docker-java/docker-java-transport/3.3.6/docker-java-transport-3.3.6.jar:/Users/alykhan/.m2/repository/net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar:/Users/alykhan/.m2/repository/org/testcontainers/postgresql/1.19.7/postgresql-1.19.7.jar:/Users/alykhan/.m2/repository/org/testcontainers/jdbc/1.19.7/jdbc-1.19.7.jar:/Users/alykhan/.m2/repository/org/testcontainers/database-commons/1.19.7/database-commons-1.19.7.jar:"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="/Users/alykhan"/>
+    <property name="user.language" value="en"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2024-04-16"/>
+    <property name="java.home" value="/Users/alykhan/Library/Java/JavaVirtualMachines/corretto-21.0.3/Contents/Home"/>
+    <property name="file.separator" value="/"/>
+    <property name="basedir" value="/Users/alykhan/Documents/tradeflow-2WYSE/backend"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="FILE_LOG_CHARSET" value="UTF-8"/>
+    <property name="java.awt.headless" value="true"/>
+    <property name="apple.awt.application.name" value="ForkedBooter"/>
+    <property name="surefire.real.class.path" value="/Users/alykhan/Documents/tradeflow-2WYSE/backend/target/surefire/surefirebooter-20260804121648508_3.jar"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property name="java.runtime.version" value="21.0.3+9-LTS"/>
+    <property name="user.name" value="alykhan"/>
+    <property name="stdout.encoding" value="UTF-8"/>
+    <property name="path.separator" value=":"/>
+    <property name="os.version" value="26.5.2"/>
+    <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
+    <property name="java.vendor.version" value="Corretto-21.0.3.9.1"/>
+    <property name="localRepository" value="/Users/alykhan/.m2/repository"/>
+    <property name="java.vendor.url.bug" value="https://github.com/corretto/corretto-21/issues/"/>
+    <property name="java.io.tmpdir" value="/var/folders/rd/7wlt0wsx6pb524g3dc5hb3mc0000gn/T/"/>
+    <property name="com.zaxxer.hikari.pool_number" value="1"/>
+    <property name="java.version" value="21.0.3"/>
+    <property name="user.dir" value="/Users/alykhan/Documents/tradeflow-2WYSE/backend"/>
+    <property name="os.arch" value="x86_64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="PID" value="43554"/>
+    <property name="CONSOLE_LOG_CHARSET" value="UTF-8"/>
+    <property name="native.encoding" value="UTF-8"/>
+    <property name="java.library.path" value="/Users/alykhan/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:."/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="UTF-8"/>
+    <property name="java.vendor" value="Amazon.com Inc."/>
+    <property name="java.vm.version" value="21.0.3+9-LTS"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeBig"/>
+    <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property name="java.class.version" value="65.0"/>
+    <property name="LOGGED_APPLICATION_NAME" value="[tradeflow] "/>
+  </properties>
+  <testcase name="contextLoadsWithDevProfile" classname="com.dbtraining.tradeflow.DatabaseMigrationH2Test" time="0.855">
+    <system-out><![CDATA[12:16:50.293 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.dbtraining.tradeflow.DatabaseMigrationH2Test]: DatabaseMigrationH2Test does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+12:16:50.545 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.dbtraining.tradeflow.TradeflowApplication for test class com.dbtraining.tradeflow.DatabaseMigrationH2Test
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.4)
+
+2026-08-04T12:16:51.387+01:00  INFO 43554 --- [tradeflow] [           main] c.d.tradeflow.DatabaseMigrationH2Test    : Starting DatabaseMigrationH2Test using Java 21.0.3 with PID 43554 (started by alykhan in /Users/alykhan/Documents/tradeflow-2WYSE/backend)
+2026-08-04T12:16:51.388+01:00 DEBUG 43554 --- [tradeflow] [           main] c.d.tradeflow.DatabaseMigrationH2Test    : Running with Spring Boot v3.2.4, Spring v6.1.5
+2026-08-04T12:16:51.389+01:00  INFO 43554 --- [tradeflow] [           main] c.d.tradeflow.DatabaseMigrationH2Test    : The following 1 profile is active: "dev"
+2026-08-04T12:16:53.266+01:00  INFO 43554 --- [tradeflow] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-04T12:16:53.361+01:00  INFO 43554 --- [tradeflow] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 81 ms. Found 5 JPA repository interfaces.
+2026-08-04T12:16:54.527+01:00  INFO 43554 --- [tradeflow] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-08-04T12:16:55.000+01:00  INFO 43554 --- [tradeflow] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:tradeflow user=SA
+2026-08-04T12:16:55.003+01:00  INFO 43554 --- [tradeflow] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-08-04T12:16:55.141+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.database                       : Set default schema name to PUBLIC
+2026-08-04T12:16:56.618+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Creating database history table with name: PUBLIC.DATABASECHANGELOG
+2026-08-04T12:16:56.849+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Reading from PUBLIC.DATABASECHANGELOG
+2026-08-04T12:16:57.076+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.lockservice                    : Successfully acquired change log lock
+2026-08-04T12:16:57.077+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.command                        : Using deploymentId: 5842217077
+2026-08-04T12:16:57.080+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Reading from PUBLIC.DATABASECHANGELOG
+Running Changeset: db/changelog/changes/001-init.xml::001-init::tradeflow-team
+2026-08-04T12:16:57.201+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Tag 'v0.0.0-init' applied to database
+2026-08-04T12:16:57.203+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : ChangeSet db/changelog/changes/001-init.xml::001-init::tradeflow-team ran successfully in 4ms
+Running Changeset: db/changelog/changes/002-create-trades.xml::002-create-trades::your-name
+2026-08-04T12:16:57.228+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Table trades created
+2026-08-04T12:16:57.252+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Custom SQL executed
+2026-08-04T12:16:57.255+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Index idx_trades_trade_date created
+2026-08-04T12:16:57.256+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Index idx_trades_status created
+2026-08-04T12:16:57.257+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : ChangeSet db/changelog/changes/002-create-trades.xml::002-create-trades::your-name ran successfully in 40ms
+Running Changeset: db/changelog/changes/003-createinstruments.xml::003-create-instruments::your-name
+2026-08-04T12:16:57.267+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Table instruments created
+2026-08-04T12:16:57.270+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Custom SQL executed
+2026-08-04T12:16:57.270+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : ChangeSet db/changelog/changes/003-createinstruments.xml::003-create-instruments::your-name ran successfully in 7ms
+Running Changeset: db/changelog/changes/004-create-counterparties.xml::004-create-counterparties::tradeflow-team
+2026-08-04T12:16:57.279+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Table counterparties created
+2026-08-04T12:16:57.281+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Custom SQL executed
+2026-08-04T12:16:57.281+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : ChangeSet db/changelog/changes/004-create-counterparties.xml::004-create-counterparties::tradeflow-team ran successfully in 6ms
+Running Changeset: db/changelog/changes/005-create-settlements.xml::005-create-settlements::your-name
+2026-08-04T12:16:57.295+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Table settlements created
+2026-08-04T12:16:57.297+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Custom SQL executed
+2026-08-04T12:16:57.298+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Index idx_settlements_trade created
+2026-08-04T12:16:57.299+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : ChangeSet db/changelog/changes/005-create-settlements.xml::005-create-settlements::your-name ran successfully in 12ms
+Running Changeset: db/changelog/changes/006-create-recon-breaks.xml::006-create-recon-breaks::your-name
+2026-08-04T12:16:57.309+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Table recon_breaks created
+2026-08-04T12:16:57.320+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Custom SQL executed
+2026-08-04T12:16:57.323+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Index idx_recon_breaks_status created
+2026-08-04T12:16:57.325+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Index idx_recon_breaks_trade created
+2026-08-04T12:16:57.325+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : ChangeSet db/changelog/changes/006-create-recon-breaks.xml::006-create-recon-breaks::your-name ran successfully in 20ms
+Running Changeset: db/changelog/changes/007-fks-and-indexes.xml::007-fks-and-indexes::your-name
+2026-08-04T12:16:57.340+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Foreign key constraint added to trades (instrument_id)
+2026-08-04T12:16:57.342+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Foreign key constraint added to trades (counterparty_id)
+2026-08-04T12:16:57.344+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Index idx_settlements_status created
+2026-08-04T12:16:57.344+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : ChangeSet db/changelog/changes/007-fks-and-indexes.xml::007-fks-and-indexes::your-name ran successfully in 9ms
+Running Changeset: db/changelog/changes/008-seed-instruments.xml::008-seed-instruments::your-name
+2026-08-04T12:16:57.354+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : New row inserted into instruments
+2026-08-04T12:16:57.356+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : New row inserted into instruments
+2026-08-04T12:16:57.357+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : New row inserted into instruments
+2026-08-04T12:16:57.358+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : New row inserted into instruments
+2026-08-04T12:16:57.360+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : New row inserted into instruments
+2026-08-04T12:16:57.360+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : ChangeSet db/changelog/changes/008-seed-instruments.xml::008-seed-instruments::your-name ran successfully in 8ms
+Running Changeset: db/changelog/changes/009-seed-counterparties.xml::009-seed-counterparties::your-name
+2026-08-04T12:16:57.368+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : New row inserted into counterparties
+2026-08-04T12:16:57.370+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : New row inserted into counterparties
+2026-08-04T12:16:57.372+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : New row inserted into counterparties
+2026-08-04T12:16:57.373+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : New row inserted into counterparties
+2026-08-04T12:16:57.374+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : ChangeSet db/changelog/changes/009-seed-counterparties.xml::009-seed-counterparties::your-name ran successfully in 8ms
+Running Changeset: db/changelog/changes/010-seed-trades.xml::010-seed-trades::your-name
+2026-08-04T12:16:57.390+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : New row inserted into trades
+2026-08-04T12:16:57.392+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : New row inserted into trades
+2026-08-04T12:16:57.394+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : New row inserted into trades
+2026-08-04T12:16:57.396+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : New row inserted into trades
+2026-08-04T12:16:57.398+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : New row inserted into trades
+2026-08-04T12:16:57.400+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : New row inserted into trades
+2026-08-04T12:16:57.401+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : New row inserted into trades
+2026-08-04T12:16:57.403+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : New row inserted into trades
+2026-08-04T12:16:57.405+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : New row inserted into trades
+2026-08-04T12:16:57.406+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : New row inserted into trades
+2026-08-04T12:16:57.407+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : ChangeSet db/changelog/changes/010-seed-trades.xml::010-seed-trades::your-name ran successfully in 20ms
+Running Changeset: db/changelog/changes/011-create-views.xml::011-create-view-open-breaks::your-name
+2026-08-04T12:16:57.419+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : View v_open_breaks created
+2026-08-04T12:16:57.419+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : ChangeSet db/changelog/changes/011-create-views.xml::011-create-view-open-breaks::your-name ran successfully in 7ms
+Running Changeset: db/changelog/changes/011-create-views.xml::011-create-view-settlement-lag::your-name
+2026-08-04T12:16:57.428+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : View v_settlement_lag created
+2026-08-04T12:16:57.429+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : ChangeSet db/changelog/changes/011-create-views.xml::011-create-view-settlement-lag::your-name ran successfully in 7ms
+Running Changeset: db/changelog/changes/012-create-audit-log.xml::012-create-audit-log::your-name
+2026-08-04T12:16:57.439+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Table audit_log created
+2026-08-04T12:16:57.442+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Custom SQL executed
+2026-08-04T12:16:57.443+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Index idx_audit_log_table_pk created
+2026-08-04T12:16:57.444+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : Index idx_audit_log_changed_at created
+2026-08-04T12:16:57.445+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.changelog                      : ChangeSet db/changelog/changes/012-create-audit-log.xml::012-create-audit-log::your-name ran successfully in 11ms
+2026-08-04T12:16:57.452+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.util                           : UPDATE SUMMARY
+2026-08-04T12:16:57.453+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.util                           : Run:                         13
+2026-08-04T12:16:57.453+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.util                           : Previously run:               0
+2026-08-04T12:16:57.453+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.util                           : Filtered out:                 0
+2026-08-04T12:16:57.453+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.util                           : -------------------------------
+2026-08-04T12:16:57.453+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.util                           : Total change sets:           13
+2026-08-04T12:16:57.453+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.util                           : Update summary generated
+2026-08-04T12:16:57.456+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.command                        : Update command completed successfully.
+Liquibase: Update has been successful. Rows affected: 32
+2026-08-04T12:16:57.459+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.lockservice                    : Successfully released change log lock
+2026-08-04T12:16:57.459+01:00  INFO 43554 --- [tradeflow] [           main] liquibase.command                        : Command execution complete
+2026-08-04T12:16:57.665+01:00  INFO 43554 --- [tradeflow] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-04T12:16:57.789+01:00  INFO 43554 --- [tradeflow] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-08-04T12:16:57.856+01:00  INFO 43554 --- [tradeflow] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-04T12:16:58.361+01:00  INFO 43554 --- [tradeflow] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-04T12:17:00.816+01:00  INFO 43554 --- [tradeflow] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-04T12:17:00.820+01:00  INFO 43554 --- [tradeflow] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-04T12:17:01.337+01:00  INFO 43554 --- [tradeflow] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-04T12:17:03.827+01:00  INFO 43554 --- [tradeflow] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 3 endpoint(s) beneath base path '/actuator'
+2026-08-04T12:17:03.943+01:00  INFO 43554 --- [tradeflow] [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@3bc9983e, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@32d0f751, org.springframework.security.web.context.SecurityContextHolderFilter@40e4a604, org.springframework.security.web.header.HeaderWriterFilter@2d176f87, org.springframework.web.filter.CorsFilter@427afdb6, org.springframework.security.web.authentication.logout.LogoutFilter@356bc5e4, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@7270e44f, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@7616f2b, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@6b1a130d, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7ed1bd96, org.springframework.security.web.session.SessionManagementFilter@273f5d0c, org.springframework.security.web.access.ExceptionTranslationFilter@3d5f46e8, org.springframework.security.web.access.intercept.AuthorizationFilter@2a6a71f2]
+2026-08-04T12:17:04.647+01:00  INFO 43554 --- [tradeflow] [           main] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:tradeflow'
+2026-08-04T12:17:04.883+01:00  INFO 43554 --- [tradeflow] [           main] o.a.k.clients.admin.AdminClientConfig    : AdminClientConfig values: 
+	auto.include.jmx.reporter = true
+	bootstrap.servers = [localhost:9092]
+	client.dns.lookup = use_all_dns_ips
+	client.id = 
+	connections.max.idle.ms = 300000
+	default.api.timeout.ms = 60000
+	metadata.max.age.ms = 300000
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	receive.buffer.bytes = 65536
+	reconnect.backoff.max.ms = 1000
+	reconnect.backoff.ms = 50
+	request.timeout.ms = 30000
+	retries = 2147483647
+	retry.backoff.ms = 100
+	sasl.client.callback.handler.class = null
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.login.callback.handler.class = null
+	sasl.login.class = null
+	sasl.login.connect.timeout.ms = null
+	sasl.login.read.timeout.ms = null
+	sasl.login.refresh.buffer.seconds = 300
+	sasl.login.refresh.min.period.seconds = 60
+	sasl.login.refresh.window.factor = 0.8
+	sasl.login.refresh.window.jitter = 0.05
+	sasl.login.retry.backoff.max.ms = 10000
+	sasl.login.retry.backoff.ms = 100
+	sasl.mechanism = GSSAPI
+	sasl.oauthbearer.clock.skew.seconds = 30
+	sasl.oauthbearer.expected.audience = null
+	sasl.oauthbearer.expected.issuer = null
+	sasl.oauthbearer.jwks.endpoint.refresh.ms = 3600000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.max.ms = 10000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.ms = 100
+	sasl.oauthbearer.jwks.endpoint.url = null
+	sasl.oauthbearer.scope.claim.name = scope
+	sasl.oauthbearer.sub.claim.name = sub
+	sasl.oauthbearer.token.endpoint.url = null
+	security.protocol = PLAINTEXT
+	security.providers = null
+	send.buffer.bytes = 131072
+	socket.connection.setup.timeout.max.ms = 30000
+	socket.connection.setup.timeout.ms = 10000
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2, TLSv1.3]
+	ssl.endpoint.identification.algorithm = https
+	ssl.engine.factory.class = null
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.certificate.chain = null
+	ssl.keystore.key = null
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLSv1.3
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.certificates = null
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+
+2026-08-04T12:17:05.063+01:00  INFO 43554 --- [tradeflow] [           main] o.a.kafka.common.utils.AppInfoParser     : Kafka version: 3.6.1
+2026-08-04T12:17:05.063+01:00  INFO 43554 --- [tradeflow] [           main] o.a.kafka.common.utils.AppInfoParser     : Kafka commitId: 5e3c2b738d253ff5
+2026-08-04T12:17:05.063+01:00  INFO 43554 --- [tradeflow] [           main] o.a.kafka.common.utils.AppInfoParser     : Kafka startTimeMs: 1785842225061
+2026-08-04T12:17:05.711+01:00  INFO 43554 --- [tradeflow] [| adminclient-1] o.a.kafka.common.utils.AppInfoParser     : App info kafka.admin.client for adminclient-1 unregistered
+2026-08-04T12:17:05.717+01:00  INFO 43554 --- [tradeflow] [| adminclient-1] o.apache.kafka.common.metrics.Metrics    : Metrics scheduler closed
+2026-08-04T12:17:05.717+01:00  INFO 43554 --- [tradeflow] [| adminclient-1] o.apache.kafka.common.metrics.Metrics    : Closing reporter org.apache.kafka.common.metrics.JmxReporter
+2026-08-04T12:17:05.717+01:00  INFO 43554 --- [tradeflow] [| adminclient-1] o.apache.kafka.common.metrics.Metrics    : Metrics reporters closed
+2026-08-04T12:17:05.773+01:00  INFO 43554 --- [tradeflow] [           main] o.a.k.clients.consumer.ConsumerConfig    : ConsumerConfig values: 
+	allow.auto.create.topics = true
+	auto.commit.interval.ms = 5000
+	auto.include.jmx.reporter = true
+	auto.offset.reset = latest
+	bootstrap.servers = [localhost:9092]
+	check.crcs = true
+	client.dns.lookup = use_all_dns_ips
+	client.id = consumer-trade-log-group-1
+	client.rack = 
+	connections.max.idle.ms = 540000
+	default.api.timeout.ms = 60000
+	enable.auto.commit = false
+	exclude.internal.topics = true
+	fetch.max.bytes = 52428800
+	fetch.max.wait.ms = 500
+	fetch.min.bytes = 1
+	group.id = trade-log-group
+	group.instance.id = null
+	heartbeat.interval.ms = 3000
+	interceptor.classes = []
+	internal.leave.group.on.close = true
+	internal.throw.on.fetch.stable.offset.unsupported = false
+	isolation.level = read_uncommitted
+	key.deserializer = class org.apache.kafka.common.serialization.StringDeserializer
+	max.partition.fetch.bytes = 1048576
+	max.poll.interval.ms = 300000
+	max.poll.records = 500
+	metadata.max.age.ms = 300000
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	partition.assignment.strategy = [class org.apache.kafka.clients.consumer.RangeAssignor, class org.apache.kafka.clients.consumer.CooperativeStickyAssignor]
+	receive.buffer.bytes = 65536
+	reconnect.backoff.max.ms = 1000
+	reconnect.backoff.ms = 50
+	request.timeout.ms = 30000
+	retry.backoff.ms = 100
+	sasl.client.callback.handler.class = null
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.login.callback.handler.class = null
+	sasl.login.class = null
+	sasl.login.connect.timeout.ms = null
+	sasl.login.read.timeout.ms = null
+	sasl.login.refresh.buffer.seconds = 300
+	sasl.login.refresh.min.period.seconds = 60
+	sasl.login.refresh.window.factor = 0.8
+	sasl.login.refresh.window.jitter = 0.05
+	sasl.login.retry.backoff.max.ms = 10000
+	sasl.login.retry.backoff.ms = 100
+	sasl.mechanism = GSSAPI
+	sasl.oauthbearer.clock.skew.seconds = 30
+	sasl.oauthbearer.expected.audience = null
+	sasl.oauthbearer.expected.issuer = null
+	sasl.oauthbearer.jwks.endpoint.refresh.ms = 3600000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.max.ms = 10000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.ms = 100
+	sasl.oauthbearer.jwks.endpoint.url = null
+	sasl.oauthbearer.scope.claim.name = scope
+	sasl.oauthbearer.sub.claim.name = sub
+	sasl.oauthbearer.token.endpoint.url = null
+	security.protocol = PLAINTEXT
+	security.providers = null
+	send.buffer.bytes = 131072
+	session.timeout.ms = 45000
+	socket.connection.setup.timeout.max.ms = 30000
+	socket.connection.setup.timeout.ms = 10000
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2, TLSv1.3]
+	ssl.endpoint.identification.algorithm = https
+	ssl.engine.factory.class = null
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.certificate.chain = null
+	ssl.keystore.key = null
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLSv1.3
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.certificates = null
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+	value.deserializer = class org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+
+2026-08-04T12:17:05.905+01:00  INFO 43554 --- [tradeflow] [           main] o.a.kafka.common.utils.AppInfoParser     : Kafka version: 3.6.1
+2026-08-04T12:17:05.905+01:00  INFO 43554 --- [tradeflow] [           main] o.a.kafka.common.utils.AppInfoParser     : Kafka commitId: 5e3c2b738d253ff5
+2026-08-04T12:17:05.905+01:00  INFO 43554 --- [tradeflow] [           main] o.a.kafka.common.utils.AppInfoParser     : Kafka startTimeMs: 1785842225905
+2026-08-04T12:17:05.908+01:00  INFO 43554 --- [tradeflow] [           main] fkaConsumerFactory$ExtendedKafkaConsumer : [Consumer clientId=consumer-trade-log-group-1, groupId=trade-log-group] Subscribed to topic(s): trade-events
+2026-08-04T12:17:05.916+01:00  INFO 43554 --- [tradeflow] [           main] o.a.k.clients.consumer.ConsumerConfig    : ConsumerConfig values: 
+	allow.auto.create.topics = true
+	auto.commit.interval.ms = 5000
+	auto.include.jmx.reporter = true
+	auto.offset.reset = latest
+	bootstrap.servers = [localhost:9092]
+	check.crcs = true
+	client.dns.lookup = use_all_dns_ips
+	client.id = consumer-audit-group-2
+	client.rack = 
+	connections.max.idle.ms = 540000
+	default.api.timeout.ms = 60000
+	enable.auto.commit = false
+	exclude.internal.topics = true
+	fetch.max.bytes = 52428800
+	fetch.max.wait.ms = 500
+	fetch.min.bytes = 1
+	group.id = audit-group
+	group.instance.id = null
+	heartbeat.interval.ms = 3000
+	interceptor.classes = []
+	internal.leave.group.on.close = true
+	internal.throw.on.fetch.stable.offset.unsupported = false
+	isolation.level = read_uncommitted
+	key.deserializer = class org.apache.kafka.common.serialization.StringDeserializer
+	max.partition.fetch.bytes = 1048576
+	max.poll.interval.ms = 300000
+	max.poll.records = 500
+	metadata.max.age.ms = 300000
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	partition.assignment.strategy = [class org.apache.kafka.clients.consumer.RangeAssignor, class org.apache.kafka.clients.consumer.CooperativeStickyAssignor]
+	receive.buffer.bytes = 65536
+	reconnect.backoff.max.ms = 1000
+	reconnect.backoff.ms = 50
+	request.timeout.ms = 30000
+	retry.backoff.ms = 100
+	sasl.client.callback.handler.class = null
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.login.callback.handler.class = null
+	sasl.login.class = null
+	sasl.login.connect.timeout.ms = null
+	sasl.login.read.timeout.ms = null
+	sasl.login.refresh.buffer.seconds = 300
+	sasl.login.refresh.min.period.seconds = 60
+	sasl.login.refresh.window.factor = 0.8
+	sasl.login.refresh.window.jitter = 0.05
+	sasl.login.retry.backoff.max.ms = 10000
+	sasl.login.retry.backoff.ms = 100
+	sasl.mechanism = GSSAPI
+	sasl.oauthbearer.clock.skew.seconds = 30
+	sasl.oauthbearer.expected.audience = null
+	sasl.oauthbearer.expected.issuer = null
+	sasl.oauthbearer.jwks.endpoint.refresh.ms = 3600000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.max.ms = 10000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.ms = 100
+	sasl.oauthbearer.jwks.endpoint.url = null
+	sasl.oauthbearer.scope.claim.name = scope
+	sasl.oauthbearer.sub.claim.name = sub
+	sasl.oauthbearer.token.endpoint.url = null
+	security.protocol = PLAINTEXT
+	security.providers = null
+	send.buffer.bytes = 131072
+	session.timeout.ms = 45000
+	socket.connection.setup.timeout.max.ms = 30000
+	socket.connection.setup.timeout.ms = 10000
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2, TLSv1.3]
+	ssl.endpoint.identification.algorithm = https
+	ssl.engine.factory.class = null
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.certificate.chain = null
+	ssl.keystore.key = null
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLSv1.3
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.certificates = null
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+	value.deserializer = class org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+
+2026-08-04T12:17:05.927+01:00  INFO 43554 --- [tradeflow] [           main] o.a.kafka.common.utils.AppInfoParser     : Kafka version: 3.6.1
+2026-08-04T12:17:05.927+01:00  INFO 43554 --- [tradeflow] [           main] o.a.kafka.common.utils.AppInfoParser     : Kafka commitId: 5e3c2b738d253ff5
+2026-08-04T12:17:05.927+01:00  INFO 43554 --- [tradeflow] [           main] o.a.kafka.common.utils.AppInfoParser     : Kafka startTimeMs: 1785842225927
+2026-08-04T12:17:05.928+01:00  INFO 43554 --- [tradeflow] [           main] fkaConsumerFactory$ExtendedKafkaConsumer : [Consumer clientId=consumer-audit-group-2, groupId=audit-group] Subscribed to topic(s): trade-events
+2026-08-04T12:17:05.930+01:00  INFO 43554 --- [tradeflow] [           main] o.a.k.clients.consumer.ConsumerConfig    : ConsumerConfig values: 
+	allow.auto.create.topics = true
+	auto.commit.interval.ms = 5000
+	auto.include.jmx.reporter = true
+	auto.offset.reset = latest
+	bootstrap.servers = [localhost:9092]
+	check.crcs = true
+	client.dns.lookup = use_all_dns_ips
+	client.id = consumer-recon-group-3
+	client.rack = 
+	connections.max.idle.ms = 540000
+	default.api.timeout.ms = 60000
+	enable.auto.commit = false
+	exclude.internal.topics = true
+	fetch.max.bytes = 52428800
+	fetch.max.wait.ms = 500
+	fetch.min.bytes = 1
+	group.id = recon-group
+	group.instance.id = null
+	heartbeat.interval.ms = 3000
+	interceptor.classes = []
+	internal.leave.group.on.close = true
+	internal.throw.on.fetch.stable.offset.unsupported = false
+	isolation.level = read_uncommitted
+	key.deserializer = class org.apache.kafka.common.serialization.StringDeserializer
+	max.partition.fetch.bytes = 1048576
+	max.poll.interval.ms = 300000
+	max.poll.records = 500
+	metadata.max.age.ms = 300000
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	partition.assignment.strategy = [class org.apache.kafka.clients.consumer.RangeAssignor, class org.apache.kafka.clients.consumer.CooperativeStickyAssignor]
+	receive.buffer.bytes = 65536
+	reconnect.backoff.max.ms = 1000
+	reconnect.backoff.ms = 50
+	request.timeout.ms = 30000
+	retry.backoff.ms = 100
+	sasl.client.callback.handler.class = null
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.login.callback.handler.class = null
+	sasl.login.class = null
+	sasl.login.connect.timeout.ms = null
+	sasl.login.read.timeout.ms = null
+	sasl.login.refresh.buffer.seconds = 300
+	sasl.login.refresh.min.period.seconds = 60
+	sasl.login.refresh.window.factor = 0.8
+	sasl.login.refresh.window.jitter = 0.05
+	sasl.login.retry.backoff.max.ms = 10000
+	sasl.login.retry.backoff.ms = 100
+	sasl.mechanism = GSSAPI
+	sasl.oauthbearer.clock.skew.seconds = 30
+	sasl.oauthbearer.expected.audience = null
+	sasl.oauthbearer.expected.issuer = null
+	sasl.oauthbearer.jwks.endpoint.refresh.ms = 3600000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.max.ms = 10000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.ms = 100
+	sasl.oauthbearer.jwks.endpoint.url = null
+	sasl.oauthbearer.scope.claim.name = scope
+	sasl.oauthbearer.sub.claim.name = sub
+	sasl.oauthbearer.token.endpoint.url = null
+	security.protocol = PLAINTEXT
+	security.providers = null
+	send.buffer.bytes = 131072
+	session.timeout.ms = 45000
+	socket.connection.setup.timeout.max.ms = 30000
+	socket.connection.setup.timeout.ms = 10000
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2, TLSv1.3]
+	ssl.endpoint.identification.algorithm = https
+	ssl.engine.factory.class = null
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.certificate.chain = null
+	ssl.keystore.key = null
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLSv1.3
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.certificates = null
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+	value.deserializer = class org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+
+2026-08-04T12:17:05.933+01:00  INFO 43554 --- [tradeflow] [ntainer#2-0-C-1] org.apache.kafka.clients.Metadata        : [Consumer clientId=consumer-trade-log-group-1, groupId=trade-log-group] Cluster ID: yvox-DzVRjudrWzgQq5keQ
+2026-08-04T12:17:05.933+01:00  INFO 43554 --- [tradeflow] [ntainer#2-0-C-1] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-trade-log-group-1, groupId=trade-log-group] Discovered group coordinator localhost:9092 (id: 2147483646 rack: null)
+2026-08-04T12:17:05.936+01:00  INFO 43554 --- [tradeflow] [ntainer#0-0-C-1] org.apache.kafka.clients.Metadata        : [Consumer clientId=consumer-audit-group-2, groupId=audit-group] Cluster ID: yvox-DzVRjudrWzgQq5keQ
+2026-08-04T12:17:05.936+01:00  INFO 43554 --- [tradeflow] [ntainer#0-0-C-1] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-audit-group-2, groupId=audit-group] Discovered group coordinator localhost:9092 (id: 2147483646 rack: null)
+2026-08-04T12:17:05.937+01:00  INFO 43554 --- [tradeflow] [ntainer#2-0-C-1] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-trade-log-group-1, groupId=trade-log-group] (Re-)joining group
+2026-08-04T12:17:05.938+01:00  INFO 43554 --- [tradeflow] [ntainer#0-0-C-1] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-audit-group-2, groupId=audit-group] (Re-)joining group
+2026-08-04T12:17:05.943+01:00  INFO 43554 --- [tradeflow] [           main] o.a.kafka.common.utils.AppInfoParser     : Kafka version: 3.6.1
+2026-08-04T12:17:05.944+01:00  INFO 43554 --- [tradeflow] [           main] o.a.kafka.common.utils.AppInfoParser     : Kafka commitId: 5e3c2b738d253ff5
+2026-08-04T12:17:05.944+01:00  INFO 43554 --- [tradeflow] [           main] o.a.kafka.common.utils.AppInfoParser     : Kafka startTimeMs: 1785842225943
+2026-08-04T12:17:05.944+01:00  INFO 43554 --- [tradeflow] [           main] fkaConsumerFactory$ExtendedKafkaConsumer : [Consumer clientId=consumer-recon-group-3, groupId=recon-group] Subscribed to topic(s): trade-events
+2026-08-04T12:17:05.951+01:00  INFO 43554 --- [tradeflow] [ntainer#1-0-C-1] org.apache.kafka.clients.Metadata        : [Consumer clientId=consumer-recon-group-3, groupId=recon-group] Cluster ID: yvox-DzVRjudrWzgQq5keQ
+2026-08-04T12:17:05.952+01:00  INFO 43554 --- [tradeflow] [ntainer#1-0-C-1] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-recon-group-3, groupId=recon-group] Discovered group coordinator localhost:9092 (id: 2147483646 rack: null)
+2026-08-04T12:17:05.953+01:00  INFO 43554 --- [tradeflow] [ntainer#1-0-C-1] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-recon-group-3, groupId=recon-group] (Re-)joining group
+2026-08-04T12:17:05.962+01:00  INFO 43554 --- [tradeflow] [ntainer#2-0-C-1] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-trade-log-group-1, groupId=trade-log-group] Request joining group due to: need to re-join with the given member-id: consumer-trade-log-group-1-4461eae8-a85f-4c9f-84c6-0b456aaf668b
+2026-08-04T12:17:05.962+01:00  INFO 43554 --- [tradeflow] [ntainer#0-0-C-1] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-audit-group-2, groupId=audit-group] Request joining group due to: need to re-join with the given member-id: consumer-audit-group-2-68f32a40-970d-4ec4-ab7b-a54466664cc8
+2026-08-04T12:17:05.963+01:00  INFO 43554 --- [tradeflow] [ntainer#1-0-C-1] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-recon-group-3, groupId=recon-group] Request joining group due to: need to re-join with the given member-id: consumer-recon-group-3-fde8736e-bfe6-4336-8792-d9adc4ef5917
+2026-08-04T12:17:05.963+01:00  INFO 43554 --- [tradeflow] [ntainer#2-0-C-1] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-trade-log-group-1, groupId=trade-log-group] Request joining group due to: rebalance failed due to 'The group member needs to have a valid member id before actually entering a consumer group.' (MemberIdRequiredException)
+2026-08-04T12:17:05.963+01:00  INFO 43554 --- [tradeflow] [ntainer#1-0-C-1] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-recon-group-3, groupId=recon-group] Request joining group due to: rebalance failed due to 'The group member needs to have a valid member id before actually entering a consumer group.' (MemberIdRequiredException)
+2026-08-04T12:17:05.963+01:00  INFO 43554 --- [tradeflow] [ntainer#2-0-C-1] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-trade-log-group-1, groupId=trade-log-group] (Re-)joining group
+2026-08-04T12:17:05.963+01:00  INFO 43554 --- [tradeflow] [ntainer#0-0-C-1] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-audit-group-2, groupId=audit-group] Request joining group due to: rebalance failed due to 'The group member needs to have a valid member id before actually entering a consumer group.' (MemberIdRequiredException)
+2026-08-04T12:17:05.963+01:00  INFO 43554 --- [tradeflow] [ntainer#1-0-C-1] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-recon-group-3, groupId=recon-group] (Re-)joining group
+2026-08-04T12:17:05.963+01:00  INFO 43554 --- [tradeflow] [ntainer#0-0-C-1] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-audit-group-2, groupId=audit-group] (Re-)joining group
+2026-08-04T12:17:05.969+01:00  INFO 43554 --- [tradeflow] [           main] c.d.tradeflow.DatabaseMigrationH2Test    : Started DatabaseMigrationH2Test in 15.122 seconds (process running for 17.361)
+2026-08-04T12:17:05.982+01:00  INFO 43554 --- [tradeflow] [           main] c.d.tradeflow.service.TradeProcessor     : Parsing internal feed: /var/folders/rd/7wlt0wsx6pb524g3dc5hb3mc0000gn/T/internal-trades16327625836428098643.csv
+2026-08-04T12:17:05.988+01:00  INFO 43554 --- [tradeflow] [           main] c.d.tradeflow.service.TradeProcessor     : Parsing external feed: /var/folders/rd/7wlt0wsx6pb524g3dc5hb3mc0000gn/T/external-trades3777893069811560740.csv
+2026-08-04T12:17:05.991+01:00  INFO 43554 --- [tradeflow] [           main] c.d.tradeflow.service.TradeProcessor     : 
+Reconciliation summary
+----------------------
+  Internal trades : 4
+  External trades : 3
+  Matched         : 0
+  With breaks     : 4
+  Breakdown:
+    - PRICE_MISMATCH       1
+    - QUANTITY_MISMATCH    1
+    - DATE_MISMATCH        1
+    - MISSING_TRADE        1
+
+
+== Day-3 recon demo (TICKET-I040) ==================================================
+ReconSummary[totalInternal=4, totalExternal=3, matchedCount=0, unmatchedCount=4, breakdownByType={PRICE_MISMATCH=1, QUANTITY_MISMATCH=1, DATE_MISMATCH=1, MISSING_TRADE=1}]
+====================================================================================
+]]></system-out>
+    <system-err><![CDATA[WARNING: A Java agent has been loaded dynamically (/Users/alykhan/.m2/repository/net/bytebuddy/byte-buddy-agent/1.14.12/byte-buddy-agent-1.14.12.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+]]></system-err>
+  </testcase>
+</testsuite>

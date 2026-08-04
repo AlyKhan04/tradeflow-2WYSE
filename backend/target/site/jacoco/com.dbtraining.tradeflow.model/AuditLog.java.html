@@ -36,7 +36,7 @@ import java.time.Instant;
 @Table(name = &quot;audit_log&quot;)
 public class AuditLog {
 
-<span class="nc" id="L39">    public enum Operation { I, U, D }</span>
+<span class="fc" id="L39">    public enum Operation { I, U, D }</span>
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -65,7 +65,7 @@ public class AuditLog {
     @Column(name = &quot;changed_at&quot;, nullable = false, updatable = false)
     private Instant changedAt;
 
-<span class="nc" id="L68">    protected AuditLog() {}</span>
+<span class="fc" id="L68">    protected AuditLog() {}</span>
 
 <span class="nc" id="L70">    private AuditLog(Builder b) {</span>
 <span class="nc" id="L71">        this.tableName  = b.tableName;</span>

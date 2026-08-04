@@ -37,19 +37,19 @@ public class TradeValidator {
 
     public TradeValidator(EquityTradeValidator equity,
                           FXTradeValidator fx,
-<span class="nc" id="L40">                          BondTradeValidator bond) {</span>
-<span class="nc" id="L41">        this.strategies = Map.of(</span>
+<span class="fc" id="L40">                          BondTradeValidator bond) {</span>
+<span class="fc" id="L41">        this.strategies = Map.of(</span>
                 EquityTrade.class, equity,
                 FXTrade.class,     fx,
                 BondTrade.class,   bond
         );
-<span class="nc" id="L46">    }</span>
+<span class="fc" id="L46">    }</span>
 
     public List&lt;TradeValidationException&gt; validateAll(List&lt;BaseTrade&gt; trades) {
-<span class="nc" id="L49">        List&lt;TradeValidationException&gt; findings = new ArrayList&lt;&gt;();</span>
-<span class="nc bnc" id="L50" title="All 2 branches missed.">        for (BaseTrade t : trades) {</span>
-<span class="nc" id="L51">            ITradeValidator v = strategies.get(t.getClass());</span>
-<span class="nc bnc" id="L52" title="All 2 branches missed.">            if (v == null) {</span>
+<span class="fc" id="L49">        List&lt;TradeValidationException&gt; findings = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        for (BaseTrade t : trades) {</span>
+<span class="fc" id="L51">            ITradeValidator v = strategies.get(t.getClass());</span>
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">            if (v == null) {</span>
 <span class="nc" id="L53">                findings.add(new TradeValidationException(</span>
                         TradeValidationException.Code.INVALID_VALUE,
 <span class="nc" id="L55">                        &quot;no validator registered for &quot; + t.getClass().getSimpleName()</span>
@@ -57,12 +57,12 @@ public class TradeValidator {
 <span class="nc" id="L57">                continue;</span>
             }
             try {
-<span class="nc" id="L60">                v.validate(t);</span>
+<span class="fc" id="L60">                v.validate(t);</span>
 <span class="nc" id="L61">            } catch (TradeValidationException ex) {</span>
 <span class="nc" id="L62">                findings.add(ex);</span>
-<span class="nc" id="L63">            }</span>
-<span class="nc" id="L64">        }</span>
-<span class="nc" id="L65">        return findings;</span>
+<span class="fc" id="L63">            }</span>
+<span class="fc" id="L64">        }</span>
+<span class="fc" id="L65">        return findings;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

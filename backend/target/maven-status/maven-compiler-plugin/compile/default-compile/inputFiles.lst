@@ -10,6 +10,8 @@
 /Users/alykhan/Documents/tradeflow-2WYSE/backend/src/main/java/com/dbtraining/tradeflow/model/FXTrade.java
 /Users/alykhan/Documents/tradeflow-2WYSE/backend/src/main/java/com/dbtraining/tradeflow/model/Counterparty.java
 /Users/alykhan/Documents/tradeflow-2WYSE/backend/src/main/java/com/dbtraining/tradeflow/service/validator/ITradeValidator.java
+/Users/alykhan/Documents/tradeflow-2WYSE/backend/src/main/java/com/dbtraining/tradeflow/repository/AuditLogRepository.java
+/Users/alykhan/Documents/tradeflow-2WYSE/backend/src/main/java/com/dbtraining/tradeflow/service/AuditService.java
 /Users/alykhan/Documents/tradeflow-2WYSE/backend/src/main/java/com/dbtraining/tradeflow/service/TradeValidator.java
 /Users/alykhan/Documents/tradeflow-2WYSE/backend/src/main/java/com/dbtraining/tradeflow/kafka/AuditEventConsumer.java
 /Users/alykhan/Documents/tradeflow-2WYSE/backend/src/main/java/com/dbtraining/tradeflow/model/DiscrepancyType.java
