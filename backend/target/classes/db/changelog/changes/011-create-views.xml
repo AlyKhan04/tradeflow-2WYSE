@@ -10,7 +10,7 @@
       SELECT
           rb.id              AS break_id,
           rb.discrepancy_type,
-          rb.created_at      AS detected_at,
+          rb.detected_at     AS detected_at,
           t.trade_ref,
           t.quantity,
           t.price,

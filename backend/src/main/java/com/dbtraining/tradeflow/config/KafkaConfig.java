@@ -2,6 +2,7 @@ package com.dbtraining.tradeflow.config;
 
 import com.dbtraining.tradeflow.dto.TradeEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +14,8 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
@@ -69,6 +72,14 @@ public class KafkaConfig {
     }
 
     @Bean
+    public ProducerFactory<String, TradeEvent> producerFactory(KafkaProperties props) {
+        Map<String, Object> p = new HashMap<>(props.buildProducerProperties());
+        p.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
+
+        return new DefaultKafkaProducerFactory<>(p);
+    }
+
+    @Bean
     public ConsumerFactory<String, TradeEvent> consumerFactory() {
         Map<String, Object> props = new HashMap<>(kafkaProperties.buildConsumerProperties());
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -109,6 +120,6 @@ public class KafkaConfig {
 
     @Bean
     public NewTopic deadLetterTopic() {
-        return TopicBuilder.name(dltTopic).partitions(1).replicas(1).build();
+        return TopicBuilder.name("trade-events.DLT").partitions(1).replicas(1).build();
     }
 }

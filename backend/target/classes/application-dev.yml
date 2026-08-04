@@ -25,9 +25,22 @@ spring:
       # 'defer-datasource-initialization', and enabling it creates a circular
       # bean dependency (liquibase ↔ entityManagerFactory) in Boot 3.x.
 
+  # Day 9 — Kafka (TICKET-I113): local broker from docker-compose.
+  # Overridable via KAFKA_BOOTSTRAP_SERVERS when running inside Docker, where
+  # the broker resolves as 'kafka:29092' rather than 'localhost:9092'.
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+tradeflow:
+  kafka:
+    topics:
+      trades: trade-events
+      dlt: trade-events.DLT
+
 logging:
   level:
     com.dbtraining.tradeflow: DEBUG
     org.springframework.web: INFO
     org.hibernate.SQL: DEBUG
+    org.springframework.kafka: INFO
 
