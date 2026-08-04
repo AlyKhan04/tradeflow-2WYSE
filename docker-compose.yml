@@ -58,7 +58,8 @@ services:
     image: confluentinc/cp-kafka:7.5.0
     container_name: tradeflow-kafka
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_started
     ports:
       - "9092:9092"
       - "29092:29092"
@@ -67,6 +68,8 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
@@ -83,7 +86,8 @@ services:
     image: obsidiandynamics/kafdrop:latest
     container_name: tradeflow-kafdrop
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     ports:
       - "9000:9000"
     environment:
@@ -93,22 +97,55 @@ services:
   # --------------------------------------------------------------------------
   # Backend — Spring Boot recon-service
   # --------------------------------------------------------------------------
-  # TODO(TICKET-I125 + TICKET-I127): build from ./backend/Dockerfile, depend on
-  # postgres + kafka, expose 8080, point JDBC URL to 'postgres' (NOT localhost).
-  #
-  # backend:
-  #   build: ./backend
-  #   ...
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: ${BACKEND_IMAGE:-tradeflow-backend:local}
+    container_name: tradeflow-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: ${POSTGRES_DB:-tradeflow}
+      POSTGRES_USER: ${POSTGRES_USER:-tradeflow_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    restart: unless-stopped
 
   # --------------------------------------------------------------------------
   # Frontend — React UI behind nginx
   # --------------------------------------------------------------------------
-  # TODO(TICKET-I126 + TICKET-I127): build from ./frontend/Dockerfile, expose 80
-  # (mapped to host 5173), depend on backend.
-  #
-  # frontend:
-  #   build: ./frontend
-  #   ...
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: ${FRONTEND_IMAGE:-tradeflow-frontend:local}
+    container_name: tradeflow-frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "5173:80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80/ >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
   # --------------------------------------------------------------------------
   # Prometheus — scrapes /actuator/prometheus from backend
@@ -117,7 +154,8 @@ services:
     image: prom/prometheus:v2.54.1
     container_name: tradeflow-prometheus
     depends_on:
-      - kafka
+      backend:
+        condition: service_healthy
     ports:
       - "9090:9090"
     volumes:
@@ -135,7 +173,8 @@ services:
     image: grafana/grafana:11.2.0
     container_name: tradeflow-grafana
     depends_on:
-      - prometheus
+      prometheus:
+        condition: service_started
     ports:
       - "3000:3000"
     volumes:

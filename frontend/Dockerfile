@@ -10,7 +10,7 @@
 # ============================================================================
 
 # ---- Stage 1: build -------------------------------------------------------
-FROM node:20-alpine AS build
+FROM --platform=linux/amd64 node:20-alpine AS build
 WORKDIR /app
 
 # Cache node_modules layer
@@ -21,7 +21,7 @@ COPY . .
 RUN npm run build
 
 # ---- Stage 2: nginx serve -------------------------------------------------
-FROM nginx:1.27-alpine
+FROM --platform=linux/amd64 nginx:1.27-alpine
 
 # TODO(TICKET-I126 + TICKET-I128): copy a custom nginx.conf that:
 #   - serves /dist
