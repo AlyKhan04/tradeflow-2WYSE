@@ -7,6 +7,7 @@ import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -81,6 +82,11 @@ public class KafkaConfig {
     }
 
     @Bean
+    public KafkaTemplate<String, TradeEvent> kafkaTemplate(ProducerFactory<String, TradeEvent> pf) {
+        return new KafkaTemplate<>(pf);
+    }
+
+    @Bean
     public ConsumerFactory<String, TradeEvent> consumerFactory() {
         Map<String, Object> props = new HashMap<>(kafkaProperties.buildConsumerProperties());
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -104,7 +110,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public DefaultErrorHandler kafkaErrorHandler(KafkaTemplate<String, Object> kafkaTemplate) {
+    public DefaultErrorHandler kafkaErrorHandler(KafkaTemplate<String, TradeEvent> kafkaTemplate) {
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(
                 kafkaTemplate,
                 (record, ex) -> new TopicPartition(record.topic() + ".DLT", record.partition()));

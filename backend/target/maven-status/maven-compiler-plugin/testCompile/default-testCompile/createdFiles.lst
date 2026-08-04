@@ -1,6 +1,0 @@
-com\dbtraining\tradeflow\service\ReconciliationServiceTest$ReconciliationOrchestrator.class
-com\dbtraining\tradeflow\repository\TradeDAOTest.class
-com\dbtraining\tradeflow\service\AuditServiceTest.class
-com\dbtraining\tradeflow\kafka\TradeEventConsumerIT$TestKafkaConfig.class
-com\dbtraining\tradeflow\service\ReconciliationServiceTest.class
-com\dbtraining\tradeflow\kafka\TradeEventConsumerIT.class
