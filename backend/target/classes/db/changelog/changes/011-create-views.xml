@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+  <changeSet id="011-create-view-open-breaks" author="your-name">
+    <createView viewName="v_open_breaks" replaceIfExists="true">
+      SELECT
+          rb.id              AS break_id,
+          rb.discrepancy_type,
+          rb.detected_at     AS detected_at,
+          t.trade_ref,
+          t.quantity,
+          t.price,
+          i.symbol           AS instrument,
+          cp.name            AS counterparty,
+          cp.region
+      FROM recon_breaks rb
+      JOIN trades t          ON t.id = rb.trade_id
+      JOIN instruments i     ON i.id = t.instrument_id
+      JOIN counterparties cp ON cp.id = t.counterparty_id
+      WHERE rb.status = 'OPEN'
+    </createView>
+    <rollback>
+      <dropView viewName="v_open_breaks"/>
+    </rollback>
+  </changeSet>
+
+  <changeSet id="011-create-view-settlement-lag" author="your-name">
+    <createView viewName="v_settlement_lag" replaceIfExists="true">
+      SELECT
+          t.trade_ref,
+          t.trade_date,
+          s.settled_at,
+          (CAST(s.settled_at AS DATE) - t.trade_date) AS lag_days,
+          s.status AS settlement_status
+      FROM settlements s
+      JOIN trades t ON t.id = s.trade_id
+      WHERE s.status = 'SETTLED'
+    </createView>
+    <rollback>
+      <dropView viewName="v_settlement_lag"/>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>

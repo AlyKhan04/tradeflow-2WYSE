@@ -37,6 +37,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 .topbar .logo {
     font-weight: 700;
@@ -155,6 +156,7 @@ body {
 .badge-pending   { background: var(--status-pending); }
 .badge-resolved  { background: var(--status-matched); }
 .badge-open      { background: var(--status-unmatched); }
+.badge:hover     { filter: brightness(1.1); }
 
 /* ---------- Forms ---------- */
 form {
@@ -215,6 +217,15 @@ button {
     padding: 0.75rem 1rem;
     background: #ecf3fb;
     border-left: 4px solid var(--db-navy);
+}
+
+/* ---------- Pagination (TICKET-I087) ---------- */
+.pagination {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1.5rem;
 }
 
 /* ---------- Responsive (TICKET-I091) ---------- */

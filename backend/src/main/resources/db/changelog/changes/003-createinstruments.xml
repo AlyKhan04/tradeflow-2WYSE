@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+  <changeSet id="003-create-instruments" author="your-name">
+    <createTable tableName="instruments">
+      <column name="id" type="BIGINT" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="symbol" type="VARCHAR(20)">
+        <constraints nullable="false" unique="true"
+                     uniqueConstraintName="uq_instruments_symbol"/>
+      </column>
+      <column name="name" type="VARCHAR(200)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="asset_class" type="VARCHAR(20)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="currency" type="CHAR(3)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="isin" type="VARCHAR(12)"/>
+    </createTable>
+
+    <sql>
+      ALTER TABLE instruments ADD CONSTRAINT chk_instruments_asset_class
+          CHECK (asset_class IN ('EQUITY','FIXED_INCOME','FX','COMMODITY','DERIVATIVE'));
+    </sql>
+
+    <rollback>
+      <dropTable tableName="instruments"/>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>

@@ -20,13 +20,12 @@ scrape_configs:
       - targets: ['localhost:9090']
 
   # ----- Backend (Spring Boot Actuator) --------------------------------------
-  # TODO(TICKET-I129):
-  #  - inside docker-compose the host is 'backend', port 8080
-  #  - outside docker-compose (local dev) use 'host.docker.internal:8080'
+  # Local dev is running the backend on the host, so scrape that endpoint from
+  # inside the Prometheus container via host.docker.internal.
   - job_name: 'recon-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['backend:8080']
+      - targets: ['host.docker.internal:8080']
 
   # ----- Kafka -- TICKET-I121 (uncomment when Kafka exposes JMX metrics) ----
   # - job_name: 'kafka'

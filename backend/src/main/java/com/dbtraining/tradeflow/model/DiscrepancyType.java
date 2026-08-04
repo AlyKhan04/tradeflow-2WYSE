@@ -26,7 +26,11 @@ public enum DiscrepancyType {
      *   MISSING_TRADE     -> "Trade exists internally but not externally"
      */
     public String describe() {
-        // HINT: switch expression on `this`.
-        throw new UnsupportedOperationException("TICKET-I021: implement DiscrepancyType.describe()");
+        return switch (this) {
+            case PRICE_MISMATCH    -> "Price does not match counterparty record";
+            case QUANTITY_MISMATCH -> "Quantity does not match counterparty record";
+            case DATE_MISMATCH     -> "Trade or settlement date mismatch";
+            case MISSING_TRADE     -> "Trade exists on one side only";
+        };
     }
 }

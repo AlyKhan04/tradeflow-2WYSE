@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+  <changeSet id="006-create-recon-breaks" author="your-name">
+    <createTable tableName="recon_breaks">
+      <column name="id" type="BIGINT" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="trade_id" type="BIGINT">
+        <constraints nullable="false"
+                     foreignKeyName="fk_recon_breaks_trade"
+                     references="trades(id)"/>
+      </column>
+      <column name="status" type="VARCHAR(20)" defaultValue="OPEN">
+        <constraints nullable="false"/>
+      </column>
+      <column name="discrepancy_type" type="VARCHAR(30)">
+      </column>
+      <column name="resolved_at" type="TIMESTAMP WITH TIME ZONE">
+      </column>
+      <column name="resolved_by" type="VARCHAR(50)">
+      </column>
+      <column name="detected_at" type="TIMESTAMP WITH TIME ZONE"
+              defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE"
+              defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <sql>
+      ALTER TABLE recon_breaks ADD CONSTRAINT chk_recon_breaks_status
+          CHECK (status IN ('OPEN','RESOLVED','SUPPRESSED'));
+      ALTER TABLE recon_breaks ADD CONSTRAINT chk_recon_breaks_type
+          CHECK (discrepancy_type IS NULL OR discrepancy_type IN
+                 ('PRICE_MISMATCH','QUANTITY_MISMATCH','DATE_MISMATCH','MISSING_TRADE'));
+    </sql>
+
+    <createIndex tableName="recon_breaks" indexName="idx_recon_breaks_status">
+      <column name="status"/>
+    </createIndex>
+    <createIndex tableName="recon_breaks" indexName="idx_recon_breaks_trade">
+      <column name="trade_id"/>
+    </createIndex>
+
+    <rollback>
+      <dropTable tableName="recon_breaks"/>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>

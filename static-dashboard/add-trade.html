@@ -1,14 +1,8 @@
 <!DOCTYPE html>
-<!--
-=============================================================================
-  add-trade.html — TICKET-I089 + TICKET-I095 + TICKET-I096
-=============================================================================
-  WHAT:    Form to submit a new trade to the backend.
-=============================================================================
--->
 <html lang="en">
 <head>
     <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>TradeFlow — Add Trade</title>
     <link rel="stylesheet" href="css/style.css"/>
 </head>
@@ -21,7 +15,7 @@
 
 <div class="layout">
 
-    <nav class="sidebar">
+    <nav class="sidebar" aria-label="Primary">
         <ul>
             <li><a href="dashboard.html">Dashboard</a></li>
             <li><a href="trades.html">Trades</a></li>
@@ -34,18 +28,7 @@
 
         <h1>New Trade</h1>
 
-        <!--
-        =============================================================
-          TODO(TICKET-I089 + I095 + I096):
-            - all fields required
-            - quantity > 0
-            - price > 0
-            - trade_date <= today
-            - inline error messages BELOW each invalid field
-            - on submit: POST /api/v1/trades, show toast, redirect to trades.html
-        =============================================================
-        -->
-        <form id="trade-form" novalidate>
+        <form id="trade-form" novalidate autocomplete="off">
 
             <label>Trade Ref
                 <input type="text" name="tradeRef" required pattern="TRD-\d{4}-\d{4}"
@@ -56,7 +39,6 @@
             <label>Instrument
                 <select name="instrumentId" required>
                     <option value="">— select —</option>
-                    <!-- TODO(TICKET-I089/I096): populate from GET /api/v1/instruments -->
                 </select>
                 <span class="field-error" data-for="instrumentId"></span>
             </label>

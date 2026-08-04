@@ -10,6 +10,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>TradeFlow — Trades</title>
     <link rel="stylesheet" href="css/style.css"/>
 </head>
@@ -22,7 +23,7 @@
 
 <div class="layout">
 
-    <nav class="sidebar">
+    <nav class="sidebar" aria-label="Primary">
         <ul>
             <li><a href="dashboard.html">Dashboard</a></li>
             <li><a href="trades.html" class="active">Trades</a></li>
@@ -63,7 +64,16 @@
         <div id="trades-loading" class="loading hidden">Loading trades…</div>
         <div id="trades-error" class="error hidden"></div>
 
-        <!-- TODO(TICKET-I094): pagination controls. -->
+        <!--
+          Pagination shell (TICKET-I087). Static today: the buttons are inert
+          until TICKET-I094 wires page state in trades.js. The three ids below
+          are the contract that ticket reads.
+        -->
+        <nav class="pagination" aria-label="Trades pagination">
+            <button id="trades-prev" type="button">‹ Prev</button>
+            <span id="trades-pagination-info">Page 1</span>
+            <button id="trades-next" type="button">Next ›</button>
+        </nav>
 
     </main>
 </div>

@@ -28,10 +28,10 @@ export function useTradeData(filters = {}) {
     const [error, setError] = useState(null);
     const filterKey = JSON.stringify(filters);
     const lastRequest = useRef(0);
+    const mounted = useRef(true);
 
     const refetch = useCallback(async () => {
         const myReq = ++lastRequest.current;
-        const ctrl = new AbortController();
 
         setLoading(true);
         setError(null);
@@ -39,20 +39,27 @@ export function useTradeData(filters = {}) {
         try {
             const page = await getTrades(filters);
             // Drop the result if a newer request has been started.
-            if (myReq !== lastRequest.current) return;
+            if (!mounted.current || myReq !== lastRequest.current) return;
             setTrades(page.content || page);
         } catch (e) {
-            if (myReq !== lastRequest.current) return;
+            if (!mounted.current || myReq !== lastRequest.current) return;
             setError(e);
         } finally {
-            if (myReq === lastRequest.current) setLoading(false);
+            if (mounted.current && myReq === lastRequest.current) setLoading(false);
         }
 
-        return () => ctrl.abort();
+        
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filterKey]);
 
-    useEffect(() => { refetch(); }, [refetch]);
+    useEffect(() => {
+        mounted.current = true;
+        refetch();
+    
+        return () => {
+            mounted.current = false;
+        };
+    }, [refetch]);
 
     return { trades, loading, error, refetch };
 }

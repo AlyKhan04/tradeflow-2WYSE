@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+============================================================================
+  Liquibase master changelog — TradeFlow
+============================================================================
+  TICKET-I009 (Day 2 Sprint 3) — wire every Day-1 changeset (I003..I015)
+  into this file in dependency order. Day-1 students AUTHOR the XML
+  files; today you list them here.
+
+  TICKET-I010 (Day 2 Sprint 3) — `./mvnw spring-boot:run` boots Spring +
+  Liquibase reads this file + applies every change in order. Verify in
+  /h2-console: every changeset shows EXECUTED in DATABASECHANGELOG.
+
+  Order matters — Liquibase applies includes top-to-bottom; parents
+  before children (instruments + counterparties before trades);
+  FKs/indexes after both tables exist.
+============================================================================
+-->
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Day-1 bootstrap: all 5 tables + indexes + seed data + views -->
+    <include file="db/changelog/changes/001-init.xml"/>
+    <include file="db/changelog/changes/002-create-trades.xml"/>
+    <include file="db/changelog/changes/003-createinstruments.xml"/>
+    <include file="db/changelog/changes/004-create-counterparties.xml"/>
+    <include file="db/changelog/changes/005-create-settlements.xml"/>
+    <include file="db/changelog/changes/006-create-recon-breaks.xml"/>
+    <include file="db/changelog/changes/007-fks-and-indexes.xml"/>
+    <include file="db/changelog/changes/008-seed-instruments.xml"/>
+    <include file="db/changelog/changes/009-seed-counterparties.xml"/>
+    <include file="db/changelog/changes/010-seed-trades.xml"/>
+    <include file="db/changelog/changes/011-create-views.xml"/>
+    <include file="db/changelog/changes/012-create-audit-log.xml"/>
+    <include file="db/changelog/changes/013-add-instrument-isin.xml"/>
+
+</databaseChangeLog>
