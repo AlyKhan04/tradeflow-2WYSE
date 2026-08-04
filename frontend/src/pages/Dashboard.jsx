@@ -17,20 +17,13 @@ import { useEffect, useMemo } from 'react';
 import StatCard from '../components/StatCard.jsx';
 import { useTradeData } from '../hooks/useTradeData.js';
 import { useReconResults } from '../hooks/useReconResults.js';
-import { useBreaks } from '../context/BreakContext.jsx';
 
 export default function Dashboard() {
     const filters = useMemo(() => ({ size: 500 }), []);
     const { trades, loading, refetch: refetchTrades } = useTradeData(filters);
     const { results: openBreaks, refetch: refetchBreaks } = useReconResults('OPEN');
     const { results: resolvedBreaks } = useReconResults('RESOLVED');
-    const { openCount, dispatch } = useBreaks();
 
-    useEffect(() => {
-        if (openBreaks.length) {
-            dispatch({ type: 'HYDRATE', payload: openBreaks.length });
-        }
-    }, [openBreaks, dispatch]);
 
     useEffect(() => {
         const id = setInterval(() => {
@@ -53,7 +46,7 @@ export default function Dashboard() {
             <section className="cards">
                 <StatCard caption="Total Trades"        value={loading ? '…' : total} />
                 <StatCard caption="Matched %"           value={loading ? '…' : matchedPct} />
-                <StatCard caption="Unmatched Count"     value={openCount || openBreaks.length} />
+                <StatCard caption="Unmatched Count"     value={openBreaks.length} />
                 <StatCard caption="Avg Resolution Hrs" value={avgHours} />
             </section>
         </>
