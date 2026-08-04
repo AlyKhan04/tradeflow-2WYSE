@@ -103,9 +103,9 @@ class TradeEventConsumerIT {
                 ProducerFactory<String, TradeEvent> pf) {
             return new KafkaTemplate<>(pf);
         }
-        @Bean ProducerFactory<String, TradeEvent> producerFactory(KafkaProperties props) {
-            return new DefaultKafkaProducerFactory<>(props.buildProducerProperties());
-        }
+        // @Bean ProducerFactory<String, TradeEvent> producerFactory(KafkaProperties props) {
+        //     return new DefaultKafkaProducerFactory<>(props.buildProducerProperties());
+        // }
         @Bean KafkaTemplate<String, Object> dltKafkaTemplate(KafkaProperties props) {
             return new KafkaTemplate<>(
                     new DefaultKafkaProducerFactory<>(props.buildProducerProperties()));

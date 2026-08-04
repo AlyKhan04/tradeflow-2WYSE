@@ -2,10 +2,12 @@ package com.dbtraining.tradeflow.config;
 
 import com.dbtraining.tradeflow.dto.TradeEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -13,6 +15,8 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
@@ -57,6 +61,7 @@ import java.util.Map;
  */
 @Configuration
 @EnableKafka
+@EnableConfigurationProperties(KafkaProperties.class)
 public class KafkaConfig {
 
     private final KafkaProperties kafkaProperties;
@@ -66,6 +71,19 @@ public class KafkaConfig {
                        @Value("${tradeflow.kafka.topics.dlt:trade-events.DLT}") String dltTopic) {
         this.kafkaProperties = kafkaProperties;
         this.dltTopic = dltTopic;
+    }
+
+    @Bean
+    public ProducerFactory<String, TradeEvent> producerFactory(KafkaProperties props) {
+        Map<String, Object> p = new HashMap<>(props.buildProducerProperties());
+        p.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
+
+        return new DefaultKafkaProducerFactory<>(p);
+    }
+
+    @Bean
+    public KafkaTemplate<String, TradeEvent> kafkaTemplate(ProducerFactory<String, TradeEvent> pf) {
+        return new KafkaTemplate<>(pf);
     }
 
     @Bean
@@ -92,7 +110,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public DefaultErrorHandler kafkaErrorHandler(KafkaTemplate<String, Object> kafkaTemplate) {
+    public DefaultErrorHandler kafkaErrorHandler(KafkaTemplate<String, TradeEvent> kafkaTemplate) {
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(
                 kafkaTemplate,
                 (record, ex) -> new TopicPartition(record.topic() + ".DLT", record.partition()));
@@ -109,6 +127,6 @@ public class KafkaConfig {
 
     @Bean
     public NewTopic deadLetterTopic() {
-        return TopicBuilder.name(dltTopic).partitions(1).replicas(1).build();
+        return TopicBuilder.name("trade-events.DLT").partitions(1).replicas(1).build();
     }
 }
