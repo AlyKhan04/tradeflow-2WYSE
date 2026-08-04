@@ -1,25 +1,38 @@
 # ============================================================================
-# docker-compose.yml — TradeFlow full-stack runtime
+# docker-compose.yml — TradeFlow full-stack runtime (TICKET-I127)
 # ============================================================================
-# This file is the SKELETON. By Day 10 you will fill in every service so that
-# `docker compose up` brings up the whole platform end-to-end.
-#
-# TODO(TICKET-I127): wire all 7 services below + verify trade flow E2E.
-# TODO(TICKET-I128): set up the docker network so services can resolve each
-#                    other by name (e.g. backend can reach 'postgres', not
-#                    'localhost').
-#
-# WHAT:    7 services: postgres, kafka, zookeeper, backend, frontend,
-#          prometheus, grafana (+ kafdrop as an optional UI for Kafka).
-# HOW:     Use service NAMES as DNS hostnames inside the compose network.
-#          Mount the prometheus.yml from ./monitoring/prometheus/.
-# WHY:     A single command must bring up the whole platform reproducibly
-#          for the Day 10 final demo and for the CI/CD pipeline.
-# OBSERVE: After `docker compose up -d` all 7 containers must reach the
-#          'healthy' or 'running' state. The recon flow must work end-to-end.
+# WHAT:    8 services: postgres, zookeeper, kafka, kafdrop, backend, frontend,
+#          prometheus, grafana. (The "7 services" headline drops kafdrop —
+#          it's a Kafka UI, not a Kafka peer.)
+# HOW:     Service NAMES are DNS hostnames inside the compose network.
+# WHY:     A single `docker compose up -d` must bring up the whole platform
+#          reproducibly for the Day 10 final demo and the CI/CD pipeline.
+# OBSERVE: After `docker compose up -d` every row in `docker compose ps` shows
+#          'Up' or 'Up (healthy)'. The trade -> Kafka -> recon -> audit flow
+#          works end-to-end.
 # ============================================================================
-
-version: "3.9"
+# Network map (default compose bridge network) — TICKET-I128:
+#
+#   browser    --[host:5173]--> frontend (nginx)
+#   browser    --[host:8080]--> backend  (Spring Boot)
+#   browser    --[host:9000]--> kafdrop      --[host:9090]--> prometheus
+#                                            --[host:3000]--> grafana
+#
+#   frontend   --[/api/, /actuator/]--> http://backend:8080     (proxy_pass)
+#   backend    --[JDBC]              --> jdbc:postgresql://postgres:5432/tradeflow
+#   backend    --[Kafka client]      --> kafka:29092            (INTERNAL listener)
+#   kafdrop    --[Kafka client]      --> kafka:29092
+#   kafka      --[ZK]                --> zookeeper:2181
+#   grafana    --[datasource]        --> http://prometheus:9090
+#
+# Inside the compose network, NEVER use `localhost` — localhost is the
+# container itself. Use service names + CONTAINER ports. Host-mapped ports
+# (the left side of `5173:80`) exist only for your browser / Postman.
+#
+# Decision: the frontend reaches the API through the nginx reverse-proxy at
+# RUNTIME, not via VITE_API_BASE_URL baked in at BUILD time, so one frontend
+# image works in dev and on the demo laptop with no rebuild.
+# ============================================================================
 
 services:
   # --------------------------------------------------------------------------
@@ -41,6 +54,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    restart: unless-stopped
 
   # --------------------------------------------------------------------------
   # Kafka + Zookeeper (Day 9)
@@ -53,6 +67,7 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
+    restart: unless-stopped
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
@@ -66,6 +81,7 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      # Two listeners: kafka:29092 for containers, localhost:9092 for the host.
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
@@ -78,46 +94,94 @@ services:
       interval: 10s
       timeout: 10s
       retries: 20
+    restart: unless-stopped
 
   kafdrop:
     image: obsidiandynamics/kafdrop:latest
     container_name: tradeflow-kafdrop
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     ports:
       - "9000:9000"
     environment:
       KAFKA_BROKERCONNECT: kafka:29092
       JVM_OPTS: "-Xms32M -Xmx64M"
+    restart: unless-stopped
 
   # --------------------------------------------------------------------------
-  # Backend — Spring Boot recon-service
+  # Backend — Spring Boot recon-service (TICKET-I125 + TICKET-I127)
   # --------------------------------------------------------------------------
-  # TODO(TICKET-I125 + TICKET-I127): build from ./backend/Dockerfile, depend on
-  # postgres + kafka, expose 8080, point JDBC URL to 'postgres' (NOT localhost).
-  #
-  # backend:
-  #   build: ./backend
-  #   ...
+  # `image:` + `build:` together is deliberate. `image:` gives the GHCR name
+  # (with the ${BACKEND_IMAGE} override the demo laptop pins to a CI SHA), and
+  # `build:` means the stack still comes up locally before TICKET-I133's
+  # pipeline has published anything. Once GHCR has images,
+  # `docker compose pull` fetches them instead of building.
+  # --------------------------------------------------------------------------
+  backend:
+    image: ${BACKEND_IMAGE:-ghcr.io/alykhan04/tradeflow-backend:latest}
+    build: ./backend
+    container_name: tradeflow-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      # Service names, not localhost — see the network map above.
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: ${POSTGRES_DB:-tradeflow}
+      POSTGRES_USER: ${POSTGRES_USER:-tradeflow_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    restart: unless-stopped
 
   # --------------------------------------------------------------------------
-  # Frontend — React UI behind nginx
+  # Frontend — React UI behind nginx (TICKET-I126 + TICKET-I127)
   # --------------------------------------------------------------------------
-  # TODO(TICKET-I126 + TICKET-I127): build from ./frontend/Dockerfile, expose 80
-  # (mapped to host 5173), depend on backend.
-  #
-  # frontend:
-  #   build: ./frontend
-  #   ...
+  frontend:
+    image: ${FRONTEND_IMAGE:-ghcr.io/alykhan04/tradeflow-frontend:latest}
+    build: ./frontend
+    container_name: tradeflow-frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "5173:80"
+    # 127.0.0.1, not localhost: inside the container `localhost` resolves to
+    # ::1 first, and nginx.conf only has `listen 80;` (IPv4). Using localhost
+    # here leaves the container permanently (health: unhealthy) while it is in
+    # fact serving traffic perfectly well.
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:80/ >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
   # --------------------------------------------------------------------------
   # Prometheus — scrapes /actuator/prometheus from backend
+  # --------------------------------------------------------------------------
+  # NOTE: monitoring/prometheus/prometheus.yml still targets
+  # host.docker.internal:8080. That resolves whether the backend runs on the
+  # host (Day 9 local dev) or in this stack (backend publishes 8080), so both
+  # workflows stay green. TICKET-I129 retargets it to backend:8080.
   # --------------------------------------------------------------------------
   prometheus:
     image: prom/prometheus:v2.54.1
     container_name: tradeflow-prometheus
     depends_on:
-      - kafka
+      - backend
     ports:
       - "9090:9090"
     volumes:
@@ -127,6 +191,7 @@ services:
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
+    restart: unless-stopped
 
   # --------------------------------------------------------------------------
   # Grafana — dashboards for API + Kafka metrics
@@ -142,8 +207,10 @@ services:
       - grafana-data:/var/lib/grafana
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
     environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    restart: unless-stopped
 
 volumes:
   postgres-data:

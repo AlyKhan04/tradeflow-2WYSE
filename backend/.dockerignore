@@ -1,0 +1,22 @@
+# ============================================================================
+# backend/.dockerignore — TICKET-I125
+# ============================================================================
+# Keeps the build context small and the dependency-cache layer stable.
+# `target/` is tracked in this repo and holds compiled .class files — shipping
+# it into the build context slows every build and can leak stale artifacts.
+# ============================================================================
+
+target/
+data/
+.git
+.gitignore
+*.md
+.DS_Store
+
+# Local IDE noise
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project

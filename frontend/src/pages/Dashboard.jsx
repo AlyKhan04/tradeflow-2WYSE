@@ -19,7 +19,9 @@ import { useReconResults } from '../hooks/useReconResults.js';
 import { useBreaks } from '../context/BreakContext.jsx';
 
 export default function Dashboard() {
-    const filters = useMemo(() => ({ size: 500 }), []);
+    // 100 is TradeController.MAX_PAGE_SIZE. Asking for more returns 400, which
+    // left every card on this page showing 0.
+    const filters = useMemo(() => ({ size: 100 }), []);
     const { trades, loading, refetch: refetchTrades } = useTradeData(filters);
     const { results: openBreaks, refetch: refetchBreaks } = useReconResults('OPEN');
     const { results: resolvedBreaks } = useReconResults('RESOLVED');

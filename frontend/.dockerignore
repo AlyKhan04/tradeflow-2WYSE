@@ -1,0 +1,22 @@
+# ============================================================================
+# frontend/.dockerignore — TICKET-I126
+# ============================================================================
+# The Dockerfile does `COPY . .` after `npm ci`. Without this file a local
+# node_modules/ or dist/ would be copied into the image, busting the npm cache
+# layer on every build and potentially shipping host-built binaries.
+# ============================================================================
+
+node_modules/
+dist/
+.git
+.gitignore
+*.md
+.DS_Store
+
+# Local env files must not leak into the image
+.env
+.env.*
+
+# Local IDE noise
+.idea/
+.vscode/

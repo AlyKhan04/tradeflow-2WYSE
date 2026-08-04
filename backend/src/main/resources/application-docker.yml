@@ -1,0 +1,52 @@
+# ============================================================================
+# application-docker.yml — Compose runtime profile (TICKET-I127)
+# ============================================================================
+# WHAT:    Settings for `SPRING_PROFILES_ACTIVE=docker`, i.e. the backend
+#          running as a container on the compose network.
+# HOW:     Same shape as application-uat.yml, but every default is the
+#          COMPOSE SERVICE NAME rather than localhost.
+# WHY:     Without this file the `docker` profile has no datasource at all.
+#          H2 is on the runtime classpath, so Spring Boot would silently
+#          auto-configure an in-memory H2: the app boots, /actuator/health
+#          returns UP, Liquibase runs — but against H2, not Postgres. Every
+#          psql query then comes back empty with no error to explain it.
+# OBSERVE: Boot log shows "HikariPool-1 - Added connection
+#          org.postgresql.jdbc.PgConnection" and Liquibase changesets applying.
+# ============================================================================
+
+spring:
+  datasource:
+    # TICKET-I128: `postgres` is the compose service name, resolved by Docker
+    # DNS. 5432 is the CONTAINER port. Never localhost — inside a container
+    # localhost is the container itself.
+    url: jdbc:postgresql://${POSTGRES_HOST:postgres}:${POSTGRES_PORT:5432}/${POSTGRES_DB:tradeflow}
+    username: ${POSTGRES_USER:tradeflow_user}
+    password: ${POSTGRES_PASSWORD:changeme}
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 5000
+
+  # data.sql is a dev-only seed for H2. Liquibase owns the schema AND the seed
+  # rows (changesets 008-010) against Postgres, so keep the script off.
+  sql:
+    init:
+      mode: never
+
+  # Day 9 — Kafka. Inside the compose network the broker is reachable on its
+  # INTERNAL listener, kafka:29092. localhost:9092 is the HOST listener and is
+  # only valid from your laptop.
+  kafka:
+    bootstrap-servers: "${KAFKA_BOOTSTRAP_SERVERS:kafka:29092}"
+
+tradeflow:
+  kafka:
+    topics:
+      trades: trade-events
+      dlt: trade-events.DLT
+
+logging:
+  level:
+    com.dbtraining.tradeflow: INFO
+    org.springframework.kafka: INFO
+    org.hibernate.SQL: WARN
+    liquibase: INFO
